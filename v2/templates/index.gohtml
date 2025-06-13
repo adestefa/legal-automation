@@ -13,7 +13,7 @@
         <!-- Header -->
         <header class="mb-8">
             <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-800">Legal Document Automation <span class="text-sm font-normal text-gray-500">v2.5.31</span></h1>
+                <h1 class="text-3xl font-bold text-gray-800">Legal Document Automation <span class="text-sm font-normal text-gray-500">v2.5.32</span></h1>
                 <div class="flex items-center space-x-4">
                     <!-- iCloud Status -->
                     <div class="flex items-center space-x-2">
@@ -72,24 +72,116 @@
 
     <!-- HTMX Global Event Handlers -->
     <script>
+        // Configure HTMX to include session credentials
+        htmx.config.withCredentials = true;
+        htmx.config.includeIndicatorStyles = false;
+        
         // Global HTMX event listeners
         document.body.addEventListener('htmx:beforeRequest', function(evt) {
             console.log('HTMX: Making request to', evt.detail.pathInfo.requestPath);
+            
+            // Ensure session cookies are included
+            const xhr = evt.detail.xhr;
+            xhr.withCredentials = true;
+            
+            // Add session validation headers
+            const sessionToken = getCookie('session_token');
+            if (sessionToken) {
+                xhr.setRequestHeader('X-Session-Token', sessionToken);
+            }
+            
             // Show loading indicators if needed
+            showLoadingIndicator(evt.detail.target);
         });
 
         document.body.addEventListener('htmx:afterSwap', function(evt) {
             console.log('HTMX: Content swapped for target', evt.detail.target.id || evt.detail.target.tagName);
+            hideLoadingIndicator(evt.detail.target);
         });
 
         document.body.addEventListener('htmx:responseError', function(evt) {
-            console.error('HTMX Error:', evt.detail.error);
+            console.error('HTMX Error:', evt.detail.error, evt.detail.xhr.status);
+            hideLoadingIndicator(evt.detail.target);
+            
+            // Handle session expiration
+            if (evt.detail.xhr.status === 401) {
+                console.warn('Session expired, redirecting to login');
+                window.location.href = '/login';
+                return;
+            }
+            
             // Display user-friendly error message
-            const errorMsg = "An error occurred. Please try again.";
-            alert("Request Error: " + errorMsg);
+            let errorMsg = "An error occurred. Please try again.";
+            if (evt.detail.xhr.status === 500) {
+                errorMsg = "Server error. Please try again later.";
+            } else if (evt.detail.xhr.status === 404) {
+                errorMsg = "Resource not found. Please refresh the page.";
+            }
+            
+            showErrorMessage(errorMsg);
         });
 
-        console.log('Mallon Legal Assistant v2.5.31 loaded');
+        document.body.addEventListener('htmx:timeout', function(evt) {
+            console.error('HTMX Timeout for request:', evt.detail.pathInfo.requestPath);
+            hideLoadingIndicator(evt.detail.target);
+            showErrorMessage("Request timed out. Please try again.");
+        });
+
+        // Utility functions
+        function getCookie(name) {
+            const value = "; " + document.cookie;
+            const parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        function showLoadingIndicator(target) {
+            if (target && !target.querySelector('.htmx-loading')) {
+                const loader = document.createElement('div');
+                loader.className = 'htmx-loading absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center';
+                loader.innerHTML = '<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>';
+                if (target.style.position !== 'relative' && target.style.position !== 'absolute') {
+                    target.style.position = 'relative';
+                }
+                target.appendChild(loader);
+            }
+        }
+
+        function hideLoadingIndicator(target) {
+            if (target) {
+                const loader = target.querySelector('.htmx-loading');
+                if (loader) {
+                    loader.remove();
+                }
+            }
+        }
+
+        function showErrorMessage(message) {
+            // Create or update error toast
+            let toast = document.getElementById('error-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'error-toast';
+                toast.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 max-w-md';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-red-600 hover:text-red-800">✕</button>
+                </div>
+            `;
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        console.log('Mallon Legal Assistant v2.5.32 loaded with enhanced session management');
     </script>
 </body>
 </html>

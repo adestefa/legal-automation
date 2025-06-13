@@ -228,11 +228,39 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 	// Get current session state
 	state := h.getWorkflowState(c)
 	
+	// Validate session exists and handle missing sessions gracefully
+	if state == nil {
+		log.Printf("[WARNING] No session state found for GetStep request to step %d", step)
+		// Create new state but indicate session was missing
+		state = &services.WorkflowState{
+			CurrentStep: 0,
+			LastUpdated: time.Now(),
+		}
+		// Redirect to step 0 if trying to access later steps without session
+		if step > 0 {
+			log.Printf("[INFO] Redirecting to step 0 due to missing session state")
+			c.Header("HX-Redirect", "/ui/step/0")
+			c.String(http.StatusOK, "")
+			return
+		}
+	}
+	
+	// Log session state for debugging
+	log.Printf("[DEBUG] GetStep - Step: %d, Session CurrentStep: %d, HasCaseFolder: %v, HasDocuments: %d, HasTemplate: %v", 
+		step, state.CurrentStep, state.SelectedCaseFolder != "", len(state.SelectedDocuments), state.SelectedTemplate != "")
+	
 	// Check if iCloud is connected (from query parameter or session)
 	icloudConnected := c.Query("icloud_connected") == "true" || state.ICloudConnected
 	
 	// Determine if user is returning to a step they've been to before
 	isReturningUser := state.CurrentStep > step
+	
+	// Update current step in session if moving forward
+	if step > state.CurrentStep {
+		h.updateWorkflowState(c, func(s *services.WorkflowState) {
+			s.CurrentStep = step
+		})
+	}
 	
 	data := PageData{
 		CurrentStep:          step,
@@ -255,6 +283,9 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 			if err == nil {
 				data.Folders = folders
 				log.Printf("Loaded %d iCloud folders for connected user", len(folders))
+			} else {
+				log.Printf("[ERROR] Failed to load iCloud folders: %v", err)
+				data.Error = "Could not load iCloud folders. Please try again."
 			}
 		}
 		// If parent folder is selected, load case folders
@@ -263,43 +294,78 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 			if err == nil {
 				data.CaseFolders = caseFolders
 				log.Printf("Loaded %d case folders from session state", len(caseFolders))
+			} else {
+				log.Printf("[ERROR] Failed to load case folders from %s: %v", state.SelectedParentFolder, err)
 			}
 		}
 	case 1:
+		// Validate prerequisites for step 1
+		if state.SelectedCaseFolder == "" && !isReturningUser {
+			log.Printf("[WARNING] Attempting to access step 1 without case folder selection")
+			data.Error = "Please select a case folder first."
+		}
+		
 		// Load documents for step 1 - prioritize from session state
 		if state.SelectedCaseFolder != "" {
 			documents, err := h.icloudService.GetDocuments("", "", state.SelectedCaseFolder)
 			if err == nil {
 				data.Documents = documents
-				log.Printf("Loaded %d documents from session case folder", len(documents))
+				log.Printf("Loaded %d documents from session case folder: %s", len(documents), state.SelectedCaseFolder)
 			} else {
+				log.Printf("[WARNING] Failed to load documents from case folder %s: %v", state.SelectedCaseFolder, err)
 				// Fallback to default loading
 				documents, err := h.loadDocumentsForStep1(c)
 				if err != nil {
-					log.Printf("Error loading documents for step 1: %v", err)
+					log.Printf("[ERROR] Fallback document loading failed: %v", err)
+					data.Error = "Could not load documents. Please check your case folder selection."
+				} else {
+					data.Documents = documents
 				}
-				data.Documents = documents
 			}
 		} else {
 			// Load documents using default method
 			documents, err := h.loadDocumentsForStep1(c)
 			if err != nil {
-				log.Printf("Error loading documents for step 1: %v", err)
+				log.Printf("[ERROR] Default document loading failed: %v", err)
+				data.Error = "Could not load documents. Please select a case folder."
+			} else {
+				data.Documents = documents
 			}
-			data.Documents = documents
 		}
 	case 2:
+		// Validate prerequisites for step 2
+		if len(state.SelectedDocuments) == 0 && !isReturningUser {
+			log.Printf("[WARNING] Attempting to access step 2 without document selection")
+			data.Error = "Please select documents first."
+		}
+		
 		// Load templates for step 2
 		templates, err := h.docService.GetTemplates()
 		if err != nil {
-			log.Printf("Error loading templates: %v", err)
+			log.Printf("[ERROR] Failed to load templates: %v", err)
+			data.Error = "Could not load templates. Please try again."
 		} else {
 			data.Templates = templates
+			log.Printf("Loaded %d templates for step 2", len(templates))
 		}
 	case 3:
+		// Validate prerequisites for step 3
+		if state.SelectedTemplate == "" && !isReturningUser {
+			log.Printf("[WARNING] Attempting to access step 3 without template selection")
+			data.Error = "Please select a template first."
+		}
+		
 		// Load legal analysis for step 3
 		legalAnalysis := h.generateLegalAnalysis()
 		data.LegalAnalysis = legalAnalysis
+		
+		// Load processing result if available in session
+		if state.ProcessingResult != nil {
+			data.ProcessingResult = state.ProcessingResult
+		}
+		if state.ClientCase != nil {
+			data.ClientCase = state.ClientCase
+		}
 	}
 	
 	err = h.templates.ExecuteTemplate(c.Writer, "_step_wrapper.gohtml", data)
@@ -597,6 +663,9 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 	h.updateWorkflowState(c, func(state *services.WorkflowState) {
 		state.SelectedTemplate = selectedTemplate
 		state.CurrentStep = 3 // Move to review data
+		// Clear any previous processing results when selecting new template
+		state.ProcessingResult = nil
+		state.ClientCase = nil
 	})
 	
 	if selectedTemplate == "" {
@@ -642,6 +711,12 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 		h.templates.ExecuteTemplate(c.Writer, "_error_fragment.gohtml", data)
 		return
 	}
+	
+	// Save processing results to session state
+	h.updateWorkflowState(c, func(state *services.WorkflowState) {
+		state.ProcessingResult = processingResult
+		state.ClientCase = clientCase
+	})
 	
 	username := c.GetString("username")
 	if username == "" {

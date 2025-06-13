@@ -24,6 +24,12 @@ func main() {
 			sessionToken = "temp_session"
 		}
 		
+		// Validate session token header if present
+		headerToken := c.GetHeader("X-Session-Token")
+		if headerToken != "" && headerToken != sessionToken {
+			log.Printf("[WARNING] Session token mismatch: cookie=%s, header=%s", sessionToken, headerToken)
+		}
+		
 		// Add session service and session ID to context
 		c.Set("sessionService", sessionService)
 		c.Set("sessionID", sessionToken)
@@ -174,8 +180,9 @@ func main() {
 
 	// Start the server
 	log.Println("[INFO] Starting Mallon Legal Server v2.5.32 on :8080")
-	log.Printf("[INFO] Features: Dynamic document processing (Task 8), document editing, Go SSR + HTMX")
+	log.Printf("[INFO] Features: Dynamic document processing (Task 8), document editing, Go SSR + HTMX, Enhanced Session Navigation (Defect 1C)")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
+	log.Printf("[INFO] Session TTL: 24 hours with automatic cleanup")
 	router.Run(":8080")
 }

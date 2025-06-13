@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -111,11 +112,15 @@ func (s *SessionService) cleanupExpiredSessions() {
 	for range ticker.C {
 		s.mutex.Lock()
 		now := time.Now()
+		deletedCount := 0
 		for sessionID, state := range s.sessions {
 			if now.Sub(state.LastUpdated) > s.ttl {
 				delete(s.sessions, sessionID)
+				deletedCount++
 			}
 		}
+		log.Printf("[INFO] Session cleanup: removed %d expired sessions, %d active sessions remaining", 
+			deletedCount, len(s.sessions))
 		s.mutex.Unlock()
 	}
 }
