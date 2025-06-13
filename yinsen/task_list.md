@@ -38,14 +38,17 @@ NOTE: !!! IGNORE 4_done/archived_tasks/ folder !! it is not part of your task li
 
 
 ## Defect Tasks ##
-1. [x] DEFECT:1A Session Infrastructure - Add session management to Go handlers and state storage (GitHub Issue #2) (Completed: 2025-06-12 22:32)
-2. [x] DEFECT:1B UI State Restoration - Update templates to read and display saved user selections (GitHub Issue #3) (Completed: 2025-06-12 23:10)
-3. [x] DEFECT:1C Navigation Integration - HTMX navigation integration and end-to-end testing (GitHub Issue #4) (Completed: 2025-06-12 23:35)
+1. [x] DEFECT:1 Navigation State Loss - User Selections Not Persisted During Back Navigation (Completed: 2025-06-13 10:15)
+2. [x] DEFECT:1A Session Infrastructure - Add session management to Go handlers and state storage (GitHub Issue #2) (Completed: 2025-06-12 22:32)
+3. [x] DEFECT:1B UI State Restoration - Update templates to read and display saved user selections (GitHub Issue #3) (Completed: 2025-06-12 23:10)
+4. [x] DEFECT:1C Navigation Integration - HTMX navigation integration and end-to-end testing (GitHub Issue #4) (Completed: 2025-06-12 23:35)
+5. [ ] DEFECT:2 Missing Content Tab Reports Errors When Data is Present (GitHub Issue #7)
+6. [x] DEFECT:3 Step Icons Are No Longer Active (GitHub Issue #8) (Completed: 2025-06-13 10:45)
 
 
 ## Development Tasks
 1. [ ] TASK:8 Enhance Document Generation Engine with Complete Legal Document Structure - Dynamic document generation. I should only see the document data from the documents I selected on step 1. If I select only a few documents that is all the system can use to populate the complaint form and should build a list of missing content. Ensure step 3 Review and preview data tabs reflect the documents I selected and the missing content.
 2. [ ] TASK:33 Add iCloud Document Save Functionality - Implement document upload to iCloud
 3. [x] TASK:34 replace "Restart Setup" button with a Back button that only moves the user to the last step. Every page should have a back button except the first and last pages. (Completed: 2025-06-12 22:11) 
-4. [ ] TASK:35 Return to use the user.json file to make it easier to admin the site and we can use it to add users and assign roles to them from future UI. 
+4. [x] TASK:35 Return to use the user.json file to make it easier to admin the site and we can use it to add users and assign roles to them from future UI. (Completed: 2025-06-13 10:15) 
 5. [x] TASK:36 Dynamic document preview based on selected documents - Document preview shows only user-selected documents with missing content analysis tab (Completed: 2025-06-13 00:30)
