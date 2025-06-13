@@ -1,10 +1,5 @@
 {{define "_step_wrapper.gohtml"}}
-<!-- Progress Steps Update -->
-<div hx-swap-oob="true" id="progress-steps">
-    {{template "_progress_steps_content.gohtml" .}}
-</div>
-
-<!-- Step Content -->
+<!-- Step Content Only - Removing OOB update temporarily for debugging -->
 {{if eq .CurrentStep 0}}
     {{template "_step0_case_setup.gohtml" .}}
 {{else if eq .CurrentStep 1}}
@@ -17,5 +12,7 @@
     {{template "_step4_generate_document.gohtml" .}}
 {{else if eq .CurrentStep 5}}
     {{template "_step5_icloud_sync.gohtml" .}}
+{{else}}
+    <div class="error">Unknown step: {{.CurrentStep}}</div>
 {{end}}
 {{end}}

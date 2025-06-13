@@ -106,6 +106,14 @@ func main() {
 		ui.POST("/save-document", uiHandlers.SaveDocument)
 	}
 
+	// Initialize user service
+	userService, err := services.NewUserService("config")
+	if err != nil {
+		log.Printf("Failed to initialize user service: %v", err)
+		log.Printf("Falling back to hardcoded credentials")
+		userService = nil
+	}
+
 	// Legacy API endpoints (keep for backward compatibility during transition)
 	api := router.Group("/api")
 	{
@@ -121,23 +129,47 @@ func main() {
 				return
 			}
 			
-			// Simple credential check for demo
-			if (loginRequest.Username == "admin" || loginRequest.Username == "kmallon" || loginRequest.Username == "demo") && 
-			   loginRequest.Password == "password" {
+			var isValid bool
+			var user *services.User
+			
+			// Try user service first, fallback to hardcoded
+			if userService != nil {
+				user, isValid = userService.ValidateUser(loginRequest.Username, loginRequest.Password)
+			} else {
+				// Fallback to hardcoded credentials
+				isValid = (loginRequest.Username == "admin" || loginRequest.Username == "kmallon" || loginRequest.Username == "demo") && 
+						 loginRequest.Password == "password"
+			}
+			
+			if isValid {
 				// Set session cookie
 				c.SetCookie("session_token", "demo_session_token", 3600, "/", "", false, true)
+				
+				// Determine display name and role
+				displayName := "Kevin Mallon"
+				role := "Attorney"
+				
+				if user != nil {
+					// Use data from user service
+					displayName = user.Username
+					role = user.Role
+					log.Printf("[LOGIN] User %s logged in with role: %s", user.Username, user.Role)
+				} else {
+					log.Printf("[LOGIN] User %s logged in (fallback mode)", loginRequest.Username)
+				}
 				
 				// Return success with user info
 				c.JSON(http.StatusOK, gin.H{
 					"success": true,
 					"user": gin.H{
 						"username": loginRequest.Username,
-						"displayName": "Kevin Mallon",
-						"role": "Attorney",
+						"displayName": displayName,
+						"role": role,
 					},
 					"sessionToken": "demo_session_token",
 				})
 			} else {
+				log.Printf("[LOGIN] Invalid login attempt for user: %s", loginRequest.Username)
 				c.JSON(http.StatusUnauthorized, gin.H{"success": false, "error": "Invalid credentials"})
 			}
 		})
@@ -179,7 +211,7 @@ func main() {
 	}
 
 	// Start the server
-	log.Println("[INFO] Starting Mallon Legal Server v2.5.32 on :8080")
+	log.Println("[INFO] Starting Mallon Legal Server v2.5.40 on :8080")
 	log.Printf("[INFO] Features: Dynamic document processing (Task 8), document editing, Go SSR + HTMX, Enhanced Session Navigation (Defect 1C)")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
