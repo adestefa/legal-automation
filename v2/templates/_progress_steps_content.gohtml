@@ -1,8 +1,8 @@
 {{define "_progress_steps_content.gohtml"}}
 <div class="flex items-center justify-between">
     <div class="flex items-center {{if ge .CurrentStep 0}}text-blue-600{{else}}text-gray-400{{end}}">
-        <button {{if ge .SessionState.CurrentStep 0}}hx-get="/ui/step/0" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
-                class="flex items-center {{if ge .SessionState.CurrentStep 0}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
+        <button hx-get="/ui/step/0" hx-target="#step-content" hx-swap="innerHTML"
+                class="flex items-center cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2">
             <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 0}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 0}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
                 {{if gt .CurrentStep 0}}✓{{else}}0{{end}}
             </div>
@@ -11,8 +11,8 @@
     </div>
     <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 1}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
     <div class="flex items-center {{if ge .CurrentStep 1}}text-blue-600{{else}}text-gray-400{{end}}">
-        <button {{if and (ge .SessionState.CurrentStep 1) .SessionState.SelectedCaseFolder}}hx-get="/ui/step/1" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
-                class="flex items-center {{if and (ge .SessionState.CurrentStep 1) .SessionState.SelectedCaseFolder}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
+        <button {{if and .SelectedCaseFolder (ge .CurrentStep 1)}}hx-get="/ui/step/1" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
+                class="flex items-center {{if and .SelectedCaseFolder (ge .CurrentStep 1)}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
             <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 1}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 1}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
                 {{if gt .CurrentStep 1}}✓{{else}}1{{end}}
             </div>
@@ -21,8 +21,8 @@
     </div>
     <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 2}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
     <div class="flex items-center {{if ge .CurrentStep 2}}text-blue-600{{else}}text-gray-400{{end}}">
-        <button {{if and (ge .SessionState.CurrentStep 2) .SessionState.SelectedDocuments}}hx-get="/ui/step/2" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
-                class="flex items-center {{if and (ge .SessionState.CurrentStep 2) .SessionState.SelectedDocuments}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
+        <button {{if and .SelectedDocuments (ge .CurrentStep 2)}}hx-get="/ui/step/2" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
+                class="flex items-center {{if and .SelectedDocuments (ge .CurrentStep 2)}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
             <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 2}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 2}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
                 {{if gt .CurrentStep 2}}✓{{else}}2{{end}}
             </div>
@@ -31,8 +31,8 @@
     </div>
     <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 3}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
     <div class="flex items-center {{if ge .CurrentStep 3}}text-blue-600{{else}}text-gray-400{{end}}">
-        <button {{if and (ge .SessionState.CurrentStep 3) .SessionState.SelectedTemplate}}hx-get="/ui/step/3" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
-                class="flex items-center {{if and (ge .SessionState.CurrentStep 3) .SessionState.SelectedTemplate}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
+        <button {{if and .SelectedTemplate (ge .CurrentStep 3)}}hx-get="/ui/step/3" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
+                class="flex items-center {{if and .SelectedTemplate (ge .CurrentStep 3)}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
             <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 3}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 3}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
                 {{if gt .CurrentStep 3}}✓{{else}}3{{end}}
             </div>
@@ -41,8 +41,8 @@
     </div>
     <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 4}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
     <div class="flex items-center {{if ge .CurrentStep 4}}text-blue-600{{else}}text-gray-400{{end}}">
-        <button {{if ge .SessionState.CurrentStep 4}}hx-get="/ui/step/4" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
-                class="flex items-center {{if ge .SessionState.CurrentStep 4}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
+        <button {{if ge .CurrentStep 4}}hx-get="/ui/step/4" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
+                class="flex items-center {{if ge .CurrentStep 4}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
             <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 4}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 4}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
                 {{if gt .CurrentStep 4}}✓{{else}}4{{end}}
             </div>
@@ -51,8 +51,8 @@
     </div>
     <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 5}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
     <div class="flex items-center {{if ge .CurrentStep 5}}text-blue-600{{else}}text-gray-400{{end}}">
-        <button {{if ge .SessionState.CurrentStep 5}}hx-get="/ui/step/5" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
-                class="flex items-center {{if ge .SessionState.CurrentStep 5}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
+        <button {{if ge .CurrentStep 5}}hx-get="/ui/step/5" hx-target="#step-content" hx-swap="innerHTML"{{end}} 
+                class="flex items-center {{if ge .CurrentStep 5}}cursor-pointer hover:bg-blue-50 rounded-lg p-2 -m-2{{else}}cursor-not-allowed{{end}}">
             <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 5}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 5}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
                 {{if gt .CurrentStep 5}}✓{{else}}5{{end}}
             </div>
