@@ -749,9 +749,18 @@ func (h *UIHandlers) PreviewDocument(c *gin.Context) {
 		username = "User"
 	}
 	
-	// Generate preview document with highlighted content
-	previewData := h.generatePreviewDocument()
-	log.Printf("[DEBUG] Generated preview document with %d sections", len(previewData.Content))
+	// Get workflow state to access selected documents
+	state := h.getWorkflowState(c)
+	selectedDocs := state.SelectedDocuments
+	if len(selectedDocs) == 0 {
+		// Fallback to hardcoded for backwards compatibility during development
+		selectedDocs = []string{"Attorney_Notes.txt", "Adverse_Action_Letter_Cap_One.pdf", "Civil_Cover_Sheet.txt", "Complaint_Final.docx"}
+		log.Printf("[WARNING] No selected documents found in session, using fallback")
+	}
+	
+	// Generate preview document with highlighted content using selected documents
+	previewData := h.generatePreviewDocument(selectedDocs)
+	log.Printf("[DEBUG] Generated preview document with %d sections for selected docs: %v", len(previewData.Content), selectedDocs)
 	
 	// Debug the content structure
 	for i, section := range previewData.Content {
@@ -872,14 +881,14 @@ func (h *UIHandlers) generateLegalAnalysis() LegalAnalysis {
 }
 
 // generatePreviewDocument creates a complete legal document with highlighted content
-func (h *UIHandlers) generatePreviewDocument() PreviewDocument {
-	// For prototype: Generate complete FCRA legal complaint document
+func (h *UIHandlers) generatePreviewDocument(selectedDocs []string) PreviewDocument {
+	// Generate complete FCRA legal complaint document using only selected documents
 	// In production: this would process actual extracted data from documents
 	
 	return PreviewDocument{
 		Title:         "COMPLAINT FOR VIOLATIONS OF THE FAIR CREDIT REPORTING ACT",
-		GeneratedDate: "June 5, 2025",
-		SourceDocs:    []string{"Attorney_Notes.txt", "Adverse_Action_Letter_Cap_One.pdf", "Civil_Cover_Sheet.txt", "Complaint_Final.docx"},
+		GeneratedDate: time.Now().Format("January 2, 2006"),
+		SourceDocs:    selectedDocs,
 		Content: []PreviewSection{
 			{
 				Title:   "UNITED STATES DISTRICT COURT",
@@ -1012,7 +1021,13 @@ func (h *UIHandlers) ViewDocument(c *gin.Context) {
 		log.Printf("[INFO] No existing document found, generating new document from preview content")
 		
 		// Generate preview content
-		previewContent := h.generatePreviewDocument()
+		// Get selected documents from session state
+		state := h.getWorkflowState(c)
+		selectedDocs := state.SelectedDocuments
+		if len(selectedDocs) == 0 {
+			selectedDocs = []string{"Attorney_Notes.txt", "Adverse_Action_Letter_Cap_One.pdf", "Civil_Cover_Sheet.txt", "Complaint_Final.docx"}
+		}
+		previewContent := h.generatePreviewDocument(selectedDocs)
 		
 		// Create HTML document from preview content
 		var legalDocHTML strings.Builder
@@ -1258,7 +1273,13 @@ func (h *UIHandlers) EditDocument(c *gin.Context) {
 		log.Printf("[INFO] No existing document found, generating new document from preview content")
 		
 		// Generate preview content
-		previewContent := h.generatePreviewDocument()
+		// Get selected documents from session state
+		state := h.getWorkflowState(c)
+		selectedDocs := state.SelectedDocuments
+		if len(selectedDocs) == 0 {
+			selectedDocs = []string{"Attorney_Notes.txt", "Adverse_Action_Letter_Cap_One.pdf", "Civil_Cover_Sheet.txt", "Complaint_Final.docx"}
+		}
+		previewContent := h.generatePreviewDocument(selectedDocs)
 		
 		// Create HTML document from preview content
 		var legalDocHTML strings.Builder
@@ -1372,8 +1393,15 @@ func (h *UIHandlers) EditDocument(c *gin.Context) {
 	timestamp := time.Now().Format("20060102_150405")
 	documentFilename := fmt.Sprintf("complaint_%s_%s.html", clientNameLower, timestamp)
 	
+	// Get selected documents from session state
+	state := h.getWorkflowState(c)
+	selectedDocs := state.SelectedDocuments
+	if len(selectedDocs) == 0 {
+		selectedDocs = []string{"Attorney_Notes.txt", "Adverse_Action_Letter_Cap_One.pdf", "Civil_Cover_Sheet.txt", "Complaint_Final.docx"}
+	}
+	
 	// Generate preview content with source documents for the sidebar
-	previewContent := h.generatePreviewDocument()
+	previewContent := h.generatePreviewDocument(selectedDocs)
 	
 	data := PageData{
 		Username:          username,
