@@ -149,12 +149,7 @@
     {{end}}
 
     <!-- Action Buttons -->
-    <div class="mt-6 flex justify-between">
-        <button type="button"
-                onclick="window.location.reload()" 
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
-            Restart Setup
-        </button>
+    <div class="mt-6 flex justify-end">
         {{if .SelectedCaseFolder}}
         <button hx-get="/ui/step/1" 
                 hx-target="#step-content"
