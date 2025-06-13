@@ -13,7 +13,7 @@
         <!-- Header -->
         <header class="mb-8">
             <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-800">Legal Document Automation <span class="text-sm font-normal text-gray-500">v2.5.33</span></h1>
+                <h1 class="text-3xl font-bold text-gray-800">Legal Document Automation <span class="text-sm font-normal text-gray-500">v2.5.40</span></h1>
                 <div class="flex items-center space-x-4">
                     <!-- iCloud Status -->
                     <div class="flex items-center space-x-2">
@@ -78,7 +78,10 @@
         
         // Global HTMX event listeners
         document.body.addEventListener('htmx:beforeRequest', function(evt) {
-            console.log('HTMX: Making request to', evt.detail.pathInfo.requestPath);
+            console.log('=== HTMX BEFORE REQUEST ===');
+            console.log('Request path:', evt.detail.pathInfo.requestPath);
+            console.log('Target element:', evt.detail.target.id);
+            console.log('=== END BEFORE REQUEST ===');
             
             // Ensure session cookies are included
             const xhr = evt.detail.xhr;
@@ -94,8 +97,49 @@
             showLoadingIndicator(evt.detail.target);
         });
 
+        document.body.addEventListener('htmx:beforeSwap', function(evt) {
+            console.log('=== HTMX BEFORE SWAP DEBUG ===');
+            console.log('Server response length:', evt.detail.serverResponse.length);
+            console.log('Server response preview:', evt.detail.serverResponse.substring(0, 300));
+            console.log('Response status:', evt.detail.xhr.status);
+            console.log('Response content-type:', evt.detail.xhr.getResponseHeader('content-type'));
+            console.log('Target before swap:', evt.detail.target.id);
+            console.log('Target innerHTML before swap length:', evt.detail.target.innerHTML.length);
+            console.log('=== END BEFORE SWAP DEBUG ===');
+        });
+
         document.body.addEventListener('htmx:afterSwap', function(evt) {
-            console.log('HTMX: Content swapped for target', evt.detail.target.id || evt.detail.target.tagName);
+            const target = evt.detail.target;
+            console.log('=== HTMX AFTER SWAP DEBUG ===');
+            console.log('Target ID:', target.id);
+            console.log('Target tagName:', target.tagName);
+            console.log('Target innerHTML length:', target.innerHTML.length);
+            console.log('Target innerHTML preview:', target.innerHTML.substring(0, 200));
+            console.log('Target visible children count:', target.children.length);
+            console.log('Target clientHeight:', target.clientHeight);
+            console.log('Target clientWidth:', target.clientWidth);
+            console.log('Target style.display:', window.getComputedStyle(target).display);
+            console.log('Target style.visibility:', window.getComputedStyle(target).visibility);
+            console.log('Target style.height:', window.getComputedStyle(target).height);
+            
+            // Check if content exists but is hidden
+            if (target.children.length > 0) {
+                console.log('First child:', target.children[0]);
+                console.log('First child display:', window.getComputedStyle(target.children[0]).display);
+                console.log('First child visibility:', window.getComputedStyle(target.children[0]).visibility);
+            }
+            
+            console.log('=== END HTMX DEBUG ===');
+            
+            // Check again after a delay to see if content appears later
+            setTimeout(function() {
+                console.log('=== DELAYED CHECK (500ms) ===');
+                console.log('Target innerHTML length after delay:', target.innerHTML.length);
+                console.log('Target clientHeight after delay:', target.clientHeight);
+                console.log('Target visible after delay:', target.offsetParent !== null);
+                console.log('=== END DELAYED CHECK ===');
+            }, 500);
+            
             hideLoadingIndicator(evt.detail.target);
         });
 

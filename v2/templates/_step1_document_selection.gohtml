@@ -16,6 +16,26 @@
         {{end}}
     </p>
 
+    {{if .SelectedCaseFolder}}
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="h-6 w-6 text-gray-600 text-sm mr-2">📁</div>
+                <div>
+                    <span class="text-sm font-medium text-gray-800">Current Folder:</span>
+                    <span class="text-sm text-gray-600 ml-1">{{.SelectedCaseFolder}}</span>
+                </div>
+            </div>
+            <button hx-get="/ui/step/0" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                Change Folder
+            </button>
+        </div>
+    </div>
+    {{end}}
+
     {{if and .IsReturningUser .SelectedDocuments}}
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <div class="flex items-center">
@@ -56,23 +76,26 @@
             <!-- Document List -->
             <ul class="divide-y divide-gray-200">
                 {{if .Documents}}
-                    {{range .Documents}}
-                    <li class="p-3 hover:bg-gray-50 flex justify-between items-center{{if contains $.SelectedDocuments .Path}} bg-blue-50{{end}}">
+                    {{range $index, $doc := .Documents}}
+                    <li class="p-3 hover:bg-gray-50 flex justify-between items-center{{if contains $.SelectedDocuments $doc.Path}} bg-blue-50{{end}}">
                         <div class="flex items-center">
+                            <div class="mr-3 flex-shrink-0">
+                                <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-gray-500 bg-gray-100 rounded-full">{{add $index 1}}</span>
+                            </div>
                             <div>
-                                <span class="text-black font-medium">{{.Name}}{{if contains $.SelectedDocuments .Path}} <span class="text-blue-600 text-sm">(Previously Selected)</span>{{end}}</span>
+                                <span class="text-black font-medium">{{$doc.Name}}{{if contains $.SelectedDocuments $doc.Path}} <span class="text-blue-600 text-sm">(Previously Selected)</span>{{end}}</span>
                                 <div class="text-xs text-gray-500">
-                                    {{if .Type}}<span>{{.Type | upper}}</span>{{end}}
-                                    {{if .Size}} • <span>{{.Size | formatSize}}</span>{{end}}
-                                    {{if .Modified}} • <span>{{.Modified.Format "Jan 2, 2006"}}</span>{{end}}
+                                    {{if $doc.Type}}<span>{{$doc.Type | upper}}</span>{{end}}
+                                    {{if $doc.Size}} • <span>{{$doc.Size | formatSize}}</span>{{end}}
+                                    {{if $doc.Modified}} • <span>{{$doc.Modified.Format "Jan 2, 2006"}}</span>{{end}}
                                 </div>
                             </div>
                         </div>
                         <input type="checkbox" 
                                name="selectedDocs" 
-                               value="{{.Path}}" 
+                               value="{{$doc.Path}}" 
                                class="doc-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                               onchange="updateSelectAllState()"{{if contains $.SelectedDocuments .Path}} checked{{end}}>
+                               onchange="updateSelectAllState()"{{if contains $.SelectedDocuments $doc.Path}} checked{{end}}>
                     </li>
                     {{end}}
                 {{else}}
@@ -93,14 +116,6 @@
                             hx-swap="outerHTML"
                             class="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
                         Reload Documents
-                    </button>
-                    <button type="button"
-                            hx-get="/ui/load-documents"
-                            hx-vals='{"folder": "/CASES/Yousef_Eman"}'
-                            hx-target="#step-1-content"
-                            hx-swap="outerHTML"
-                            class="mt-2 ml-2 px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
-                        Load Test Documents
                     </button>
                     {{end}}
                 </li>

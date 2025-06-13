@@ -132,6 +132,9 @@ func NewUIHandlers() *UIHandlers {
 		"stringEq": func(a, b string) bool {
 			return a == b
 		},
+		"add": func(a, b int) int {
+			return a + b
+		},
 	})
 	
 	// Parse template files
@@ -353,18 +356,65 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 		if state.SelectedTemplate == "" && !isReturningUser {
 			log.Printf("[WARNING] Attempting to access step 3 without template selection")
 			data.Error = "Please select a template first."
+			// Redirect back to step 2 with templates loaded
+			templates, err := h.docService.GetTemplates()
+			if err != nil {
+				log.Printf("[ERROR] Failed to load templates: %v", err)
+				templates = []services.Template{}
+			}
+			data.CurrentStep = 2
+			data.Templates = templates
+			break
+		}
+		
+		// Check if we have processing results in session
+		if state.ProcessingResult == nil || state.ClientCase == nil {
+			log.Printf("[WARNING] Missing processing results in session for step 3")
+			
+			// If we have selected documents and template, try to reprocess
+			if len(state.SelectedDocuments) > 0 && state.SelectedTemplate != "" {
+				log.Printf("[INFO] Reprocessing documents for step 3")
+				processingResult, clientCase, err := h.docService.ProcessSelectedDocuments(state.SelectedDocuments, state.SelectedTemplate)
+				if err != nil {
+					log.Printf("[ERROR] Failed to reprocess documents: %v", err)
+					data.Error = "Failed to process documents. Please try again."
+					// Redirect back to step 2
+					templates, _ := h.docService.GetTemplates()
+					data.CurrentStep = 2
+					data.Templates = templates
+					break
+				}
+				
+				// Save the reprocessed results to session
+				h.updateWorkflowState(c, func(state *services.WorkflowState) {
+					state.ProcessingResult = processingResult
+					state.ClientCase = clientCase
+				})
+				
+				data.ProcessingResult = processingResult
+				data.ClientCase = clientCase
+			} else {
+				// No way to recover, redirect to step 2
+				log.Printf("[ERROR] Cannot proceed to step 3 without document processing")
+				data.Error = "Session data missing. Please select your documents and template again."
+				templates, _ := h.docService.GetTemplates()
+				data.CurrentStep = 2
+				data.Templates = templates
+				break
+			}
+		} else {
+			// Load from session
+			data.ProcessingResult = state.ProcessingResult
+			data.ClientCase = state.ClientCase
 		}
 		
 		// Load legal analysis for step 3
 		legalAnalysis := h.generateLegalAnalysis()
 		data.LegalAnalysis = legalAnalysis
 		
-		// Load processing result if available in session
-		if state.ProcessingResult != nil {
-			data.ProcessingResult = state.ProcessingResult
-		}
-		if state.ClientCase != nil {
-			data.ClientCase = state.ClientCase
+		// Ensure we have selected documents list
+		if len(state.SelectedDocuments) > 0 {
+			data.SelectedDocuments = state.SelectedDocuments
 		}
 	}
 	
@@ -536,31 +586,26 @@ func (h *UIHandlers) SelectCaseFolder(c *gin.Context) {
 		username = "User"
 	}
 	
-	// Load documents from the selected case folder
+	// Load documents from the selected case folder - only from iCloud
 	documents, err := h.icloudService.GetDocuments("", "", caseFolder)
 	if err != nil {
 		log.Printf("Error loading documents from case folder %s: %v", caseFolder, err)
-		// Fallback to backend documents if iCloud fails
-		backendDocs, backendErr := h.docService.GetDocuments()
-		if backendErr != nil {
-			log.Printf("Both iCloud and backend document loading failed: %v, %v", err, backendErr)
-		} else {
-			// Convert backend documents to iCloud document format for consistency
-			var icloudDocs []services.ICloudDocument
-			for _, doc := range backendDocs {
-				icloudDoc := services.ICloudDocument{
-					ID:          doc.ID,
-					Name:        doc.Name,
-					Path:        doc.Path,
-					Type:        doc.Type,
-					Size:        doc.Size,
-					Modified:    time.Now(), // Use current time as fallback since backend docs don't have Modified
-					IsDirectory: false,
-				}
-				icloudDocs = append(icloudDocs, icloudDoc)
-			}
-			documents = icloudDocs
+		// Return error without fallback - user must have valid iCloud access
+		data := PageData{
+			CurrentStep:        1,
+			Username:           username,
+			ICloudConnected:    true,
+			SelectedCaseFolder: caseFolder,
+			Error:             fmt.Sprintf("Could not load documents from case folder '%s'. Please check your iCloud Drive connection and ensure the folder exists.", caseFolder),
 		}
+		h.templates.ExecuteTemplate(c.Writer, "_step_wrapper.gohtml", data)
+		return
+	}
+	
+	// Log document loading results for debugging
+	log.Printf("Successfully loaded %d documents from case folder %s", len(documents), caseFolder)
+	if len(documents) == 0 {
+		log.Printf("[INFO] Case folder %s is empty or contains no readable documents", caseFolder)
 	}
 	
 	data := PageData{
@@ -568,11 +613,42 @@ func (h *UIHandlers) SelectCaseFolder(c *gin.Context) {
 		Username:           username,
 		ICloudConnected:    true,
 		SelectedCaseFolder: caseFolder,
-		Documents:          documents,
+		Documents:          documents, // This could be empty slice, which is fine
 	}
 	
-	// Navigate directly to Step 1 with the loaded documents
-	h.templates.ExecuteTemplate(c.Writer, "_step_wrapper.gohtml", data)
+	// Navigate directly to Step 1 with the loaded documents (or empty list)
+	log.Printf("[DEBUG] Rendering step wrapper template for step %d with %d documents", data.CurrentStep, len(data.Documents))
+	log.Printf("[DEBUG] Case folder: %s, ICloud connected: %t", data.SelectedCaseFolder, data.ICloudConnected)
+	
+	// Set content type to ensure proper HTML rendering
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	
+	// Capture the template output for debugging
+	var templateBuffer strings.Builder
+	err = h.templates.ExecuteTemplate(&templateBuffer, "_step_wrapper.gohtml", data)
+	if err != nil {
+		log.Printf("Error executing step wrapper template: %v", err)
+		c.String(http.StatusInternalServerError, "Error rendering page")
+		return
+	}
+	
+	output := templateBuffer.String()
+	log.Printf("[DEBUG] ========== SERVER RESPONSE DEBUG ==========")
+	log.Printf("[DEBUG] Template output length: %d characters", len(output))
+	previewLen := 300
+	if len(output) < previewLen {
+		previewLen = len(output)
+	}
+	log.Printf("[DEBUG] Template output first 300 chars: %s", output[:previewLen])
+	if len(output) > 300 {
+		log.Printf("[DEBUG] Template output last 100 chars: %s", output[len(output)-100:])
+	}
+	log.Printf("[DEBUG] ========== END SERVER DEBUG ==========")
+	
+	// Write the captured output
+	c.Writer.WriteString(output)
+	
+	log.Printf("[DEBUG] Successfully rendered step wrapper template")
 }
 
 // LoadDocuments handles loading documents from a folder
@@ -662,6 +738,7 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 	// Save template selection to session state
 	h.updateWorkflowState(c, func(state *services.WorkflowState) {
 		state.SelectedTemplate = selectedTemplate
+		state.SelectedDocuments = selectedDocs // Save selected documents
 		state.CurrentStep = 3 // Move to review data
 		// Clear any previous processing results when selecting new template
 		state.ProcessingResult = nil
@@ -1560,32 +1637,18 @@ func (h *UIHandlers) SaveDocument(c *gin.Context) {
 
 // Helper function to load documents for step 1
 func (h *UIHandlers) loadDocumentsForStep1(c *gin.Context) ([]services.ICloudDocument, error) {
-	// In production, this would get the selected case folder from session
-	// For now, try to load from a default test folder
-	defaultFolder := "/CASES/Yousef_Eman"
+	// Get session state to check for selected case folder
+	state := h.getWorkflowState(c)
 	
-	documents, err := h.icloudService.GetDocuments("", "", defaultFolder)
+	// Use selected case folder if available, otherwise require user to select one
+	if state.SelectedCaseFolder == "" {
+		return nil, fmt.Errorf("no case folder selected - please select a case folder first")
+	}
+	
+	// Load documents only from iCloud - no test folder or backend fallback
+	documents, err := h.icloudService.GetDocuments("", "", state.SelectedCaseFolder)
 	if err != nil {
-		// Fallback to backend documents if iCloud fails
-		backendDocs, backendErr := h.docService.GetDocuments()
-		if backendErr != nil {
-			return nil, fmt.Errorf("both iCloud and backend document loading failed: %v, %v", err, backendErr)
-		}
-		
-		// Convert backend documents to iCloud document format for consistency
-		var icloudDocs []services.ICloudDocument
-		for _, doc := range backendDocs {
-			icloudDoc := services.ICloudDocument{
-				ID:          doc.ID,
-				Name:        doc.Name,
-				Path:        doc.Path,
-				Type:        doc.Type,
-				Size:        doc.Size,
-				IsDirectory: false,
-			}
-			icloudDocs = append(icloudDocs, icloudDoc)
-		}
-		return icloudDocs, nil
+		return nil, fmt.Errorf("failed to load documents from iCloud case folder %s: %v", state.SelectedCaseFolder, err)
 	}
 	
 	return documents, nil

@@ -33,20 +33,14 @@ func NewICloudService() *ICloudService {
 
 // GetRootFolders returns the top-level folders in iCloud Drive
 func (s *ICloudService) GetRootFolders(username, appPassword string) ([]ICloudDocument, error) {
-	// Always try test directory first for development
-	var icloudPath string
-	if _, err := os.Stat(s.testPath); err == nil {
-		icloudPath = s.testPath
-		fmt.Printf("Using test iCloud directory: %s\n", s.testPath)
-	} else {
-		// Get iCloud Drive path on macOS
-		icloudPath = "/Users/" + getCurrentUser() + "/Library/Mobile Documents/com~apple~CloudDocs"
-		
-		// Check if iCloud Drive is available
-		if _, err := os.Stat(icloudPath); os.IsNotExist(err) {
-			return nil, fmt.Errorf("iCloud Drive not available or not synced")
-		}
+	// Get iCloud Drive path on macOS - no test folder fallback for production
+	icloudPath := "/Users/" + getCurrentUser() + "/Library/Mobile Documents/com~apple~CloudDocs"
+	
+	// Check if iCloud Drive is available
+	if _, err := os.Stat(icloudPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("iCloud Drive not available or not synced")
 	}
+	fmt.Printf("[DEBUG] Using real iCloud directory: %s\n", icloudPath)
 	
 	// List directories in iCloud Drive root
 	dirs, err := os.ReadDir(icloudPath)
@@ -80,20 +74,14 @@ func (s *ICloudService) GetRootFolders(username, appPassword string) ([]ICloudDo
 
 // GetSubfolders returns subfolders within a specific iCloud directory
 func (s *ICloudService) GetSubfolders(username, appPassword, parentFolder string) ([]ICloudDocument, error) {
-	// Always try test directory first for development
-	var icloudPath string
-	if _, err := os.Stat(s.testPath); err == nil {
-		icloudPath = s.testPath
-		fmt.Printf("Using test iCloud directory for subfolders: %s\n", s.testPath)
-	} else {
-		// Get iCloud Drive path on macOS
-		icloudPath = "/Users/" + getCurrentUser() + "/Library/Mobile Documents/com~apple~CloudDocs"
-		
-		// Check if iCloud Drive is available
-		if _, err := os.Stat(icloudPath); os.IsNotExist(err) {
-			return nil, fmt.Errorf("iCloud Drive not available or not synced")
-		}
+	// Get iCloud Drive path on macOS - no test folder fallback for production
+	icloudPath := "/Users/" + getCurrentUser() + "/Library/Mobile Documents/com~apple~CloudDocs"
+	
+	// Check if iCloud Drive is available
+	if _, err := os.Stat(icloudPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("iCloud Drive not available or not synced")
 	}
+	fmt.Printf("[DEBUG] Using real iCloud directory for subfolders: %s\n", icloudPath)
 	
 	// Clean the parent folder path
 	cleanParent := strings.TrimPrefix(parentFolder, "/")
@@ -136,21 +124,14 @@ func (s *ICloudService) GetSubfolders(username, appPassword, parentFolder string
 
 // GetDocuments returns documents from a specific iCloud folder
 func (s *ICloudService) GetDocuments(username, appPassword, folderPath string) ([]ICloudDocument, error) {
-	// Always try test directory first for development
-	var icloudPath string
-	if _, err := os.Stat(s.testPath); err == nil {
-		icloudPath = s.testPath
-		fmt.Printf("[DEBUG] Using test iCloud directory for documents: %s\n", s.testPath)
-	} else {
-		// Get iCloud Drive path on macOS
-		icloudPath = "/Users/" + getCurrentUser() + "/Library/Mobile Documents/com~apple~CloudDocs"
-		
-		// Check if iCloud Drive is available
-		if _, err := os.Stat(icloudPath); os.IsNotExist(err) {
-			return nil, fmt.Errorf("iCloud Drive not available or not synced")
-		}
-		fmt.Printf("[DEBUG] Using real iCloud directory: %s\n", icloudPath)
+	// Get iCloud Drive path on macOS - no test folder fallback for production
+	icloudPath := "/Users/" + getCurrentUser() + "/Library/Mobile Documents/com~apple~CloudDocs"
+	
+	// Check if iCloud Drive is available
+	if _, err := os.Stat(icloudPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("iCloud Drive not available or not synced")
 	}
+	fmt.Printf("[DEBUG] Using real iCloud directory: %s\n", icloudPath)
 	
 	// Clean the folder path
 	cleanPath := strings.TrimPrefix(folderPath, "/")
