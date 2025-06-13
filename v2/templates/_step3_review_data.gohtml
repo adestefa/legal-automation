@@ -1,9 +1,30 @@
 {{define "_step3_review_data.gohtml"}}
 <div id="step-3-content" class="bg-white p-6 rounded-lg shadow-md mb-6">
-    <h2 class="text-xl font-semibold mb-4">Step 3: Review Extracted Data</h2>
+    <h2 class="text-xl font-semibold mb-4">
+        Step 3: Review Extracted Data
+        {{if .IsReturningUser}}
+        <span class="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Returning</span>
+        {{end}}
+    </h2>
     <p class="text-gray-600 mb-6">
+        {{if .IsReturningUser}}
+        Review the extracted data based on your previous selections. The data has been generated from your selected documents and template.
+        {{else}}
         Review the information extracted from your documents before generating the final complaint.
+        {{end}}
     </p>
+
+    {{if .IsReturningUser}}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+            <div class="h-8 w-8 text-blue-600 text-xl mr-3">↩</div>
+            <div>
+                <h4 class="text-sm font-medium text-blue-800">Data Generated from Previous Selections</h4>
+                <p class="text-sm text-blue-700 mt-1">This data was generated based on your previous document and template selections. You can go back to modify your selections if needed.</p>
+            </div>
+        </div>
+    </div>
+    {{end}}
     
     <!-- Tab Navigation -->
     <div class="border-b border-gray-200 mb-6">

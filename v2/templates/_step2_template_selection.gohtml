@@ -1,9 +1,30 @@
 {{define "_step2_template_selection.gohtml"}}
 <div id="step-2-content" class="bg-white p-6 rounded-lg shadow-md mb-6">
-    <h2 class="text-xl font-semibold mb-4">Step 2: Select Complaint Template</h2>
+    <h2 class="text-xl font-semibold mb-4">
+        Step 2: Select Complaint Template
+        {{if .IsReturningUser}}
+        <span class="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Returning</span>
+        {{end}}
+    </h2>
     <p class="text-gray-600 mb-6">
+        {{if .IsReturningUser}}
+        Review and modify your template selection. Your previously selected template is pre-selected.
+        {{else}}
         Choose the complaint form template you want to populate with the extracted information.
+        {{end}}
     </p>
+
+    {{if and .IsReturningUser .SelectedTemplate}}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+            <div class="h-8 w-8 text-blue-600 text-xl mr-3">↩</div>
+            <div>
+                <h4 class="text-sm font-medium text-blue-800">Previous Template Selection Restored</h4>
+                <p class="text-sm text-blue-700 mt-1">Your previously selected template has been pre-selected. You can change it if needed.</p>
+            </div>
+        </div>
+    </div>
+    {{end}}
     
     {{if .Error}}
     <div class="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded">
@@ -37,14 +58,14 @@
             <ul class="divide-y divide-gray-200">
                 {{if .Templates}}
                     {{range .Templates}}
-                    <li class="p-3 hover:bg-gray-50">
+                    <li class="p-3 hover:bg-gray-50{{if and $.SelectedTemplate .ID (stringEq $.SelectedTemplate .ID)}} bg-blue-50{{end}}">
                         <label class="flex items-center cursor-pointer">
                             <input type="radio" 
                                    name="selectedTemplate" 
                                    value="{{.ID}}" 
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"{{if and $.SelectedTemplate .ID (stringEq $.SelectedTemplate .ID)}} checked{{end}}>
                             <div class="ml-3">
-                                <span class="block font-medium text-black">{{.Name}}</span>
+                                <span class="block font-medium text-black">{{.Name}}{{if and $.SelectedTemplate .ID (stringEq $.SelectedTemplate .ID)}} <span class="text-blue-600 text-sm">(Previously Selected)</span>{{end}}</span>
                                 <span class="block text-sm text-gray-500">{{.Desc}}</span>
                             </div>
                         </label>
@@ -52,15 +73,14 @@
                     {{end}}
                 {{else}}
                 <!-- Fallback template if API call fails -->
-                <li class="p-3 hover:bg-gray-50">
+                <li class="p-3 hover:bg-gray-50{{if and $.SelectedTemplate (stringEq $.SelectedTemplate "fcra-credit-card-fraud")}} bg-blue-50{{end}}">
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" 
                                name="selectedTemplate" 
                                value="fcra-credit-card-fraud" 
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" 
-                               checked>
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"{{if or (and $.SelectedTemplate (stringEq $.SelectedTemplate "fcra-credit-card-fraud")) (not $.SelectedTemplate)}} checked{{end}}>
                         <div class="ml-3">
-                            <span class="block font-medium text-black">FCRA Complaint - Credit Card Fraud</span>
+                            <span class="block font-medium text-black">FCRA Complaint - Credit Card Fraud{{if and $.SelectedTemplate (stringEq $.SelectedTemplate "fcra-credit-card-fraud")}} <span class="text-blue-600 text-sm">(Previously Selected)</span>{{end}}</span>
                             <span class="block text-sm text-gray-500">For cases involving fraudulent credit card transactions</span>
                         </div>
                     </label>

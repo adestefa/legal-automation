@@ -1,13 +1,32 @@
 {{define "_step1_document_selection.gohtml"}}
 <div id="step-1-content" class="bg-white p-6 rounded-lg shadow-md mb-6">
-    <h2 class="text-xl font-semibold mb-4">Step 1: Select Source Documents</h2>
+    <h2 class="text-xl font-semibold mb-4">
+        Step 1: Select Source Documents
+        {{if .IsReturningUser}}
+        <span class="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">Returning</span>
+        {{end}}
+    </h2>
     <p class="text-gray-600 mb-6">
-        {{if .SelectedCaseFolder}}
+        {{if .IsReturningUser}}
+        Review and modify your document selection. Previously selected documents are pre-checked.
+        {{else if .SelectedCaseFolder}}
         Select documents from your <strong>{{.SelectedCaseFolder}}</strong> case folder that contain relevant case information.
         {{else}}
         Select the documents that contain relevant case information.
         {{end}}
     </p>
+
+    {{if and .IsReturningUser .SelectedDocuments}}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+            <div class="h-8 w-8 text-blue-600 text-xl mr-3">↩</div>
+            <div>
+                <h4 class="text-sm font-medium text-blue-800">Previous Selection Restored</h4>
+                <p class="text-sm text-blue-700 mt-1">{{len .SelectedDocuments}} document(s) from your previous selection have been pre-selected. You can modify the selection as needed.</p>
+            </div>
+        </div>
+    </div>
+    {{end}}
 
     <!-- Document List with Select All -->
     <form hx-post="/ui/select-documents" 
@@ -38,10 +57,10 @@
             <ul class="divide-y divide-gray-200">
                 {{if .Documents}}
                     {{range .Documents}}
-                    <li class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                    <li class="p-3 hover:bg-gray-50 flex justify-between items-center{{if contains $.SelectedDocuments .Path}} bg-blue-50{{end}}">
                         <div class="flex items-center">
                             <div>
-                                <span class="text-black font-medium">{{.Name}}</span>
+                                <span class="text-black font-medium">{{.Name}}{{if contains $.SelectedDocuments .Path}} <span class="text-blue-600 text-sm">(Previously Selected)</span>{{end}}</span>
                                 <div class="text-xs text-gray-500">
                                     {{if .Type}}<span>{{.Type | upper}}</span>{{end}}
                                     {{if .Size}} • <span>{{.Size | formatSize}}</span>{{end}}
@@ -53,7 +72,7 @@
                                name="selectedDocs" 
                                value="{{.Path}}" 
                                class="doc-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                               onchange="updateSelectAllState()">
+                               onchange="updateSelectAllState()"{{if contains $.SelectedDocuments .Path}} checked{{end}}>
                     </li>
                     {{end}}
                 {{else}}

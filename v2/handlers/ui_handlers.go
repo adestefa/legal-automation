@@ -46,6 +46,11 @@ type PageData struct {
 	ProcessingResult     *services.DocumentProcessingResult
 	ClientCase           *services.ClientCase
 	SelectedDocuments    []string
+	
+	// Session state for UI restoration
+	SessionState         *services.WorkflowState
+	IsReturningUser      bool
+	SelectedTemplate     string
 }
 
 // LegalAnalysis represents the extracted legal information for Step 3
@@ -116,6 +121,17 @@ func NewUIHandlers() *UIHandlers {
 		},
 		"ge": func(a, b int) bool { return a >= b },
 		"eq": func(a, b int) bool { return a == b },
+		"contains": func(slice []string, item string) bool {
+			for _, s := range slice {
+				if s == item {
+					return true
+				}
+			}
+			return false
+		},
+		"stringEq": func(a, b string) bool {
+			return a == b
+		},
 	})
 	
 	// Parse template files
@@ -184,6 +200,9 @@ func (h *UIHandlers) ShowMainPage(c *gin.Context) {
 		SelectedParentFolder: state.SelectedParentFolder,
 		SelectedCaseFolder:   state.SelectedCaseFolder,
 		SelectedDocuments:    state.SelectedDocuments,
+		SelectedTemplate:     state.SelectedTemplate,
+		SessionState:         state,
+		IsReturningUser:      state.CurrentStep > 0,
 	}
 	
 	err := h.templates.ExecuteTemplate(c.Writer, "index.gohtml", data)
@@ -206,13 +225,25 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 		username = "User"
 	}
 	
+	// Get current session state
+	state := h.getWorkflowState(c)
+	
 	// Check if iCloud is connected (from query parameter or session)
-	icloudConnected := c.Query("icloud_connected") == "true"
+	icloudConnected := c.Query("icloud_connected") == "true" || state.ICloudConnected
+	
+	// Determine if user is returning to a step they've been to before
+	isReturningUser := state.CurrentStep > step
 	
 	data := PageData{
-		CurrentStep:     step,
-		Username:        username,
-		ICloudConnected: icloudConnected,
+		CurrentStep:          step,
+		Username:             username,
+		ICloudConnected:      icloudConnected,
+		SelectedParentFolder: state.SelectedParentFolder,
+		SelectedCaseFolder:   state.SelectedCaseFolder,
+		SelectedDocuments:    state.SelectedDocuments,
+		SelectedTemplate:     state.SelectedTemplate,
+		SessionState:         state,
+		IsReturningUser:      isReturningUser,
 	}
 	
 	// Add step-specific data
@@ -226,13 +257,37 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 				log.Printf("Loaded %d iCloud folders for connected user", len(folders))
 			}
 		}
-	case 1:
-		// Load documents for step 1
-		documents, err := h.loadDocumentsForStep1(c)
-		if err != nil {
-			log.Printf("Error loading documents for step 1: %v", err)
+		// If parent folder is selected, load case folders
+		if state.SelectedParentFolder != "" {
+			caseFolders, err := h.icloudService.GetSubfolders("", "", state.SelectedParentFolder)
+			if err == nil {
+				data.CaseFolders = caseFolders
+				log.Printf("Loaded %d case folders from session state", len(caseFolders))
+			}
 		}
-		data.Documents = documents
+	case 1:
+		// Load documents for step 1 - prioritize from session state
+		if state.SelectedCaseFolder != "" {
+			documents, err := h.icloudService.GetDocuments("", "", state.SelectedCaseFolder)
+			if err == nil {
+				data.Documents = documents
+				log.Printf("Loaded %d documents from session case folder", len(documents))
+			} else {
+				// Fallback to default loading
+				documents, err := h.loadDocumentsForStep1(c)
+				if err != nil {
+					log.Printf("Error loading documents for step 1: %v", err)
+				}
+				data.Documents = documents
+			}
+		} else {
+			// Load documents using default method
+			documents, err := h.loadDocumentsForStep1(c)
+			if err != nil {
+				log.Printf("Error loading documents for step 1: %v", err)
+			}
+			data.Documents = documents
+		}
 	case 2:
 		// Load templates for step 2
 		templates, err := h.docService.GetTemplates()
@@ -320,8 +375,11 @@ func (h *UIHandlers) HandleICloudAuth(c *gin.Context) {
 	// In production: implement actual iCloud API authentication
 	log.Printf("iCloud auth attempt for user: %s", username)
 	
-	// Store iCloud connection state in session (simplified for prototype)
-	// In production: use proper session management
+	// Store iCloud connection state in session
+	h.updateWorkflowState(c, func(state *services.WorkflowState) {
+		state.ICloudConnected = true
+		state.ICloudUsername = username
+	})
 	
 	// Return success modal that will trigger a page refresh to Step 0 with connected state
 	data := PageData{
@@ -356,7 +414,11 @@ func (h *UIHandlers) SelectParentFolder(c *gin.Context) {
 		return
 	}
 	
-	// In production, store this in session
+	// Store parent folder in session
+	h.updateWorkflowState(c, func(state *services.WorkflowState) {
+		state.SelectedParentFolder = folderPath
+	})
+	
 	log.Printf("Selected parent folder: %s", folderPath)
 	
 	// Load case folders for the selected parent
@@ -371,12 +433,17 @@ func (h *UIHandlers) SelectParentFolder(c *gin.Context) {
 		username = "User"
 	}
 	
+	// Get current session state
+	state := h.getWorkflowState(c)
+	
 	data := PageData{
 		CurrentStep:          0,
 		Username:             username,
 		ICloudConnected:      true, // Assume connected if we got here
 		SelectedParentFolder: folderPath,
 		CaseFolders:          caseFolders,
+		SessionState:         state,
+		IsReturningUser:      state.CurrentStep > 0,
 	}
 	
 	h.templates.ExecuteTemplate(c.Writer, "_step0_case_setup.gohtml", data)
