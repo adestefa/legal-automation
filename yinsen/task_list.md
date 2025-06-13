@@ -48,3 +48,4 @@ NOTE: !!! IGNORE 4_done/archived_tasks/ folder !! it is not part of your task li
 2. [ ] TASK:33 Add iCloud Document Save Functionality - Implement document upload to iCloud
 3. [x] TASK:34 replace "Restart Setup" button with a Back button that only moves the user to the last step. Every page should have a back button except the first and last pages. (Completed: 2025-06-12 22:11) 
 4. [ ] TASK:35 Return to use the user.json file to make it easier to admin the site and we can use it to add users and assign roles to them from future UI. 
+5. [x] TASK:36 Dynamic document preview based on selected documents - Document preview shows only user-selected documents with missing content analysis tab (Completed: 2025-06-13 00:30)
