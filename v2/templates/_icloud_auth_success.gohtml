@@ -1,0 +1,44 @@
+{{define "_icloud_auth_success.gohtml"}}
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+     id="icloud-modal">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">iCloud Connected</h3>
+            <button onclick="closeAndRefreshStep()" 
+                    class="text-gray-400 hover:text-gray-600">
+                <span class="text-2xl">&times;</span>
+            </button>
+        </div>
+        
+        <div class="text-center py-4">
+            <div class="mb-4">
+                <div class="h-12 w-12 text-green-500 mx-auto mb-2 text-2xl">✓</div>
+                <h4 class="text-lg font-medium text-green-800">Successfully Connected!</h4>
+                <p class="text-sm text-gray-600 mt-1">Your iCloud account is now connected. Loading your folders...</p>
+            </div>
+            <button onclick="closeAndRefreshStep()" 
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                Continue
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function closeAndRefreshStep() {
+    // Close modal
+    document.getElementById('icloud-modal').remove();
+    
+    // Refresh Step 0 with connected state using HTMX
+    htmx.ajax('GET', '/ui/step/0?icloud_connected=true', {
+        target: '#step-content',
+        swap: 'innerHTML'
+    });
+}
+
+// Auto-close and refresh after 2 seconds
+setTimeout(closeAndRefreshStep, 2000);
+
+console.log('iCloud authentication successful - will refresh step');
+</script>
+{{end}}

@@ -1,0 +1,21 @@
+{{define "_step_wrapper.gohtml"}}
+<!-- Progress Steps Update -->
+<div hx-swap-oob="true" id="progress-steps">
+    {{template "_progress_steps_content.gohtml" .}}
+</div>
+
+<!-- Step Content -->
+{{if eq .CurrentStep 0}}
+    {{template "_step0_case_setup.gohtml" .}}
+{{else if eq .CurrentStep 1}}
+    {{template "_step1_document_selection.gohtml" .}}
+{{else if eq .CurrentStep 2}}
+    {{template "_step2_template_selection.gohtml" .}}
+{{else if eq .CurrentStep 3}}
+    {{template "_step3_review_data.gohtml" .}}
+{{else if eq .CurrentStep 4}}
+    {{template "_step4_generate_document.gohtml" .}}
+{{else if eq .CurrentStep 5}}
+    {{template "_step5_icloud_sync.gohtml" .}}
+{{end}}
+{{end}}

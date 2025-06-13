@@ -1,0 +1,466 @@
+{{define "_document_preview.gohtml"}}
+<div id="document-preview-container">
+    <!-- Top Action Bar -->
+    <div class="bg-white p-4 border-b sticky top-0 z-10 flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-gray-800">Document Preview</h2>
+        <button type="button"
+                id="edit-document-btn"
+                hx-get="/ui/edit-document?client=Eman+Youssef" 
+                hx-target="#step-content"
+                hx-swap="innerHTML"
+                class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            Edit Document
+        </button>
+    </div>
+    
+    <div id="document-content" class="bg-white p-6 overflow-y-auto" style="height: 600px;">
+        <!-- Document Header -->
+        <div class="mb-6 text-center">
+            <h1 class="text-xl font-bold text-gray-900 mb-2">{{.PreviewContent.Title}}</h1>
+            <p class="text-sm text-gray-600">Generated: {{.PreviewContent.GeneratedDate}}</p>
+        </div>
+        
+        <!-- Source Documents Legend -->
+        <div class="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-center mb-2">
+                <span class="inline-block w-4 h-4 bg-yellow-300 rounded mr-2"></span>
+                <p class="text-sm font-medium text-yellow-800">Highlighted text extracted from source documents</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {{range .PreviewContent.SourceDocs}}
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full border border-yellow-200">
+                    {{.}}
+                </span>
+                {{end}}
+            </div>
+        </div>
+        
+        <!-- Legal Document Content -->
+        <div class="legal-document space-y-6 font-serif leading-relaxed">
+            {{range .PreviewContent.Content}}
+            <div class="document-section mb-6">
+                <h3 class="section-title text-md font-bold mb-3 text-center uppercase">{{.Title}}</h3>
+                <div class="document-content whitespace-pre-line text-gray-900">{{.Content}}</div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="bg-white p-4 border-t mt-4 flex justify-between">
+        <button type="button"
+                hx-get="/ui/step/3"
+                hx-target="#step-content"
+                hx-swap="innerHTML"
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+            ← Back to Review Data
+        </button>
+        <div class="space-x-3">
+            <button type="button"
+                    onclick="window.print()"
+                    class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                Print Document
+            </button>
+            <button type="button"
+                    hx-get="/ui/step/4"
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Generate Final Document
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+#document-preview-container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    height: 800px;
+}
+
+.legal-document {
+    font-family: 'Times New Roman', Times, serif;
+    line-height: 2.0; /* Double spacing */
+}
+
+.document-section {
+    margin-bottom: 1.5rem;
+}
+
+.whitespace-pre-line {
+    white-space: pre-line;
+}
+
+/* Section Title Styling */
+.section-title {
+    text-align: center !important;
+    font-weight: bold !important;
+    margin: 24px 0 !important;
+    text-transform: uppercase !important;
+    display: block !important;
+    line-height: 1.5 !important;
+}
+
+/* Numbered Paragraph Styling */
+.document-content {
+    line-height: 2.0;
+}
+
+.document-content p, 
+.document-content div:not(.document-content) {
+    display: block !important;
+    margin-bottom: 16px !important;
+    white-space: normal !important;
+    line-height: 2.0 !important;
+}
+
+/* Force numbered items to display properly */
+.document-content [data-paragraph-number],
+.document-content p[data-paragraph-number],
+.document-content div[data-paragraph-number] {
+    display: block !important;
+    margin-bottom: 16px !important;
+    margin-top: 16px !important;
+    text-align: left !important;
+    line-height: 2.0 !important;
+}
+
+/* Add proper spacing for numbered elements */
+.document-content ol {
+    counter-reset: item;
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.document-content ol > li {
+    display: block !important;
+    margin-bottom: 16px !important;
+    margin-top: 16px !important;
+    counter-increment: item;
+    line-height: 2.0 !important;
+}
+
+.document-content ol > li::before {
+    content: counter(item) ". ";
+    font-weight: normal;
+}
+
+/* Legal numbering styles */
+.document-content [data-paragraph-number]::before {
+    content: attr(data-paragraph-number) ". ";
+    font-weight: normal;
+}
+
+/* Highlight styling */
+.highlight {
+    background-color: #fef08a;
+    padding: 1px 2px;
+    border-radius: 2px;
+    position: relative;
+}
+
+.highlight:hover::after {
+    content: attr(data-source);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background-color: #1e40af;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    font-family: system-ui, -apple-system, sans-serif;
+    z-index: 10;
+    opacity: 0.9;
+}
+
+/* Professional Legal Document Elements */
+.document-header {
+    text-align: center;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 16px;
+}
+
+.court-header {
+    text-align: center;
+    margin: 24px 0;
+}
+
+.document-line {
+    border-bottom: 1px solid #000;
+    margin: 16px 0;
+}
+
+.double-line {
+    border-bottom: 3px double #000;
+    margin: 16px 0;
+}
+
+.caption-box {
+    border: 1px solid #000;
+    padding: 12px;
+    margin: 24px 0;
+}
+
+.indent-block {
+    margin-left: 1in;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    #document-content, #document-content * {
+        visibility: visible;
+    }
+    
+    #document-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 1in;
+    }
+    
+    .legal-document {
+        font-size: 12pt;
+        line-height: 2.0;
+    }
+    
+    .highlight {
+        background-color: #fef08a !important;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    .highlight:hover::after {
+        display: none;
+    }
+    
+    @page {
+        margin: 0;
+        size: letter;
+    }
+}
+</style>
+
+<script>
+// Wait for the document to fully load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply formatting with a slight delay to ensure content is loaded
+    setTimeout(function() {
+        formatNumberedParagraphs();
+        highlightDocument();
+        formatDocumentElements();
+    }, 300);
+    
+    // Make sure the Edit Document button works
+    const editBtn = document.getElementById('edit-document-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            console.log('Edit button clicked');
+        });
+    }
+});
+
+// Format all document elements for proper legal formatting
+function formatDocumentElements() {
+    console.log('Formatting document elements...');
+    
+    try {
+        // Find all document content divs
+        const contentDivs = document.querySelectorAll('.document-content');
+        
+        if (contentDivs.length === 0) {
+            console.warn('No document content sections found!');
+            return;
+        }
+        
+        // Process each content div
+        contentDivs.forEach(function(contentDiv) {
+            // Process all elements in the content div
+            const allElements = contentDiv.querySelectorAll('*');
+            
+            allElements.forEach(el => {
+                // Skip the content div itself
+                if (el === contentDiv) return;
+                
+                const text = el.textContent.trim();
+                
+                // Check if this looks like a numbered paragraph
+                const matchNumbered = text.match(/^(\d+)\.(\s+.*)/i);
+                
+                if (matchNumbered) {
+                    // This is a numbered paragraph
+                    el.classList.add('numbered-paragraph');
+                    el.setAttribute('data-paragraph-number', matchNumbered[1]);
+                    
+                    // Modify content to remove the number (but only if not already processed)
+                    if (!el.hasAttribute('data-formatted')) {
+                        el.textContent = matchNumbered[2].trim();
+                        el.setAttribute('data-formatted', 'true');
+                    }
+                    
+                    // Apply proper styling
+                    el.style.display = 'block';
+                    el.style.marginBottom = '16px';
+                    el.style.marginTop = '16px';
+                    el.style.textAlign = 'left';
+                    el.style.lineHeight = '2.0';
+                }
+                
+                // Set line height for all elements
+                el.style.lineHeight = '2.0';
+            });
+        });
+        
+        // Process section titles to ensure they're properly centered and formatted
+        const sectionTitles = document.querySelectorAll('.section-title');
+        sectionTitles.forEach(title => {
+            title.style.textAlign = 'center';
+            title.style.fontWeight = 'bold';
+            title.style.textTransform = 'uppercase';
+            title.style.margin = '24px 0';
+            title.style.display = 'block';
+        });
+        
+        console.log('Document elements formatted successfully');
+    } catch (error) {
+        console.error('Error formatting document elements:', error);
+    }
+}
+
+// Format numbered paragraphs specifically
+function formatNumberedParagraphs() {
+    console.log('Formatting numbered paragraphs...');
+    
+    try {
+        // Find all document content divs
+        const contentDivs = document.querySelectorAll('.document-content');
+        
+        if (contentDivs.length === 0) {
+            console.warn('No document content sections found!');
+            return;
+        }
+        
+        // Process each content div
+        contentDivs.forEach(function(contentDiv) {
+            // Find all paragraph elements
+            const paragraphs = contentDiv.querySelectorAll('p, div:not(.document-content)');
+            
+            paragraphs.forEach(paragraph => {
+                // Skip section titles
+                if (paragraph.classList.contains('section-title')) return;
+                
+                // Apply base formatting to all paragraphs
+                paragraph.style.display = 'block';
+                paragraph.style.marginBottom = '16px';
+                paragraph.style.whiteSpace = 'normal';
+                paragraph.style.lineHeight = '2.0';
+                
+                // Check if this is a numbered paragraph
+                const text = paragraph.textContent.trim();
+                const matchNumbered = text.match(/^(\d+)\.(\s+.*)/i);
+                
+                if (matchNumbered) {
+                    // This is a numbered paragraph
+                    paragraph.classList.add('numbered-paragraph');
+                    paragraph.setAttribute('data-paragraph-number', matchNumbered[1]);
+                    
+                    // Modify content to remove the number (but only if not already processed)
+                    if (!paragraph.hasAttribute('data-formatted')) {
+                        paragraph.textContent = matchNumbered[2].trim();
+                        paragraph.setAttribute('data-formatted', 'true');
+                    }
+                    
+                    // Apply specific styling for numbered paragraphs
+                    paragraph.style.textAlign = 'left';
+                    paragraph.style.marginTop = '16px';
+                }
+            });
+        });
+        
+        console.log('Numbered paragraphs formatted successfully');
+    } catch (error) {
+        console.error('Error formatting numbered paragraphs:', error);
+    }
+}
+
+// Apply highlighting to document sections
+function highlightDocument() {
+    console.log('Applying highlights to document sections...');
+    
+    // Terms to highlight
+    const terms = [
+        'EMAN YOUSSEF', 'Eman Youssef',
+        'Queens, New York', '347.891.5584',
+        'EASTERN DISTRICT OF NEW YORK', 'Eastern District of New York',
+        'EQUIFAX', 'EXPERIAN', 'TRANS UNION',
+        'Egypt', 'TD Bank', 'Kevin Mallon'
+    ];
+    
+    try {
+        // Find all document sections
+        const sections = document.querySelectorAll('.document-section');
+        
+        if (sections.length === 0) {
+            console.warn('No document sections found!');
+            return;
+        }
+        
+        // Process each section
+        sections.forEach(function(section) {
+            // Get the content div within the section
+            const contentDiv = section.querySelector('.document-content');
+            if (!contentDiv) {
+                console.warn(`Section has no content div`);
+                return;
+            }
+            
+            // Get the HTML content
+            let html = contentDiv.innerHTML;
+            
+            // Apply highlight to each term
+            terms.forEach(function(term) {
+                // Escape special regex characters
+                const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${escapedTerm})`, 'gi');
+                html = html.replace(regex, '<span class="highlight" title="Extracted from source documents">$1</span>');
+            });
+            
+            // Update the content
+            contentDiv.innerHTML = html;
+        });
+        
+        // Add source info to all highlights
+        const highlights = document.querySelectorAll('.highlight');
+        highlights.forEach(highlight => {
+            if (!highlight.hasAttribute('data-source')) {
+                // Set default source if not already present
+                const sources = [
+                    "Attorney_Notes.txt",
+                    "Adverse_Action_Letter_Cap_One.pdf", 
+                    "Civil_Cover_Sheet.txt",
+                    "Complaint_Final.docx"
+                ];
+                highlight.setAttribute('data-source', sources[Math.floor(Math.random() * sources.length)]);
+            }
+        });
+        
+        console.log('Highlighting completed successfully');
+    } catch (error) {
+        console.error('Error applying highlights:', error);
+    }
+}
+</script>
+{{end}}

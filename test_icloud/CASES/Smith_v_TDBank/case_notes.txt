@@ -1,0 +1,4 @@
+Smith Case Documents
+Client: John Smith
+Bank: TD Bank
+Issue: Credit report disputes

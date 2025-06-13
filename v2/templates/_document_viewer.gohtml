@@ -1,0 +1,148 @@
+{{define "_document_viewer.gohtml"}}
+<div id="document-viewer" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <div class="flex justify-between items-center mb-4 border-b pb-4">
+        <h2 class="text-xl font-semibold">Document Viewer - {{ .DocumentTitle }}</h2>
+        <div class="flex space-x-2">
+            <button type="button" 
+                    onclick="window.print()" 
+                    class="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-gray-700 text-sm hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+            </button>
+            <button type="button"
+                    hx-get="/ui/edit-document?client=Eman+Youssef" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    hx-indicator=".htmx-indicator"
+                    class="px-3 py-1 bg-amber-600 text-white rounded text-sm hover:bg-amber-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Edit
+            </button>
+            <button type="button" 
+                    onclick="downloadDocument()" 
+                    class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+            </button>
+            <button type="button" 
+                    hx-get="/ui/step/4" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-gray-700 text-sm hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close
+            </button>
+        </div>
+    </div>
+    
+    <div class="document-content border rounded p-6 bg-gray-50 print:bg-white print:border-0 print:p-0">
+        {{ .DocumentHTML }}
+    </div>
+    
+    <div class="mt-6 text-center">
+        <button type="button"
+                hx-get="/ui/step/4" 
+                hx-target="#step-content"
+                hx-swap="innerHTML"
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+            Back to Summary
+        </button>
+    </div>
+</div>
+
+<script>
+    // Function to download the document as HTML
+    function downloadDocument() {
+        // Create a blob with the HTML content
+        const htmlContent = document.querySelector('.document-content').innerHTML;
+        const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .DocumentTitle }}</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; margin: 1in; line-height: 1.5; }
+        .highlight { background-color: #ffffc0; }
+        .legal-document {
+            font-family: Times New Roman, serif;
+            line-height: 1.5;
+            margin: 1in;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .court-info {
+            text-align: center;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+        .case-info {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin: 24px 0;
+        }
+        .paragraph {
+            text-indent: 0.5in;
+            margin-bottom: 12px;
+        }
+        .numbered-paragraph {
+            margin-bottom: 12px;
+        }
+        .signature-block {
+            margin-top: 48px;
+        }
+    </style>
+</head>
+<body>
+    ${htmlContent}
+</body>
+</html>`;
+        
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        
+        // Create a temporary anchor element to trigger the download
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '{{ .DocumentFilename }}';
+        
+        // Trigger the download
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    }
+
+    // Add print styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @media print {
+            body * { visibility: hidden; }
+            #document-viewer .document-content, 
+            #document-viewer .document-content * { visibility: visible; }
+            #document-viewer .document-content { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{{end}}

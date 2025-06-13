@@ -1,0 +1,694 @@
+{{define "_document_editor.gohtml"}}
+<div id="document-editor" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <div class="flex justify-between items-center mb-4 border-b pb-4">
+        <div class="flex">
+            <h2 class="text-xl font-semibold">Document Editor - {{ .DocumentTitle }}</h2>
+            <!-- Document tabs moved inline with title -->
+            <div class="ml-6 flex items-center">
+                <button class="px-4 py-1 border-b-2 border-blue-600 text-blue-600 font-medium">
+                    Edit Document
+                </button>
+                <button class="px-4 py-1 text-gray-500 hover:text-gray-800" 
+                        hx-get="/ui/view-document?client=Eman+Youssef" 
+                        hx-target="#step-content" 
+                        hx-swap="innerHTML">
+                    View Only
+                </button>
+            </div>
+        </div>
+        
+        <!-- Right aligned controls -->
+        <div class="flex items-center space-x-3">
+            <!-- Editing tools moved to top, right-aligned -->
+            <div class="mr-2 flex space-x-1 border-r pr-3">
+                <button onclick="formatText('bold')" class="w-8 h-8 inline-flex items-center justify-center border rounded hover:bg-gray-200" title="Bold">
+                    <strong>B</strong>
+                </button>
+                <button onclick="formatText('italic')" class="w-8 h-8 inline-flex items-center justify-center border rounded hover:bg-gray-200" title="Italic">
+                    <em>I</em>
+                </button>
+                <button onclick="formatText('underline')" class="w-8 h-8 inline-flex items-center justify-center border rounded hover:bg-gray-200" title="Underline">
+                    <span class="underline">U</span>
+                </button>
+            </div>
+            
+            <!-- Document controls -->
+            <button type="button" 
+                    onclick="printDocument()" 
+                    class="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-gray-700 text-sm hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+            </button>
+            <button type="button" 
+                    id="saveChangesBtn"
+                    onclick="saveChanges().then(() => {
+                        // Show success toast notification
+                        showToast('Document saved successfully', 'success');
+                    }).catch(err => {
+                        console.error('Save error:', err);
+                        showToast('Error saving document', 'error');
+                    });"
+                    class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                Save Changes
+            </button>
+            <button type="button" 
+                    onclick="downloadEditedDocument()" 
+                    class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+            </button>
+            <button type="button" 
+                    hx-get="/ui/step/4" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-gray-700 text-sm hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close
+            </button>
+        </div>
+
+        <!-- Toast notification -->
+        <div id="toast-notification" class="fixed top-4 right-4 p-4 rounded-md shadow-lg hidden transition-all duration-300 transform translate-y-0 opacity-0 z-50">
+            <div class="flex items-center space-x-2">
+                <span id="toast-icon" class="text-xl"></span>
+                <span id="toast-message" class="font-medium"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Content - Now takes full width -->
+    <div id="document-container" class="border rounded overflow-auto h-[calc(100vh-280px)] bg-gray-50 flex justify-center">
+        <div id="document-content" class="legal-document-editable bg-white shadow-sm my-4 mx-auto p-8" style="width: 8.5in; max-width: 90%;" contenteditable="true">
+            {{ .DocumentHTML }}
+        </div>
+    </div>
+    
+    <div class="flex justify-between items-center mt-4">
+        <div>
+            <span id="saveStatus" class="text-sm text-gray-500">No changes</span>
+            <span class="text-xs text-gray-500 ml-2">Last Saved: <span id="lastSavedTime">{{ .LastSaved }}</span></span>
+        </div>
+        <div class="flex space-x-3">
+            <button type="button"
+                    hx-get="/ui/step/3" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="px-3 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm">
+                Back to Data Review
+            </button>
+            <button type="button" 
+                id="saveAndContinueBtn"
+                onclick="saveDocumentBeforeContinuing()"
+                class="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                    <span class="save-btn-text">Save & Continue</span>
+                    <span class="save-btn-loading hidden">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                    </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Document Editor Styles */
+    .legal-document-editable {
+        font-family: 'Times New Roman', Times, serif;
+        line-height: 2.0; /* Double spacing */
+        min-height: 100%;
+        box-sizing: border-box;
+    }
+    
+    .legal-document-editable:focus {
+        outline: none;
+    }
+    
+    /* Force everything to be blocks with proper spacing */
+    #document-content div, 
+    #document-content p, 
+    #document-content span:not(.highlight) {
+        display: block !important;
+        margin-bottom: 16px !important;
+        white-space: pre-wrap !important;
+        line-height: 2.0 !important;
+    }
+    
+    /* Section titles must be centered, bold, and uppercase */
+    #document-content div:empty + div:not(:empty),
+    #document-content p:empty + p:not(:empty),
+    #document-content div[style*="text-align: center"],
+    #document-content p[style*="text-align: center"],
+    #document-content div:not(:empty):first-child,
+    #document-content p:not(:empty):first-child {
+        text-align: center !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+        display: block !important;
+        margin: 24px 0 !important;
+    }
+    
+    /* Handle specific known section titles */
+    #document-content div:contains("UNITED STATES DISTRICT COURT"),
+    #document-content div:contains("COMPLAINT"),
+    #document-content div:contains("JURISDICTION AND VENUE"),
+    #document-content div:contains("PARTIES"),
+    #document-content div:contains("FACTUAL ALLEGATIONS"),
+    #document-content div:contains("CAUSE OF ACTION"),
+    #document-content div:contains("PRAYER FOR RELIEF"),
+    #document-content div:contains("JURY DEMAND") {
+        text-align: center !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+        display: block !important;
+        margin: 24px 0 !important;
+    }
+    
+    /* Numbered paragraphs need special treatment */
+    #document-content div:contains(/^\d+\./),
+    #document-content p:contains(/^\d+\./) {
+        display: block !important;
+        margin-bottom: 16px !important;
+        margin-top: 16px !important;
+        text-align: left !important;
+        white-space: pre-wrap !important;
+        line-height: 2.0 !important;
+    }
+</style>
+
+<script>
+    // Add debugging to measure document width
+    function measureDocument() {
+        const container = document.getElementById('document-container');
+        const content = document.getElementById('document-content');
+        
+        if (container && content) {
+            console.log('Document Container:', {
+                width: container.offsetWidth + 'px',
+                clientWidth: container.clientWidth + 'px',
+                scrollWidth: container.scrollWidth + 'px'
+            });
+            
+            console.log('Document Content:', {
+                width: content.offsetWidth + 'px',
+                clientWidth: content.clientWidth + 'px',
+                scrollWidth: content.scrollWidth + 'px',
+                computedWidth: window.getComputedStyle(content).width
+            });
+        }
+    }
+    
+    // Initialize editor on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Document loaded, checking for editor...');
+        if (document.getElementById('document-content')) {
+            console.log('Document editor detected on page load, initializing...');
+            setTimeout(initEditor, 100);
+        }
+    });
+    
+    // Re-initialize editor when content is swapped via HTMX
+    document.addEventListener('htmx:afterSwap', function(event) {
+        console.log('HTMX content swapped, checking for editor...');
+        if (document.getElementById('document-content')) {
+            console.log('Document editor detected after HTMX swap, initializing...');
+            // Small delay to ensure DOM is fully updated
+            setTimeout(initEditor, 100);
+        }
+    });
+    
+    // Function to show toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+        
+        // Set message
+        toastMessage.textContent = message;
+        
+        // Set type-specific styling
+        toast.classList.remove('bg-green-100', 'bg-red-100', 'bg-blue-100');
+        toastIcon.classList.remove('text-green-500', 'text-red-500', 'text-blue-500');
+        toastMessage.classList.remove('text-green-800', 'text-red-800', 'text-blue-800');
+        
+        if (type === 'success') {
+            toast.classList.add('bg-green-100');
+            toastIcon.classList.add('text-green-500');
+            toastMessage.classList.add('text-green-800');
+            toastIcon.textContent = '✓';
+        } else if (type === 'error') {
+            toast.classList.add('bg-red-100');
+            toastIcon.classList.add('text-red-500');
+            toastMessage.classList.add('text-red-800');
+            toastIcon.textContent = '✗';
+        } else {
+            toast.classList.add('bg-blue-100');
+            toastIcon.classList.add('text-blue-500');
+            toastMessage.classList.add('text-blue-800');
+            toastIcon.textContent = 'ℹ';
+        }
+        
+        // Show toast
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.remove('opacity-0');
+            toast.classList.remove('translate-y-0');
+            toast.classList.add('opacity-100');
+            toast.classList.add('translate-y-1');
+        }, 10);
+        
+        // Hide toast after delay
+        setTimeout(() => {
+            toast.classList.remove('opacity-100');
+            toast.classList.remove('translate-y-1');
+            toast.classList.add('opacity-0');
+            toast.classList.add('translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 300);
+        }, 3000);
+    }
+    
+    // Global variables for document content tracking
+    let docOriginalContent = '';
+    let docLastSavedContent = '';
+    let changesMade = false;
+    
+    // Initialize the document editor
+    function initEditor() {
+        const editor = document.getElementById('document-content');
+        if (!editor) {
+            console.error('Document content element not found');
+            return;
+        }
+        
+        console.log('Initializing document editor...');
+        
+        // Store original content
+        docOriginalContent = editor.innerHTML;
+        docLastSavedContent = docOriginalContent;
+        
+        // Fix and format the document content
+        fixDocumentStructure();
+        
+        // Add Enter key handler to maintain proper paragraph structure
+        editor.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                // Insert a proper paragraph element
+                e.preventDefault();
+                document.execCommand('insertHTML', false, '<div><br></div>');
+                return false;
+            }
+        });
+        
+        // Set up change detection
+        editor.addEventListener('input', function() {
+            changesMade = true;
+            document.getElementById('saveStatus').textContent = 'Unsaved changes';
+            document.getElementById('saveStatus').classList.remove('text-gray-500');
+            document.getElementById('saveStatus').classList.add('text-amber-600');
+            
+            // Reapply formatting with a delay to avoid disrupting typing
+            clearTimeout(window.formatTimeout);
+            window.formatTimeout = setTimeout(fixDocumentStructure, 500);
+        });
+        
+        // Clear previous autosave interval if it exists
+        if (window.editorAutoSaveInterval) {
+            clearInterval(window.editorAutoSaveInterval);
+        }
+        
+        // Set up autosave interval
+        window.editorAutoSaveInterval = setInterval(function() {
+            if (changesMade) {
+                saveChanges()
+                    .then(() => {
+                        showToast('Document auto-saved', 'info');
+                    })
+                    .catch(error => {
+                        console.error('Auto-save failed:', error);
+                        showToast('Auto-save failed', 'error');
+                    });
+            }
+        }, 30000); // 30 seconds
+        
+        console.log('Document editor initialized successfully');
+    }
+    
+    // Fix document structure and formatting
+    function fixDocumentStructure() {
+        console.log('Fixing document structure...');
+        const editor = document.getElementById('document-content');
+        if (!editor) return;
+        
+        try {
+            // Direct DOM manipulation to fix structure
+            const allElements = editor.children;
+            
+            // First pass: identify and mark section titles and numbered paragraphs
+            for (let i = 0; i < allElements.length; i++) {
+                const el = allElements[i];
+                const text = el.textContent.trim();
+                
+                // Is this a section title?
+                if (
+                    // All uppercase text is likely a title
+                    text === text.toUpperCase() && 
+                    text.length > 3 && 
+                    !text.match(/^\d+\./)
+                ) {
+                    // This is a section title
+                    el.style.textAlign = 'center';
+                    el.style.fontWeight = 'bold';
+                    el.style.textTransform = 'uppercase';
+                    el.style.margin = '24px 0';
+                    el.setAttribute('data-section-title', 'true');
+                }
+                
+                // Is this a numbered paragraph?
+                const numberedMatch = text.match(/^(\d+)\.(.*)/);
+                if (numberedMatch) {
+                    // This is a numbered paragraph
+                    el.setAttribute('data-paragraph-number', numberedMatch[1]);
+                    el.style.textAlign = 'left';
+                    el.style.display = 'block';
+                    el.style.marginTop = '16px';
+                    el.style.marginBottom = '16px';
+                    el.style.whiteSpace = 'pre-wrap';
+                    el.style.lineHeight = '2.0';
+                }
+            }
+            
+            // Process specific known section titles by text content
+            const titleKeywords = [
+                "UNITED STATES DISTRICT COURT",
+                "COMPLAINT",
+                "JURISDICTION AND VENUE",
+                "PARTIES",
+                "FACTUAL ALLEGATIONS",
+                "CAUSE OF ACTION",
+                "PRAYER FOR RELIEF",
+                "JURY DEMAND"
+            ];
+            
+            // Second pass: apply specific formatting to known sections
+            for (let i = 0; i < allElements.length; i++) {
+                const el = allElements[i];
+                const text = el.textContent.trim();
+                
+                // Check for known section titles
+                for (const keyword of titleKeywords) {
+                    if (text.includes(keyword)) {
+                        el.style.textAlign = 'center';
+                        el.style.fontWeight = 'bold';
+                        el.style.textTransform = 'uppercase';
+                        el.style.margin = '24px 0';
+                        el.setAttribute('data-section-title', 'true');
+                        break;
+                    }
+                }
+                
+                // Set basic formatting for all elements
+                if (!el.hasAttribute('data-section-title')) {
+                    el.style.display = 'block';
+                    el.style.marginBottom = '16px';
+                    el.style.whiteSpace = 'pre-wrap';
+                    el.style.lineHeight = '2.0';
+                }
+            }
+            
+            console.log('Document structure fixed successfully');
+        } catch (error) {
+            console.error('Error fixing document structure:', error);
+        }
+    }
+    
+    // Apply text formatting (bold, italic, underline)
+    function formatText(format) {
+        document.execCommand(format, false, null);
+        changesMade = true;
+        document.getElementById('saveStatus').textContent = 'Unsaved changes';
+        document.getElementById('saveStatus').classList.remove('text-gray-500');
+        document.getElementById('saveStatus').classList.add('text-amber-600');
+    }
+    
+    // Save the document
+    function saveChanges() {
+        const editor = document.getElementById('document-content');
+        if (!editor) {
+            return Promise.reject('Document content element not found');
+        }
+        
+        // Fix document structure before saving
+        fixDocumentStructure();
+        
+        const content = editor.innerHTML;
+        
+        // Show saving indicator
+        const saveStatus = document.getElementById('saveStatus');
+        if (saveStatus) {
+            saveStatus.textContent = 'Saving...';
+            saveStatus.classList.remove('text-gray-500', 'text-green-600', 'text-red-600');
+            saveStatus.classList.add('text-blue-600');
+        }
+        
+        // Save document via API
+        return fetch('/ui/save-document', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content: content,
+                clientName: 'Eman Youssef',
+                documentType: 'complaint'
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update saved state
+                docLastSavedContent = content;
+                changesMade = false;
+                
+                if (saveStatus) {
+                    saveStatus.textContent = 'Saved successfully';
+                    saveStatus.classList.remove('text-blue-600', 'text-amber-600');
+                    saveStatus.classList.add('text-green-600');
+                }
+                
+                // Update last saved time
+                const lastSavedTime = document.getElementById('lastSavedTime');
+                if (lastSavedTime) {
+                    const now = new Date();
+                    lastSavedTime.textContent = now.toLocaleTimeString();
+                }
+                
+                // Reset status after a delay
+                setTimeout(() => {
+                    if (saveStatus) {
+                        saveStatus.textContent = 'No changes';
+                        saveStatus.classList.remove('text-green-600');
+                        saveStatus.classList.add('text-gray-500');
+                    }
+                }, 3000);
+                
+                return data;
+            } else {
+                const errorMsg = data.error || 'Unknown server error';
+                throw new Error(errorMsg);
+            }
+        })
+        .catch(error => {
+            console.error('Error saving document:', error);
+            
+            if (saveStatus) {
+                saveStatus.textContent = 'Error saving: ' + (error.message || 'Connection failed');
+                saveStatus.classList.remove('text-blue-600', 'text-gray-500');
+                saveStatus.classList.add('text-red-600');
+            }
+            
+            throw error;
+        });
+    }
+    
+    // Save document before continuing to next step
+    function saveDocumentBeforeContinuing() {
+        console.log('Save and Continue button clicked');
+        
+        // Show saving indicator
+        const saveStatus = document.getElementById('saveStatus');
+        if (saveStatus) {
+            saveStatus.textContent = 'Saving before continuing...';
+            saveStatus.classList.remove('text-gray-500', 'text-amber-600');
+            saveStatus.classList.add('text-blue-600');
+        }
+        
+        // Show loading state on button
+        const btn = document.getElementById('saveAndContinueBtn');
+        if (btn) {
+            const textSpan = btn.querySelector('.save-btn-text');
+            const loadingSpan = btn.querySelector('.save-btn-loading');
+            
+            if (textSpan) textSpan.classList.add('hidden');
+            if (loadingSpan) loadingSpan.classList.remove('hidden');
+            btn.disabled = true;
+        }
+        
+        // Save the document
+        saveChanges()
+            .then(data => {
+                console.log('Document saved successfully before continuing');
+                
+                // Navigate to step 4 after successful save
+                setTimeout(() => {
+                    htmx.ajax('GET', '/ui/step/4', {
+                        target: '#step-content',
+                        swap: 'innerHTML'
+                    });
+                }, 500);
+            })
+            .catch(error => {
+                console.error('Failed to save before continuing:', error);
+                
+                // Reset button state
+                if (btn) {
+                    const textSpan = btn.querySelector('.save-btn-text');
+                    const loadingSpan = btn.querySelector('.save-btn-loading');
+                    
+                    if (loadingSpan) loadingSpan.classList.add('hidden');
+                    if (textSpan) textSpan.classList.remove('hidden');
+                    btn.disabled = false;
+                }
+                
+                // Show error alert
+                alert('Failed to save document. Please try again.');
+            });
+    }
+    
+    // Print the document
+    function printDocument() {
+        window.print();
+    }
+    
+    // Download the document as HTML
+    function downloadEditedDocument() {
+        // Fix document structure before downloading
+        fixDocumentStructure();
+        
+        // Get current editable content
+        const content = document.getElementById('document-content').innerHTML;
+        
+        // Create HTML document for download
+        const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Complaint - Eman Youssef</title>
+    <style>
+        @page { size: letter; margin: 1in; }
+        body { 
+            font-family: 'Times New Roman', serif; 
+            margin: 0; 
+            padding: 0; 
+            line-height: 2.0; 
+        }
+        .legal-document {
+            font-family: 'Times New Roman', serif;
+            line-height: 2.0;
+            width: 100%;
+            max-width: 8.5in;
+            margin: 1in auto;
+            box-sizing: border-box;
+        }
+        
+        /* Base styles for all elements */
+        div, p, span { 
+            display: block !important; 
+            margin-bottom: 16px !important; 
+            white-space: pre-wrap !important; 
+            line-height: 2.0 !important;
+        }
+        
+        /* Section title styling */
+        [data-section-title="true"],
+        div[style*="text-align: center"],
+        p[style*="text-align: center"] {
+            text-align: center !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            margin: 24px 0 !important;
+        }
+        
+        /* Numbered paragraph styling */
+        [data-paragraph-number]::before {
+            content: attr(data-paragraph-number) ". ";
+            font-weight: normal;
+        }
+        
+        [data-paragraph-number] {
+            text-align: left !important;
+        }
+        
+        @media print {
+            body { margin: 0; }
+            .legal-document { margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="legal-document">
+        ${content}
+    </div>
+</body>
+</html>`;
+        
+        // Create download blob
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'complaint_eman_youssef.html';
+        
+        // Trigger download
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+        
+        // Show success notification
+        showToast('Document downloaded successfully', 'success');
+    }
+    
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function(e) {
+        if (changesMade) {
+            const message = 'You have unsaved changes. Are you sure you want to leave?';
+            e.returnValue = message;
+            return message;
+        }
+    });
+    
+    window.addEventListener('unload', function() {
+        if (window.editorAutoSaveInterval) {
+            clearInterval(window.editorAutoSaveInterval);
+        }
+    });
+</script>
+{{end}}

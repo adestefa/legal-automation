@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Legal Complaint - Eman Youssef</title>
+	<style>
+		body { font-family: 'Times New Roman', serif; margin: 1in; line-height: 1.5; }
+		.highlight { background-color: #ffffc0; }
+	</style>
+</head>
+<body>
+
+	<div class="legal-document">
+		<style>
+			.legal-document {
+				font-family: Times New Roman, serif;
+				line-height: 1.5;
+				margin: 1in;
+			}
+			.header {
+				text-align: center;
+				margin-bottom: 24px;
+			}
+			.court-info {
+				text-align: center;
+				margin-bottom: 24px;
+				text-transform: uppercase;
+			}
+			.case-info {
+				text-align: center;
+				margin-bottom: 24px;
+			}
+			.section-title {
+				text-align: center;
+				text-transform: uppercase;
+				font-weight: bold;
+				margin: 24px 0;
+			}
+			.paragraph {
+				text-indent: 0.5in;
+				margin-bottom: 12px;
+			}
+			.numbered-paragraph {
+				margin-bottom: 12px;
+			}
+			.signature-block {
+				margin-top: 48px;
+			}
+			.highlight {
+				background-color: #ffffc0;
+			}
+		</style>
+	
+		<div class="header">
+			<div><strong>UNITED STATES DISTRICT COURT</strong></div>
+			<div><strong>EASTERN DISTRICT OF NEW YORK</strong></div>
+		</div>
+	
+		<div class="case-info">
+			<div>-------------------------------------------------------------X</div>
+			<div style="text-align: left">
+				<span class="highlight">EMAN YOUSSEF</span>,
+			</div>
+			<div style="text-align: right">
+				Case No.: ___-cv-_____
+			</div>
+			<div style="text-align: left">
+				Plaintiff,
+			</div>
+			<div style="text-align: right">
+				COMPLAINT
+			</div>
+			<div style="text-align: left">
+				-against-
+			</div>
+			<div style="text-align: right">
+				JURY TRIAL DEMANDED
+			</div>
+			<div style="text-align: left">
+				<span class="highlight">TD BANK</span> and <span class="highlight">EXPERIAN INFORMATION SOLUTIONS, INC.</span>, <span class="highlight">EQUIFAX INFORMATION SERVICES, LLC</span> and <span class="highlight">TRANSUNION LLC</span>
+			</div>
+			<div style="text-align: left">
+				Defendants.
+			</div>
+			<div>-------------------------------------------------------------X</div>
+		</div>
+	
+		<div class="section-title">PRELIMINARY STATEMENT</div>
+	
+		<div class="numbered-paragraph">
+			<strong>1.</strong> <span class="highlight">Plaintiff Eman Youssef is a victim of identity theft. While Plaintiff was travelling out of the country identity thieves used her TD Bank credit card to make over $7,500 in purchase without her consent.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>2.</strong> <span class="highlight">Plaintiff brings this action against Defendant TD Bank for violating the FCRA, 15 U.S.C. § 1681s-2(b), by failing to reasonably investigate fraudulent charges on her TD Bank credit card after Plaintiff disputed the reporting of the charge with the credit reporting agencies. Defendant TD Bank wrongfully verified that the fraudulent charges being reported accurately to the consumer reporting agency Defendants who subsequently continued to erroneously report Plaintiff's account as delinquent to her detriment.</span>
+		</div>
+	
+		<div class="section-title">PARTIES</div>
+	
+		<div class="numbered-paragraph">
+			<strong>3.</strong> <span class="highlight">Plaintiff Eman Youssef is a natural person residing in Queens, New York.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>4.</strong> <span class="highlight">Defendant TD Bank is a financial institution that furnishes information to consumer reporting agencies and is headquartered in New York, New York.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>5.</strong> <span class="highlight">Defendant Experian Information Solutions, Inc. is a consumer reporting agency as defined by 15 U.S.C. § 1681a(f).</span>
+		</div>
+		
+		<div class="numbered-paragraph">
+			<strong>6.</strong> <span class="highlight">Defendant Equifax Information Services, LLC is a consumer reporting agency as defined by 15 U.S.C. § 1681a(f).</span>
+		</div>
+		
+		<div class="numbered-paragraph">
+			<strong>7.</strong> <span class="highlight">Defendant TransUnion LLC is a consumer reporting agency as defined by 15 U.S.C. § 1681a(f).</span>
+		</div>
+		
+		<div class="section-title">FACTUAL ALLEGATIONS</div>
+	
+		<div class="numbered-paragraph">
+			<strong>8.</strong> <span class="highlight">Plaintiff opened a TD Bank credit card on or around July 1, 2023 with an $8,000 credit limit. Plaintiff has always made all payments on her account in a timely manner prior to the subject fraud.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>9.</strong> <span class="highlight">Plaintiff travelled to Egypt with her family from June 30, 2024 through July 30, 2024.</span>
+		</div>
+		
+		<div class="numbered-paragraph">
+			<strong>10.</strong> <span class="highlight">Plaintiff had two physical cards for her account and brought both of them with her to Egypt.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>11.</strong> <span class="highlight">While Plaintiff was gone imposters used her account to make over $7,500 in fraudulent charges between July 15, 2024 and July 31, 2024. Majority of charges were made at three different camera stores on July 17, July 23 and July 26.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>12.</strong> <span class="highlight">Plaintiff had never used her card to make similar significant purchases in the past.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>13.</strong> <span class="highlight">After finding out about the fraudulent charges in August 1, 2024 Plaintiff disputed the charges with TD Bank on 5 separate occasions - in person, over the phone, via fax - explaining that she did not make the charges and could not possibly have made them since she was in Egypt when they were made.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>14.</strong> <span class="highlight">In fact, TD Bank told Plaintiff It must have been her son who made the charges.</span>
+		</div>
+		
+		<div class="numbered-paragraph">
+			<strong>15.</strong> <span class="highlight">Plaintiff filed a police report, and Police obtained video footage of the thieves (two males) making a fraudulent charge at a McDonalds.</span>
+		</div>
+		
+		<div class="numbered-paragraph">
+			<strong>16.</strong> <span class="highlight">TD Bank repeatedly refused to correct the charges.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>17.</strong> <span class="highlight">Plaintiff then sent written disputes to each of the credit reporting Defendants, Experian, Equifax, Trans Union on or around December 9, 2024, providing proof that she was in Egypt when the charges were made.</span>
+		</div>
+		
+		<div class="section-title">DAMAGES</div>
+	
+		<div class="numbered-paragraph">
+			<strong>18.</strong> <span class="highlight">As a result of Defendants' conduct, Plaintiff has suffered actual damages including being denied credit, having her current credit limits reduced, mental anguish, humiliation, and anxiety related to her credit problems.</span>
+		</div>
+	
+		<div class="section-title">CAUSES OF ACTION</div>
+	
+		<div class="section-title" style="margin-top: 24px">COUNT I</div>
+		<div class="section-title" style="margin-top: 12px">Violation of FCRA § 1681s-2(b) - Furnisher Duty to Investigate</div>
+	
+		<div class="numbered-paragraph">
+			<strong>19.</strong> Plaintiff realleges and incorporates by reference the allegations contained in paragraphs 1 through 18 as if fully set forth herein.
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>20.</strong> This cause of action is brought pursuant to 15 U.S.C. § 1681s-2(b).
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>21.</strong> <span class="highlight">TD Bank furnishes consumer information to the credit reporting agencies. Plaintiff disputed the fraudulent charges with the credit bureaus, who notified TD Bank of the dispute. Despite receiving notice of the dispute and clear evidence that Plaintiff was traveling in Egypt when the charges were made, TD Bank failed to conduct a reasonable investigation and continued to report the fraudulent account as accurately reflecting Plaintiff's payment history.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>22.</strong> By reason of the foregoing, Defendants have violated 15 U.S.C. § 1681s-2(b) and Plaintiff is entitled to relief as set forth below.
+		</div>
+	
+		<div class="section-title" style="margin-top: 24px">COUNT II</div>
+		<div class="section-title" style="margin-top: 12px">Willful Violation of FCRA § 1681n - Consumer Reporting Violations</div>
+	
+		<div class="numbered-paragraph">
+			<strong>23.</strong> Plaintiff realleges and incorporates by reference the allegations contained in paragraphs 1 through 22 as if fully set forth herein.
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>24.</strong> This cause of action is brought pursuant to 15 U.S.C. § 1681n.
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>25.</strong> <span class="highlight">The credit reporting agency Defendants willfully violated the FCRA by failing to conduct reasonable reinvestigation of Plaintiff's disputes regarding the fraudulent TD Bank account. Despite receiving documentation proving Plaintiff was in Egypt during the fraud period, Defendants continued to report the account as accurately reflecting Plaintiff's payment history, acting with reckless disregard for the accuracy of the information.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>26.</strong> By reason of the foregoing, Defendants have violated 15 U.S.C. § 1681n and Plaintiff is entitled to relief as set forth below.
+		</div>
+	
+		<div class="section-title" style="margin-top: 24px">COUNT III</div>
+		<div class="section-title" style="margin-top: 12px">Negligent Violation of FCRA § 1681o - Consumer Reporting Violations</div>
+	
+		<div class="numbered-paragraph">
+			<strong>27.</strong> Plaintiff realleges and incorporates by reference the allegations contained in paragraphs 1 through 26 as if fully set forth herein.
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>28.</strong> This cause of action is brought pursuant to 15 U.S.C. § 1681o.
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>29.</strong> <span class="highlight">In the alternative, if Defendants' violations were not willful, the credit reporting agency Defendants negligently violated the FCRA by failing to maintain reasonable procedures to assure maximum possible accuracy of consumer credit information and by failing to properly reinvestigate Plaintiff's disputes, causing Plaintiff to suffer actual damages.</span>
+		</div>
+	
+		<div class="numbered-paragraph">
+			<strong>30.</strong> By reason of the foregoing, Defendants have violated 15 U.S.C. § 1681o and Plaintiff is entitled to relief as set forth below.
+		</div>
+	
+		<div class="section-title">PRAYER FOR RELIEF</div>
+		
+		<div>
+			WHEREFORE, Plaintiff respectfully prays that judgment be entered against Defendants for the following:
+		</div>
+		
+		<div style="margin-left: 0.5in; margin-top: 12px">
+			<div>A. Actual damages pursuant to 15 U.S.C. §§ 1681n and 1681o;</div>
+			<div>B. Statutory damages pursuant to 15 U.S.C. § 1681n;</div>
+			<div>C. Punitive damages pursuant to 15 U.S.C. § 1681n;</div>
+			<div>D. Costs and reasonable attorney's fees pursuant to 15 U.S.C. §§ 1681n, 1681o, and 1681s-2(c); and</div>
+			<div>E. Such other and further relief as may be necessary, just and proper.</div>
+		</div>
+	
+		<div class="section-title" style="margin-top: 36px">JURY DEMAND</div>
+		
+		<div>
+			Plaintiff hereby demands a trial by jury on all issues so triable.
+		</div>
+	
+		<div class="signature-block">
+			<div>Dated: April 9, 2025</div>
+			<div style="margin-top: 12px">Respectfully submitted,</div>
+			<div style="margin-top: 48px">______________________________</div>
+			<div>Kevin Mallon, Esq.</div>
+			<div>MALLON CONSUMER LAW GROUP</div>
+			<div>500 Fifth Avenue, Suite 1900</div>
+			<div>New York, NY 10110</div>
+			<div>Tel: (212) 732-5777</div>
+			<div>Fax: (212) 658-9177</div>
+			<div>Attorney for Plaintiff</div>
+		</div>
+	</div>
+	
+</body>
+</html>

@@ -1,0 +1,22 @@
+{{define "_error_fragment.gohtml"}}
+<div class="p-4 bg-red-100 border border-red-300 text-red-700 rounded">
+    <div class="flex items-center">
+        <div class="flex-shrink-0">
+            <span class="text-red-500">⚠</span>
+        </div>
+        <div class="ml-3">
+            <strong>Error:</strong> {{.Error}}
+        </div>
+    </div>
+    {{if .RetryAction}}
+    <div class="mt-3">
+        <button hx-get="{{.RetryAction}}" 
+                hx-target="#step-content"
+                hx-swap="innerHTML"
+                class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+            Try Again
+        </button>
+    </div>
+    {{end}}
+</div>
+{{end}}

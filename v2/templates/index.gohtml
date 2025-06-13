@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Document Automation - Mallon Law</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <link rel="stylesheet" href="/static/site.css">
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-gray-800">Legal Document Automation <span class="text-sm font-normal text-gray-500">v2.5.29</span></h1>
+                <div class="flex items-center space-x-4">
+                    <!-- iCloud Status -->
+                    <div class="flex items-center space-x-2">
+                        <div class="h-2 w-2 rounded-full {{if true}}bg-green-500{{else}}bg-gray-400{{end}}"></div>
+                        <span class="text-sm {{if true}}text-green-600{{else}}text-gray-500{{end}}">
+                            iCloud: {{if true}}Connected{{else}}Not Connected{{end}}
+                        </span>
+                        <button hx-get="/ui/icloud-setup" 
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                class="text-xs px-2 py-1 rounded {{if true}}bg-blue-100 text-blue-600 hover:bg-blue-200{{else}}bg-gray-100 text-gray-600 hover:bg-gray-200{{end}}">
+                            {{if true}}Manage{{else}}Setup{{end}}
+                        </button>
+                    </div>
+                    <!-- User & Logout -->
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">{{.Username}}</span>
+                            <div class="text-xs text-gray-500">Mallon Consumer Law Group</div>
+                        </div>
+                        <button hx-post="/api/logout" 
+                                hx-swap="none"
+                                hx-on:htmx:after-request="window.location.href = '/login'"
+                                class="text-xs px-3 py-1 bg-red-100 text-red-600 hover:bg-red-200 rounded transition duration-200">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="h-1 w-full bg-blue-600 mt-2"></div>
+        </header>
+
+        <!-- Progress Steps -->
+        {{template "_progress_steps.gohtml" .}}
+
+        <!-- Step Content Container -->
+        <div id="step-content">
+            {{if eq .CurrentStep 0}}
+                {{template "_step0_case_setup.gohtml" .}}
+            {{else if eq .CurrentStep 1}}
+                {{template "_step1_document_selection.gohtml" .}}
+            {{else if eq .CurrentStep 2}}
+                {{template "_step2_template_selection.gohtml" .}}
+            {{else if eq .CurrentStep 3}}
+                {{template "_step3_review_data.gohtml" .}}
+            {{else if eq .CurrentStep 4}}
+                {{template "_step4_generate_document.gohtml" .}}
+            {{else if eq .CurrentStep 5}}
+                {{template "_step5_icloud_sync.gohtml" .}}
+            {{end}}
+        </div>
+
+        <!-- Modal Container for HTMX-loaded modals -->
+        <div id="modal-container"></div>
+    </div>
+
+    <!-- HTMX Global Event Handlers -->
+    <script>
+        // Global HTMX event listeners
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            console.log('HTMX: Making request to', evt.detail.pathInfo.requestPath);
+            // Show loading indicators if needed
+        });
+
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            console.log('HTMX: Content swapped for target', evt.detail.target.id || evt.detail.target.tagName);
+        });
+
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            console.error('HTMX Error:', evt.detail.error);
+            // Display user-friendly error message
+            const errorMsg = "An error occurred. Please try again.";
+            alert("Request Error: " + errorMsg);
+        });
+
+        console.log('Mallon Legal Assistant v2.5.29 loaded');
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+ /* ==========================================
+           THEME SYSTEM - CSS CUSTOM PROPERTIES
+           ========================================== */
+        
+        /* Light Theme (Default) */
+        :root {
+            /* Primary Background Colors */
+            --bg-primary: #f9fafb;          /* bg-gray-50 */
+            --bg-secondary: #ffffff;        /* bg-white */
+            --bg-tertiary: #f3f4f6;         /* bg-gray-100 */
+            --bg-accent: #eff6ff;           /* bg-blue-50 */
+            
+            /* Text Colors */
+            --text-primary: #111827;        /* text-gray-900 */
+            --text-secondary: #374151;      /* text-gray-700 */
+            --text-muted: #6b7280;          /* text-gray-500 */
+            --text-accent: #2563eb;         /* text-blue-600 */
+            
+            /* Border Colors */
+            --border-primary: #d1d5db;      /* border-gray-300 */
+            --border-secondary: #e5e7eb;    /* border-gray-200 */
+            --border-accent: #3b82f6;       /* border-blue-500 */
+            
+            /* Status Colors */
+            --status-success: #10b981;      /* green-500 */
+            --status-warning: #f59e0b;      /* yellow-500 */
+            --status-error: #ef4444;        /* red-500 */
+            --status-info: #3b82f6;         /* blue-500 */
+            
+            /* Interactive Elements */
+            --interactive-primary: #2563eb;    /* blue-600 */
+            --interactive-primary-hover: #1d4ed8; /* blue-700 */
+            --interactive-secondary: #6b7280;     /* gray-500 */
+            --interactive-secondary-hover: #4b5563; /* gray-600 */
+            
+            /* Special Elements */
+            --highlight-bg: #fef3c7;        /* yellow-100 */
+            --highlight-text: #92400e;      /* yellow-800 */
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Dark Theme */
+        [data-theme="dark"] {
+            /* Primary Background Colors */
+            --bg-primary: #111827;          /* gray-900 */
+            --bg-secondary: #1f2937;        /* gray-800 */
+            --bg-tertiary: #374151;         /* gray-700 */
+            --bg-accent: #1e3a8a;           /* blue-800 */
+            
+            /* Text Colors */
+            --text-primary: #f9fafb;        /* gray-50 */
+            --text-secondary: #d1d5db;      /* gray-300 */
+            --text-muted: #9ca3af;          /* gray-400 */
+            --text-accent: #60a5fa;         /* blue-400 */
+            
+            /* Border Colors */
+            --border-primary: #4b5563;      /* gray-600 */
+            --border-secondary: #374151;    /* gray-700 */
+            --border-accent: #3b82f6;       /* blue-500 */
+            
+            /* Status Colors */
+            --status-success: #34d399;      /* green-400 */
+            --status-warning: #fbbf24;      /* yellow-400 */
+            --status-error: #f87171;        /* red-400 */
+            --status-info: #60a5fa;         /* blue-400 */
+            
+            /* Interactive Elements */
+            --interactive-primary: #3b82f6;    /* blue-500 */
+            --interactive-primary-hover: #2563eb; /* blue-600 */
+            --interactive-secondary: #9ca3af;     /* gray-400 */
+            --interactive-secondary-hover: #d1d5db; /* gray-300 */
+            
+            /* Special Elements */
+            --highlight-bg: #451a03;        /* yellow-900 */
+            --highlight-text: #fbbf24;      /* yellow-400 */
+            --modal-overlay: rgba(0, 0, 0, 0.75);
+        }
+        
+        /* ==========================================
+           THEME-AWARE BASE STYLES
+           ========================================== */
+        
+        /* Body and main containers */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Theme-aware utility classes */
+        .theme-bg-primary { background-color: var(--bg-primary); }
+        .theme-bg-secondary { background-color: var(--bg-secondary); }
+        .theme-bg-tertiary { background-color: var(--bg-tertiary); }
+        .theme-bg-accent { background-color: var(--bg-accent); }
+        
+        .theme-text-primary { color: var(--text-primary); }
+        .theme-text-secondary { color: var(--text-secondary); }
+        .theme-text-muted { color: var(--text-muted); }
+        .theme-text-accent { color: var(--text-accent); }
+        
+        .theme-border-primary { border-color: var(--border-primary); }
+        .theme-border-secondary { border-color: var(--border-secondary); }
+        .theme-border-accent { border-color: var(--border-accent); }
+        
+        /* ==========================================
+           DOCUMENT EDITING STYLES (TASK 15)
+           ========================================== */
+        
+        .edited-content {
+            background-color: #fef3c7 !important; /* yellow-100 */
+            color: #000000 !important; /* pure black for maximum contrast */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .editable-document {
+            outline: none;
+        }
+        
+        .editable-document:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+        
+        .edit-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            margin: -1rem -1rem 1rem -1rem;
+        }
+        
+        /* ==========================================
+           MARKDOWN PROSE STYLES (THEME-AWARE)
+           ========================================== */
+        
+        /* Custom styles for markdown rendering */
+        .prose {
+            color: var(--text-primary);
+        }
+        .prose h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .prose h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .prose p {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        .prose strong {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+        
+        /* ==========================================
+           LEGAL DOCUMENT SECTION NUMBERING FIX
+           ========================================== */
+        
+        /* Ensure numbered paragraphs are visible */
+        .numbered-paragraph strong {
+            color: #000000 !important;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        /* Override any theme or prose styling that might hide numbers */
+        .prose .numbered-paragraph strong,
+        #document-preview .numbered-paragraph strong,
+        .legal-document .numbered-paragraph strong {
+            color: #000000 !important;
+            font-weight: bold;
+            margin-right: 8px;
+            display: inline;
+        }
+        
+        /* Ensure section titles are visible and properly formatted */
+        .section-title {
+            color: #000000 !important;
+            font-weight: bold;
+            text-align: center;
+            margin: 24px 0;
+            display: block;
+        }
+        
+        /* Legal document container styling */
+        .legal-document {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.5;
+            color: #000000;
+        }
+        
+        /* Ensure all paragraph numbers are black and visible */
+        div[class*="numbered-paragraph"] strong:first-child {
+            color: #000000 !important;
+            font-weight: bold;
+        }

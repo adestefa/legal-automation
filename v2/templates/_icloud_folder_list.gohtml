@@ -1,0 +1,27 @@
+{{define "_icloud_folder_list.gohtml"}}
+{{if .Folders}}
+    {{range .Folders}}
+        <div class="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition">
+            <button hx-post="/ui/select-parent-folder" 
+                    hx-vals='{"folderPath": "{{.Path}}"}'
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="w-full text-left"
+                    title="Select {{.Name}} as parent folder">
+                <div class="font-medium text-sm text-black">{{.Name}}</div>
+                <div class="text-xs text-gray-500">Modified: {{.Modified.Format "Jan 2, 2006"}}</div>
+            </button>
+        </div>
+    {{end}}
+{{else}}
+    <div class="col-span-2 p-4 text-center text-gray-500">
+        <p class="text-sm">No iCloud folders found or could not load.</p>
+        <button hx-get="/ui/icloud-folders" 
+                hx-target="#icloud-folders-container"
+                hx-swap="innerHTML"
+                class="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+            Retry Loading
+        </button>
+    </div>
+{{end}}
+{{end}}

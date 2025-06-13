@@ -1,0 +1,45 @@
+{{define "_progress_steps_content.gohtml"}}
+<div class="flex items-center justify-between">
+    <div class="flex items-center {{if ge .CurrentStep 0}}text-blue-600{{else}}text-gray-400{{end}}">
+        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 0}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 0}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
+            {{if gt .CurrentStep 0}}✓{{else}}0{{end}}
+        </div>
+        <div class="ml-2 text-sm font-medium">Setup Case</div>
+    </div>
+    <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 1}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
+    <div class="flex items-center {{if ge .CurrentStep 1}}text-blue-600{{else}}text-gray-400{{end}}">
+        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 1}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 1}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
+            {{if gt .CurrentStep 1}}✓{{else}}1{{end}}
+        </div>
+        <div class="ml-2 text-sm font-medium">Select Documents</div>
+    </div>
+    <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 2}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
+    <div class="flex items-center {{if ge .CurrentStep 2}}text-blue-600{{else}}text-gray-400{{end}}">
+        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 2}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 2}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
+            {{if gt .CurrentStep 2}}✓{{else}}2{{end}}
+        </div>
+        <div class="ml-2 text-sm font-medium">Select Template</div>
+    </div>
+    <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 3}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
+    <div class="flex items-center {{if ge .CurrentStep 3}}text-blue-600{{else}}text-gray-400{{end}}">
+        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 3}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 3}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
+            {{if gt .CurrentStep 3}}✓{{else}}3{{end}}
+        </div>
+        <div class="ml-2 text-sm font-medium">Review Data</div>
+    </div>
+    <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 4}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
+    <div class="flex items-center {{if ge .CurrentStep 4}}text-blue-600{{else}}text-gray-400{{end}}">
+        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 4}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 4}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
+            {{if gt .CurrentStep 4}}✓{{else}}4{{end}}
+        </div>
+        <div class="ml-2 text-sm font-medium">Generate Document</div>
+    </div>
+    <div class="flex-1 h-1 mx-4 {{if ge .CurrentStep 5}}bg-blue-600{{else}}bg-gray-200{{end}}"></div>
+    <div class="flex items-center {{if ge .CurrentStep 5}}text-blue-600{{else}}text-gray-400{{end}}">
+        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold {{if eq .CurrentStep 5}}bg-blue-600 text-white border-blue-600{{else if gt .CurrentStep 5}}border-blue-600 bg-white text-blue-600{{else}}border-gray-400 bg-white text-gray-400{{end}}">
+            {{if gt .CurrentStep 5}}✓{{else}}5{{end}}
+        </div>
+        <div class="ml-2 text-sm font-medium">iCloud Sync</div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Document Automation - Mallon Law</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <!-- Alpine.js for simple interactions -->
+    <script defer src="https://unpkg.com/alpinejs@3.13.0/dist/cdn.min.js"></script>
+    <!-- Add highlight.js for markdown preview -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Custom styles for markdown rendering */
+        .prose h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose p {
+            margin-bottom: 0.5rem;
+        }
+        .prose strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-gray-800">Legal Document Automation <span class="text-sm font-normal text-gray-500">v2.5.28</span></h1>
+                <div class="text-sm text-gray-500">Mallon Consumer Law Group</div>
+            </div>
+            <div class="h-1 w-full bg-blue-600 mt-2"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main x-data="{ 
+            currentStep: 1, 
+            inputDocuments: [],
+            selectedTemplateId: '',
+            processingStatus: 'idle',
+            caseData: null,
+            summary: '',
+            documentHTML: '',
+            showPreview: false,
+            selectedDocs: [],
+            allDocuments: [],
+            allTemplates: []
+        }" x-init="
+            // Fetch documents and templates on page load
+            fetch('/api/documents')
+                .then(response => response.json())
+                .then(data => {
+                    allDocuments = data;
+                    console.log('Loaded documents:', allDocuments);
+                })
+                .catch(error => console.error('Error fetching documents:', error));
+                
+            fetch('/api/templates')
+                .then(response => response.json())
+                .then(data => {
+                    allTemplates = data;
+                    console.log('Loaded templates:', allTemplates);
+                })
+                .catch(error => console.error('Error fetching templates:', error));
+        ">
+            <!-- Progress Steps -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center" :class="currentStep >= 1 ? 'text-blue-600' : 'text-gray-400'">
+                        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold" 
+                             :class="currentStep >= 1 ? 'border-blue-600' : 'border-gray-400'">
+                            1
+                        </div>
+                        <div class="ml-2 text-sm font-medium">Select Documents</div>
+                    </div>
+                    <div class="flex-1 h-1 mx-4" :class="currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'"></div>
+                    <div class="flex items-center" :class="currentStep >= 2 ? 'text-blue-600' : 'text-gray-400'">
+                        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold"
+                             :class="currentStep >= 2 ? 'border-blue-600' : 'border-gray-400'">
+                            2
+                        </div>
+                        <div class="ml-2 text-sm font-medium">Select Template</div>
+                    </div>
+                    <div class="flex-1 h-1 mx-4" :class="currentStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'"></div>
+                    <div class="flex items-center" :class="currentStep >= 3 ? 'text-blue-600' : 'text-gray-400'">
+                        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold"
+                             :class="currentStep >= 3 ? 'border-blue-600' : 'border-gray-400'">
+                            3
+                        </div>
+                        <div class="ml-2 text-sm font-medium">Review Data</div>
+                    </div>
+                    <div class="flex-1 h-1 mx-4" :class="currentStep >= 4 ? 'bg-blue-600' : 'bg-gray-200'"></div>
+                    <div class="flex items-center" :class="currentStep >= 4 ? 'text-blue-600' : 'text-gray-400'">
+                        <div class="rounded-full h-8 w-8 flex items-center justify-center border-2 font-bold"
+                             :class="currentStep >= 4 ? 'border-blue-600' : 'border-gray-400'">
+                            4
+                        </div>
+                        <div class="ml-2 text-sm font-medium">Generate Document</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Document Selection -->
+            <div x-show="currentStep === 1" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-semibold mb-4">Step 1: Select Source Documents</h2>
+                <p class="text-gray-600 mb-6">
+                    Select the documents from your iCloud Drive that contain relevant case information.
+                </p>
+
+                <!-- Document Type Selection Tabs -->
+                <div class="border-b border-gray-200 mb-4">
+                    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+                        <li class="mr-2">
+                            <a href="#" class="inline-block p-4 border-b-2 border-blue-600 text-blue-600 rounded-t-lg active">
+                                All Documents
+                            </a>
+                        </li>
+                        <li class="mr-2">
+                            <a href="#" class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg">
+                                Attorney Notes
+                            </a>
+                        </li>
+                        <li class="mr-2">
+                            <a href="#" class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg">
+                                Adverse Action Letters
+                            </a>
+                        </li>
+                        <li class="mr-2">
+                            <a href="#" class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg">
+                                Supporting Documents
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Document List -->
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 p-3 border-b flex justify-between items-center">
+                        <div class="text-sm font-medium">Document Name</div>
+                        <div class="text-sm font-medium">Select</div>
+                    </div>
+                    <ul class="divide-y divide-gray-200">
+                        <template x-for="document in allDocuments" :key="document.id">
+                            <li class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span x-text="document.name"></span>
+                                </div>
+                                <input type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                                       :value="document.id" 
+                                       x-model="selectedDocs">
+                            </li>
+                        </template>
+                        <!-- Fallback items if API call fails -->
+                        <template x-if="allDocuments.length === 0">
+                            <li class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span>Atty_Notes.docx</span>
+                                </div>
+                                <input type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <div class="mt-6 text-right">
+                    <button @click="
+                        if (selectedDocs.length > 0) {
+                            inputDocuments = selectedDocs;
+                            currentStep = 2;
+                        } else {
+                            alert('Please select at least one document');
+                        }
+                    " 
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Continue
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Template Selection -->
+            <div x-show="currentStep === 2" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-semibold mb-4">Step 2: Select Complaint Template</h2>
+                <p class="text-gray-600 mb-6">
+                    Choose the complaint form template you want to populate with the extracted information.
+                </p>
+
+                <!-- Template List -->
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="bg-gray-50 p-3 border-b">
+                        <div class="text-sm font-medium">Available Templates</div>
+                    </div>
+                    <ul class="divide-y divide-gray-200">
+                        <template x-for="template in allTemplates" :key="template.id">
+                            <li class="p-3 hover:bg-gray-50">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="template" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" 
+                                           :value="template.id" 
+                                           x-model="selectedTemplateId">
+                                    <div class="ml-3">
+                                        <span class="block font-medium" x-text="template.name"></span>
+                                        <span class="block text-sm text-gray-500" x-text="template.desc"></span>
+                                    </div>
+                                </label>
+                            </li>
+                        </template>
+                        <!-- Fallback item if API call fails -->
+                        <template x-if="allTemplates.length === 0">
+                            <li class="p-3 hover:bg-gray-50">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="template" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" checked>
+                                    <div class="ml-3">
+                                        <span class="block font-medium">FCRA Complaint - Credit Card Fraud</span>
+                                        <span class="block text-sm text-gray-500">For cases involving fraudulent credit card transactions</span>
+                                    </div>
+                                </label>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <div class="mt-6 flex justify-between">
+                    <button @click="currentStep = 1" 
+                            class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Back
+                    </button>
+                    <button @click="
+                        if (selectedTemplateId) {
+                            processingStatus = 'processing';
+                            currentStep = 3;
+                            // Simulate document processing
+                            setTimeout(() => {
+                                fetch('/api/generate-summary', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        documents: inputDocuments,
+                                        templateId: selectedTemplateId
+                                    }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    caseData = data.clientCase;
+                                    summary = data.summary;
+                                    documentHTML = data.documentHTML;
+                                    processingStatus = 'completed';
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    processingStatus = 'error';
+                                });
+                            }, 1500);
+                        } else {
+                            alert('Please select a template');
+                        }
+                    " 
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Process Documents
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review Extracted Data -->
+            <div x-show="currentStep === 3" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-semibold mb-4">Step 3: Review Extracted Information</h2>
+                <p class="text-gray-600 mb-6" x-show="processingStatus === 'processing'">
+                    Processing your documents. This may take a moment...
+                </p>
+                
+                <!-- Processing Indicator -->
+                <div x-show="processingStatus === 'processing'" class="flex flex-col items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <div class="mt-4 text-sm text-gray-500">Analyzing documents and extracting case details...</div>
+                </div>
+
+                <!-- Error State -->
+                <div x-show="processingStatus === 'error'" class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-red-800">Processing Error</h3>
+                    <p class="mt-2 text-red-600">We encountered an issue while processing your documents. Please try again.</p>
+                    <button @click="processingStatus = 'idle'; currentStep = 2;" class="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                        Try Again
+                    </button>
+                </div>
+                
+                <!-- Results Preview -->
+                <div x-show="processingStatus === 'completed'">
+                    <div class="flex space-x-4 mb-6">
+                        <button @click="showPreview = false" 
+                                class="px-3 py-1 border-b-2" 
+                                :class="!showPreview ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                            Structured Data
+                        </button>
+                        <button @click="showPreview = true" 
+                                class="px-3 py-1 border-b-2" 
+                                :class="showPreview ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
+                            Document Preview
+                        </button>
+                    </div>
+                    
+                    <!-- Structured Data View -->
+                    <div x-show="!showPreview" class="space-y-6">
+                        <!-- Client Information -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium mb-3 text-gray-800">Client Information</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="block text-gray-500">Name</span>
+                                    <span class="font-medium" x-text="caseData?.clientName || 'Not found'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Contact</span>
+                                    <span class="font-medium" x-text="caseData?.contactInfo || 'Not found'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Location</span>
+                                    <span class="font-medium" x-text="(caseData?.residenceLocation || 'Not found') + ', New York'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Account Information -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium mb-3 text-gray-800">Account Information</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="block text-gray-500">Financial Institution</span>
+                                    <span class="font-medium" x-text="caseData?.financialInstitution || 'Not found'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Account Type</span>
+                                    <span class="font-medium">Credit Card</span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Credit Limit</span>
+                                    <span class="font-medium" x-text="caseData?.creditLimit || 'Not found'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Account Standing</span>
+                                    <span class="font-medium">Good (prior to fraud)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fraud Details -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium mb-3 text-gray-800">Fraud Details</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="block text-gray-500">Fraud Amount</span>
+                                    <span class="font-medium text-red-600" x-text="caseData?.fraudAmount || 'Not found'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Fraud Period</span>
+                                    <span class="font-medium">
+                                        <span x-text="formatDate(caseData?.fraudStartDate) || 'Unknown'"></span>
+                                        - <span x-text="formatDate(caseData?.fraudEndDate) || 'Unknown'"></span>
+                                    </span>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="block text-gray-500">Description</span>
+                                    <span class="font-medium" x-text="caseData?.fraudDetails || 'Not found'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Client Alibi -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium mb-3 text-gray-800">Client Alibi</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="block text-gray-500">Travel Location</span>
+                                    <span class="font-medium" x-text="caseData?.travelLocation || 'Not found'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Travel Period</span>
+                                    <span class="font-medium">
+                                        <span x-text="formatDate(caseData?.travelStartDate) || 'Unknown'"></span>
+                                        - <span x-text="formatDate(caseData?.travelEndDate) || 'Unknown'"></span>
+                                    </span>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="block text-gray-500">Card Possession</span>
+                                    <span class="font-medium">Client had physical cards in possession during travel</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dispute Information -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium mb-3 text-gray-800">Dispute Information</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="block text-gray-500">Number of Disputes</span>
+                                    <span class="font-medium" x-text="caseData?.disputeCount || 'Unknown'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Dispute Methods</span>
+                                    <span class="font-medium" x-text="Array.isArray(caseData?.disputeMethods) ? caseData.disputeMethods.join(', ') : 'Unknown'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Bank Response</span>
+                                    <span class="font-medium" x-text="caseData?.bankResponse || 'Unknown'"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-500">Police Report</span>
+                                    <span class="font-medium" x-text="caseData?.policeReportFiled ? 'Filed' : 'Not filed'"></span>
+                                </div>
+                                <div class="col-span-2" x-show="caseData?.policeReportDetails">
+                                    <span class="block text-gray-500">Police Report Details</span>
+                                    <span class="font-medium" x-text="caseData?.policeReportDetails"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Document Preview -->
+                    <div x-show="showPreview" class="border rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium">Legal Complaint Document</h3>
+                            <div class="text-sm text-gray-500">Generated from template and case data</div>
+                        </div>
+                        <div x-show="processingResult?.missingContent?.length > 0" class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
+                            <p class="text-sm text-yellow-700 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <strong>Note:</strong> Some fields marked with [BRACKETS] require information from documents not selected.
+                            </p>
+                        </div>
+                        <div id="document-preview" class="prose max-w-none" x-html="documentHTML || marked(summary || '')"></div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-between">
+                        <button @click="currentStep = 2" 
+                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            Back
+                        </button>
+                        <button @click="
+                            currentStep = 4;
+                            // Populate template with extracted data
+                            fetch('/api/populate-template', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    templateId: selectedTemplateId,
+                                    clientCase: caseData
+                                }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Template populated:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                        " 
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            Approve and Generate Document
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Final Document -->
+            <div x-show="currentStep === 4" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-semibold mb-4">Step 4: Document Generated</h2>
+                
+                <div class="flex items-center justify-center py-8 text-center">
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200 max-w-md">
+                        <div class="rounded-full bg-green-100 h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                            <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-green-800 mb-1">Document Successfully Generated!</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            The complaint form has been populated with the extracted case information and saved to your iCloud Drive.
+                        </p>
+                        <div class="flex justify-center space-x-3">
+                            <a href="#" class="px-4 py-2 bg-white border border-gray-300 rounded text-gray-700 text-sm hover:bg-gray-50">
+                                View Document
+                            </a>
+                            <a href="#" class="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                                Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <button @click="
+                        currentStep = 1;
+                        processingStatus = 'idle';
+                        caseData = null;
+                        summary = '';
+                        documentHTML = '';
+                        showPreview = false;
+                        selectedDocs = [];
+                        selectedTemplateId = '';
+                        processingResult = null;
+                    " 
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Process New Case
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (!dateString) return null;
+            
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return null;
+            
+            return new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }).format(date);
+        }
+        
+        // Make formatDate available to Alpine
+        document.addEventListener('alpine:init', () => {
+            window.formatDate = formatDate;
+            
+            // Initialize marked for markdown rendering
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{{define "_case_folder_list.gohtml"}}
+{{if .CaseFolders}}
+    {{range .CaseFolders}}
+    <div class="p-3 border-b border-gray-100 hover:bg-gray-50">
+        <button hx-post="/ui/select-case-folder" 
+                hx-vals='{"caseFolder": "{{.Path}}"}'
+                hx-target="#step-content"
+                hx-swap="innerHTML"
+                class="w-full text-left flex items-center">
+            <div>
+                <div class="font-medium text-sm text-black">{{.Name}}</div>
+                <div class="text-xs text-gray-500">Modified: {{.Modified.Format "Jan 2, 2006"}}</div>
+            </div>
+        </button>
+    </div>
+    {{end}}
+{{else}}
+<div class="p-4 text-center text-gray-500">
+    <p class="text-sm">No case folders found in {{.ParentFolder}}.</p>
+    <p class="text-xs mt-1">Create a new case above or check your folder structure.</p>
+</div>
+{{end}}
+{{end}}

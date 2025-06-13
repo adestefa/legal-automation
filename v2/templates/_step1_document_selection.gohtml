@@ -1,0 +1,179 @@
+{{define "_step1_document_selection.gohtml"}}
+<div id="step-1-content" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-xl font-semibold mb-4">Step 1: Select Source Documents</h2>
+    <p class="text-gray-600 mb-6">
+        {{if .SelectedCaseFolder}}
+        Select documents from your <strong>{{.SelectedCaseFolder}}</strong> case folder that contain relevant case information.
+        {{else}}
+        Select the documents that contain relevant case information.
+        {{end}}
+    </p>
+
+    <!-- Document List with Select All -->
+    <form hx-post="/ui/select-documents" 
+          hx-target="#step-content"
+          hx-swap="innerHTML">
+        
+        <!-- Select All Header -->
+        <div class="border rounded-lg overflow-hidden">
+            <div class="bg-gray-50 p-3 border-b flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="text-sm font-medium">Document Name</div>
+                    {{if .Documents}}
+                    <div class="flex items-center space-x-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   id="select-all-docs" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                   onchange="toggleAllDocuments(this)">
+                            <span class="ml-2 text-xs text-gray-600 font-medium" id="select-all-label">Select All</span>
+                        </label>
+                    </div>
+                    {{end}}
+                </div>
+                <div class="text-sm font-medium">Select</div>
+            </div>
+            
+            <!-- Document List -->
+            <ul class="divide-y divide-gray-200">
+                {{if .Documents}}
+                    {{range .Documents}}
+                    <li class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div>
+                                <span class="text-black font-medium">{{.Name}}</span>
+                                <div class="text-xs text-gray-500">
+                                    {{if .Type}}<span>{{.Type | upper}}</span>{{end}}
+                                    {{if .Size}} • <span>{{.Size | formatSize}}</span>{{end}}
+                                    {{if .Modified}} • <span>{{.Modified.Format "Jan 2, 2006"}}</span>{{end}}
+                                </div>
+                            </div>
+                        </div>
+                        <input type="checkbox" 
+                               name="selectedDocs" 
+                               value="{{.Path}}" 
+                               class="doc-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                               onchange="updateSelectAllState()">
+                    </li>
+                    {{end}}
+                {{else}}
+                <li class="p-4 text-center text-gray-500">
+                    <div class="text-sm">No documents found</div>
+                    <div class="text-xs mt-1">
+                        {{if .SelectedCaseFolder}}
+                        The folder may be empty or there was a loading issue.
+                        {{else}}
+                        Please complete case setup to load documents.
+                        {{end}}
+                    </div>
+                    {{if .SelectedCaseFolder}}
+                    <button type="button"
+                            hx-get="/ui/load-documents"
+                            hx-vals='{"folder": "{{.SelectedCaseFolder}}"}'
+                            hx-target="#step-1-content"
+                            hx-swap="outerHTML"
+                            class="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+                        Reload Documents
+                    </button>
+                    <button type="button"
+                            hx-get="/ui/load-documents"
+                            hx-vals='{"folder": "/CASES/Yousef_Eman"}'
+                            hx-target="#step-1-content"
+                            hx-swap="outerHTML"
+                            class="mt-2 ml-2 px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+                        Load Test Documents
+                    </button>
+                    {{end}}
+                </li>
+                {{end}}
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-between">
+            <button type="button"
+                    hx-get="/ui/step/0" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                Back to Case Setup
+            </button>
+            <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Continue with Selected Documents
+            </button>
+        </div>
+        
+        <!-- Include selected case folder for context -->
+        {{if .SelectedCaseFolder}}
+        <input type="hidden" name="caseFolder" value="{{.SelectedCaseFolder}}">
+        {{end}}
+    </form>
+</div>
+
+<script>
+// Select All functionality implementation
+function toggleAllDocuments(selectAllCheckbox) {
+    const docCheckboxes = document.querySelectorAll('.doc-checkbox');
+    const selectAllLabel = document.getElementById('select-all-label');
+    
+    docCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateSelectAllLabel();
+}
+
+function updateSelectAllState() {
+    const docCheckboxes = document.querySelectorAll('.doc-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all-docs');
+    
+    if (!docCheckboxes.length) return;
+    
+    const checkedCount = Array.from(docCheckboxes).filter(cb => cb.checked).length;
+    const totalCount = docCheckboxes.length;
+    
+    if (checkedCount === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedCount === totalCount) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    }
+    
+    updateSelectAllLabel();
+}
+
+function updateSelectAllLabel() {
+    const docCheckboxes = document.querySelectorAll('.doc-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all-docs');
+    const selectAllLabel = document.getElementById('select-all-label');
+    
+    if (!docCheckboxes.length) return;
+    
+    const checkedCount = Array.from(docCheckboxes).filter(cb => cb.checked).length;
+    const totalCount = docCheckboxes.length;
+    
+    if (checkedCount === totalCount && totalCount > 0) {
+        selectAllLabel.textContent = 'Deselect All';
+    } else {
+        selectAllLabel.textContent = 'Select All';
+    }
+}
+
+// Initialize select all state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateSelectAllState();
+});
+
+// Also initialize when HTMX swaps content
+document.addEventListener('htmx:afterSwap', function() {
+    updateSelectAllState();
+});
+
+console.log('Step 1 Document Selection with Select All functionality loaded');
+</script>
+{{end}}

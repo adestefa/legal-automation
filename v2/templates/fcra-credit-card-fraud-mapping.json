@@ -1,0 +1,194 @@
+{
+  "templateId": "fcra-credit-card-fraud",
+  "templateName": "FCRA Complaint - Credit Card Fraud",
+  "templateDescription": "Legal complaint template for Fair Credit Reporting Act violations related to credit card fraud",
+  "templateVersion": "1.0.0",
+  
+  "sections": [
+    {
+      "id": "header",
+      "title": "Document Header",
+      "placeholders": [
+        {
+          "placeholder": "[CLIENT_NAME]",
+          "dataField": "clientName",
+          "required": true
+        },
+        {
+          "placeholder": "[CASE_NUMBER]",
+          "dataField": "caseNumber",
+          "required": false,
+          "fallback": "___-cv-_____"
+        }
+      ]
+    },
+    {
+      "id": "defendants",
+      "title": "Defendant Information",
+      "placeholders": [
+        {
+          "placeholder": "[DEFENDANT_FINANCIAL_INSTITUTION]",
+          "dataField": "financialInstitution",
+          "required": true
+        },
+        {
+          "placeholder": "[DEFENDANT_CREDIT_BUREAUS]",
+          "dataField": "creditBureauNames",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "preliminary_statement",
+      "title": "Preliminary Statement",
+      "placeholders": [
+        {
+          "placeholder": "[CLIENT_NAME]",
+          "dataField": "clientName",
+          "required": true
+        },
+        {
+          "placeholder": "[FINANCIAL_INSTITUTION]",
+          "dataField": "financialInstitution",
+          "required": true
+        },
+        {
+          "placeholder": "[FRAUD_AMOUNT]",
+          "dataField": "fraudAmount",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "parties",
+      "title": "Parties Section",
+      "placeholders": [
+        {
+          "placeholder": "[BOROUGH]",
+          "dataField": "residenceLocation",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "factual_background",
+      "title": "Factual Background",
+      "placeholders": [
+        {
+          "placeholder": "[FINANCIAL_INSTITUTION]",
+          "dataField": "financialInstitution",
+          "required": true
+        },
+        {
+          "placeholder": "[ACCOUNT_OPEN_DATE]",
+          "dataField": "accountOpenDate",
+          "required": true
+        },
+        {
+          "placeholder": "[CREDIT_LIMIT]",
+          "dataField": "creditLimit",
+          "required": true
+        },
+        {
+          "placeholder": "[TRAVEL_LOCATION]",
+          "dataField": "travelLocation",
+          "required": true
+        },
+        {
+          "placeholder": "[TRAVEL_START_DATE]",
+          "dataField": "travelStartDate",
+          "required": true
+        },
+        {
+          "placeholder": "[TRAVEL_END_DATE]",
+          "dataField": "travelEndDate",
+          "required": true
+        },
+        {
+          "placeholder": "[FRAUD_AMOUNT]",
+          "dataField": "fraudAmount",
+          "required": true
+        },
+        {
+          "placeholder": "[FRAUD_START_DATE]",
+          "dataField": "fraudStartDate",
+          "required": true
+        },
+        {
+          "placeholder": "[FRAUD_END_DATE]",
+          "dataField": "fraudEndDate",
+          "required": true
+        },
+        {
+          "placeholder": "[DETAILS_OF_FRAUDULENT_PURCHASES]",
+          "dataField": "fraudDetails",
+          "required": true
+        },
+        {
+          "placeholder": "[DISCOVERY_DATE]",
+          "dataField": "discoveryDate",
+          "required": true
+        },
+        {
+          "placeholder": "[NUMBER_OF_DISPUTES]",
+          "dataField": "disputeCount",
+          "required": true
+        },
+        {
+          "placeholder": "[DISPUTE_METHODS]",
+          "dataField": "disputeMethods",
+          "required": true
+        },
+        {
+          "placeholder": "[DETAILS_OF_BANK_RESPONSES]",
+          "dataField": "bankResponse",
+          "required": true
+        },
+        {
+          "placeholder": "[DETAILS_OF_POLICE_REPORT]",
+          "dataField": "policeReportDetails",
+          "required": true
+        },
+        {
+          "placeholder": "[BANK_JUSTIFICATION]",
+          "dataField": "bankResponse",
+          "required": true
+        },
+        {
+          "placeholder": "[LIST_CREDIT_BUREAUS]",
+          "dataField": "creditBureauDisputes",
+          "required": true
+        },
+        {
+          "placeholder": "[DISPUTE_DATE]",
+          "dataField": "creditBureauDisputeDate",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "damages",
+      "title": "Damages Section",
+      "placeholders": [
+        {
+          "placeholder": "[CREDIT_IMPACT]",
+          "dataField": "creditImpact",
+          "required": false,
+          "fallback": "being denied credit, having her current credit limits reduced"
+        }
+      ]
+    },
+    {
+      "id": "signature",
+      "title": "Signature Block",
+      "placeholders": [
+        {
+          "placeholder": "[FILING_DATE]",
+          "dataField": "filingDate",
+          "required": false,
+          "fallback": "April 9, 2025"
+        }
+      ]
+    }
+  ]
+}

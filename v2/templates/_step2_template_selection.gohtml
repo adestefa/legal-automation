@@ -1,0 +1,88 @@
+{{define "_step2_template_selection.gohtml"}}
+<div id="step-2-content" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-xl font-semibold mb-4">Step 2: Select Complaint Template</h2>
+    <p class="text-gray-600 mb-6">
+        Choose the complaint form template you want to populate with the extracted information.
+    </p>
+    
+    {{if .Error}}
+    <div class="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <span class="text-red-500">⚠</span>
+            </div>
+            <div class="ml-3">
+                <strong>Error:</strong> {{.Error}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <!-- Template Selection Form -->
+    <form hx-post="/ui/select-template" 
+          hx-target="#step-content"
+          hx-swap="innerHTML">
+        
+        <!-- Hidden inputs to pass selected documents forward -->
+        {{if .SelectedDocuments}}
+            {{range .SelectedDocuments}}
+            <input type="hidden" name="selectedDocs" value="{{.}}">
+            {{end}}
+        {{end}}
+        
+        <div class="border rounded-lg overflow-hidden">
+            <div class="bg-gray-50 p-3 border-b">
+                <div class="text-sm font-medium">Available Templates</div>
+            </div>
+            <ul class="divide-y divide-gray-200">
+                {{if .Templates}}
+                    {{range .Templates}}
+                    <li class="p-3 hover:bg-gray-50">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" 
+                                   name="selectedTemplate" 
+                                   value="{{.ID}}" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                            <div class="ml-3">
+                                <span class="block font-medium text-black">{{.Name}}</span>
+                                <span class="block text-sm text-gray-500">{{.Desc}}</span>
+                            </div>
+                        </label>
+                    </li>
+                    {{end}}
+                {{else}}
+                <!-- Fallback template if API call fails -->
+                <li class="p-3 hover:bg-gray-50">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio" 
+                               name="selectedTemplate" 
+                               value="fcra-credit-card-fraud" 
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" 
+                               checked>
+                        <div class="ml-3">
+                            <span class="block font-medium text-black">FCRA Complaint - Credit Card Fraud</span>
+                            <span class="block text-sm text-gray-500">For cases involving fraudulent credit card transactions</span>
+                        </div>
+                    </label>
+                </li>
+                {{end}}
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-between">
+            <button type="button"
+                    hx-get="/ui/step/1" 
+                    hx-target="#step-content"
+                    hx-swap="innerHTML"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                Back to Documents
+            </button>
+            <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Process with Template
+            </button>
+        </div>
+    </form>
+</div>
+{{end}}

@@ -1,0 +1,172 @@
+{{define "_step0_case_setup.gohtml"}}
+<div id="step-0-content" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-xl font-semibold mb-4">Step 0: Setup Case Folder and Documents</h2>
+    <p class="text-gray-600 mb-6">
+        Select your iCloud parent folder for all legal cases and choose the specific case folder for this workflow.
+    </p>
+
+    <!-- iCloud Parent Folder Selection -->
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-3">Select Parent Folder for All Cases</h3>
+        {{if not .ICloudConnected}}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <div>
+                    <h4 class="text-sm font-medium text-yellow-800">iCloud Connection Required</h4>
+                    <p class="text-sm text-yellow-700 mt-1">Connect to your iCloud account to access and organize your legal case folders.</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button hx-get="/ui/icloud-setup" 
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML"
+                        class="text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded">
+                    Connect to iCloud
+                </button>
+            </div>
+        </div>
+        {{end}}
+        
+        <!-- Folder Selection Grid -->
+        {{if and .ICloudConnected (not .SelectedParentFolder)}}
+        <div class="grid grid-cols-2 gap-4" id="icloud-folders-container">
+            {{if .Folders}}
+                {{range .Folders}}
+                    <div class="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition">
+                        <button hx-post="/ui/select-parent-folder" 
+                                hx-vals='{"folderPath": "{{.Path}}"}'
+                                hx-target="#step-content"
+                                hx-swap="innerHTML"
+                                class="w-full text-left"
+                                title="Select {{.Name}} as parent folder">
+                            <div class="font-medium text-sm text-black">{{.Name}}</div>
+                            <div class="text-xs text-gray-500">Modified: {{.Modified.Format "Jan 2, 2006"}}</div>
+                        </button>
+                    </div>
+                {{end}}
+            {{else}}
+                <div class="col-span-2 text-center">
+                    <p class="text-gray-500 text-sm mb-3">No folders loaded yet.</p>
+                    <button hx-get="/ui/icloud-folders"
+                            hx-target="#icloud-folders-container"
+                            hx-swap="innerHTML"
+                            class="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                        Load Folders
+                    </button>
+                </div>
+            {{end}}
+        </div>
+        {{end}}
+        
+        <!-- Selected Parent Folder Display -->
+        {{if .SelectedParentFolder}}
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div>
+                        <div class="text-sm font-medium text-green-800">Parent Folder Selected</div>
+                        <div class="text-xs text-green-600">{{.SelectedParentFolder}}</div>
+                    </div>
+                </div>
+                <button hx-post="/ui/clear-parent-folder" 
+                        hx-target="#step-content"
+                        hx-swap="innerHTML"
+                        class="text-sm text-green-600 hover:text-green-800">
+                    Change
+                </button>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <!-- Case Folder Selection -->
+    {{if .SelectedParentFolder}}
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-3">Select or Create Case Folder</h3>
+        
+        <!-- TEMPORARILY HIDDEN FOR DEMO: Create New Case Option -->
+        <!-- 
+        <div class="border rounded-lg p-4 mb-4">
+            <form hx-post="/ui/create-new-case" 
+                  hx-target="#step-content"
+                  hx-swap="innerHTML">
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="caseOption" value="new" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <div class="ml-3">
+                        <span class="block font-medium text-sm">Create New Case Folder</span>
+                        <span class="block text-xs text-gray-500">Start a new legal case with organized document structure</span>
+                    </div>
+                </label>
+                <div class="mt-3 ml-7">
+                    <input type="text" name="newCaseName" placeholder="Enter case name (e.g., Smith v TD Bank)"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black bg-white">
+                    <input type="hidden" name="parentFolder" value="{{.SelectedParentFolder}}">
+                </div>
+                <div class="mt-3 ml-7">
+                    <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                        Create Case
+                    </button>
+                </div>
+            </form>
+        </div>
+        -->
+        
+        <!-- Existing Case Folders -->
+        <div class="border rounded-lg overflow-hidden">
+            <div class="bg-gray-50 p-3 border-b">
+                <span class="text-sm font-medium">Select Existing Case Folder</span>
+            </div>
+            <div class="max-h-48 overflow-y-auto" id="case-folders-container">
+                {{if .CaseFolders}}
+                    {{range .CaseFolders}}
+                    <div class="p-3 border-b border-gray-100 hover:bg-gray-50">
+                        <button hx-post="/ui/select-case-folder" 
+                                hx-vals='{"caseFolder": "{{.Path}}"}'
+                                hx-target="#step-content"
+                                hx-swap="innerHTML"
+                                class="w-full text-left flex items-center">
+                            <div>
+                                <div class="font-medium text-sm text-black">{{.Name}}</div>
+                                <div class="text-xs text-gray-500">Modified: {{.Modified.Format "Jan 2, 2006"}}</div>
+                            </div>
+                        </button>
+                    </div>
+                    {{end}}
+                {{else}}
+                <div class="p-4">
+                    <button hx-get="/ui/case-folders"
+                            hx-vals='{"parent": "{{.SelectedParentFolder}}"}'
+                            hx-target="#case-folders-container"
+                            hx-swap="innerHTML"
+                            class="w-full px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Load Case Folders
+                    </button>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <!-- Action Buttons -->
+    <div class="mt-6 flex justify-between">
+        <button type="button"
+                onclick="window.location.reload()" 
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            Restart Setup
+        </button>
+        {{if .SelectedCaseFolder}}
+        <button hx-get="/ui/step/1" 
+                hx-target="#step-content"
+                hx-swap="innerHTML"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Continue to Document Selection
+        </button>
+        {{else}}
+        <div class="text-sm text-gray-500">
+            Your case documents will be organized in the selected folder
+        </div>
+        {{end}}
+    </div>
+</div>
+{{end}}
