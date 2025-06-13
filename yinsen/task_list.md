@@ -38,9 +38,9 @@ NOTE: !!! IGNORE 4_done/archived_tasks/ folder !! it is not part of your task li
 
 
 ## Defect Tasks ##
-1. [ ] DEFECT:1A Session Infrastructure - Add session management to Go handlers and state storage (GitHub Issue #2)
-2. [ ] DEFECT:1B UI State Restoration - Update templates to read and display saved user selections (GitHub Issue #3)  
-3. [ ] DEFECT:1C Navigation Integration - HTMX navigation integration and end-to-end testing (GitHub Issue #4)
+1. [x] DEFECT:1A Session Infrastructure - Add session management to Go handlers and state storage (GitHub Issue #2) (Completed: 2025-06-12 22:32)
+2. [x] DEFECT:1B UI State Restoration - Update templates to read and display saved user selections (GitHub Issue #3) (Completed: 2025-06-12 23:10)
+3. [x] DEFECT:1C Navigation Integration - HTMX navigation integration and end-to-end testing (GitHub Issue #4) (Completed: 2025-06-12 23:35)
 
 
 ## Development Tasks
