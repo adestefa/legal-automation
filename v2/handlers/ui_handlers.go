@@ -128,6 +128,45 @@ func NewUIHandlers() *UIHandlers {
 	}
 }
 
+// Session helper functions
+func (h *UIHandlers) getSessionService(c *gin.Context) *services.SessionService {
+	sessionService, exists := c.Get("sessionService")
+	if !exists {
+		log.Printf("Session service not found in context")
+		return nil
+	}
+	return sessionService.(*services.SessionService)
+}
+
+func (h *UIHandlers) getSessionID(c *gin.Context) string {
+	sessionID, exists := c.Get("sessionID")
+	if !exists {
+		log.Printf("Session ID not found in context")
+		return "default_session"
+	}
+	return sessionID.(string)
+}
+
+func (h *UIHandlers) getWorkflowState(c *gin.Context) *services.WorkflowState {
+	sessionService := h.getSessionService(c)
+	if sessionService == nil {
+		return &services.WorkflowState{CurrentStep: 0}
+	}
+	
+	sessionID := h.getSessionID(c)
+	return sessionService.GetSession(sessionID)
+}
+
+func (h *UIHandlers) updateWorkflowState(c *gin.Context, updateFunc func(*services.WorkflowState)) {
+	sessionService := h.getSessionService(c)
+	if sessionService == nil {
+		return
+	}
+	
+	sessionID := h.getSessionID(c)
+	sessionService.UpdateSession(sessionID, updateFunc)
+}
+
 // ShowMainPage renders the main application page
 func (h *UIHandlers) ShowMainPage(c *gin.Context) {
 	username := c.GetString("username")
@@ -135,11 +174,16 @@ func (h *UIHandlers) ShowMainPage(c *gin.Context) {
 		username = "User"
 	}
 	
-	// Get current session state (would be stored in session in production)
+	// Get current session state
+	state := h.getWorkflowState(c)
+	
 	data := PageData{
-		CurrentStep:     0,
-		Username:        username,
-		ICloudConnected: false, // Default to false, would check actual session
+		CurrentStep:          state.CurrentStep,
+		Username:             username,
+		ICloudConnected:      state.ICloudConnected,
+		SelectedParentFolder: state.SelectedParentFolder,
+		SelectedCaseFolder:   state.SelectedCaseFolder,
+		SelectedDocuments:    state.SelectedDocuments,
 	}
 	
 	err := h.templates.ExecuteTemplate(c.Writer, "index.gohtml", data)
@@ -346,7 +390,12 @@ func (h *UIHandlers) SelectCaseFolder(c *gin.Context) {
 		return
 	}
 	
-	// In production, store this in session
+	// Save to session state
+	h.updateWorkflowState(c, func(state *services.WorkflowState) {
+		state.SelectedCaseFolder = caseFolder
+		state.CurrentStep = 1 // Move to document selection
+	})
+	
 	log.Printf("Selected case folder: %s", caseFolder)
 	
 	username := c.GetString("username")
@@ -439,7 +488,11 @@ func (h *UIHandlers) SelectDocuments(c *gin.Context) {
 		return
 	}
 	
-	// In production, store selected documents in session
+	// Save selected documents to session state
+	h.updateWorkflowState(c, func(state *services.WorkflowState) {
+		state.SelectedDocuments = selectedDocs
+		state.CurrentStep = 2 // Move to template selection
+	})
 	// For now, proceed to step 2 (template selection)
 	
 	templates, err := h.docService.GetTemplates()
@@ -472,6 +525,12 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 	
 	log.Printf("Selected template: %s", selectedTemplate)
 	log.Printf("Processing selected documents: %v", selectedDocs)
+	
+	// Save template selection to session state
+	h.updateWorkflowState(c, func(state *services.WorkflowState) {
+		state.SelectedTemplate = selectedTemplate
+		state.CurrentStep = 3 // Move to review data
+	})
 	
 	if selectedTemplate == "" {
 		// Return error

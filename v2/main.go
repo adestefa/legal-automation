@@ -3,13 +3,32 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"mallon-legal-v2/handlers"
+	"mallon-legal-v2/services"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
+
+	// Initialize session service with 24 hour TTL
+	sessionService := services.NewSessionService(24 * time.Hour)
+
+	// Session middleware - adds session to context
+	router.Use(func(c *gin.Context) {
+		sessionToken, err := c.Cookie("session_token")
+		if err != nil || sessionToken == "" {
+			// Generate a temporary session ID for unauthenticated users
+			sessionToken = "temp_session"
+		}
+		
+		// Add session service and session ID to context
+		c.Set("sessionService", sessionService)
+		c.Set("sessionID", sessionToken)
+		c.Next()
+	})
 
 	// Setup CORS
 	router.Use(func(c *gin.Context) {
@@ -154,7 +173,7 @@ func main() {
 	}
 
 	// Start the server
-	log.Println("[INFO] Starting Mallon Legal Server v2.5.30 on :8080")
+	log.Println("[INFO] Starting Mallon Legal Server v2.5.31 on :8080")
 	log.Printf("[INFO] Features: Dynamic document processing (Task 8), document editing, Go SSR + HTMX")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
