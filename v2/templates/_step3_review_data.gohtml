@@ -225,6 +225,10 @@
     
     <!-- Missing Content Tab Content -->
     <div id="missing-tab" class="tab-content hidden">
+        <!-- Hidden data for JavaScript -->
+        <script type="application/json" id="selected-documents-data">
+        {{range $index, $doc := .LegalAnalysis.SourceDocs}}{{if $index}},{{end}}"{{$doc}}"{{end}}
+        </script>
         <div class="space-y-6">
             <!-- Selected Documents Summary -->
             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -360,18 +364,33 @@ function loadMissingContentAnalysis() {
         'Atty_Notes.docx'
     ];
     
-    // Get selected documents from the source docs display
-    const selectedDocs = [];
-    const sourceDocElements = document.querySelectorAll('.bg-white.border.border-gray-200 span');
-    sourceDocElements.forEach(el => {
-        if (el.textContent.trim()) {
-            selectedDocs.push(el.textContent.trim());
+    // Get selected documents from backend data (reliable source)
+    let selectedDocs = [];
+    try {
+        const dataElement = document.getElementById('selected-documents-data');
+        if (dataElement) {
+            const jsonData = '[' + dataElement.textContent.trim() + ']';
+            selectedDocs = JSON.parse(jsonData);
+            console.log('Successfully loaded selected docs from backend:', selectedDocs);
         }
-    });
+    } catch (e) {
+        console.warn('Failed to parse selected documents data:', e);
+    }
     
-    // If we can't get from UI, try to get from session or use fallback
+    // Fallback: try to get from UI elements if backend data failed
     if (selectedDocs.length === 0) {
-        // This should come from the backend session state in production
+        const sourceDocElements = document.querySelectorAll('#review-tab .bg-gray-50 .bg-white.border.border-gray-200 span');
+        sourceDocElements.forEach(el => {
+            if (el.textContent.trim()) {
+                selectedDocs.push(el.textContent.trim());
+            }
+        });
+        console.log('Fallback: Found selected docs from DOM:', selectedDocs);
+    }
+    
+    // Final fallback - this should rarely be needed now
+    if (selectedDocs.length === 0) {
+        console.warn('Could not detect selected documents - using hardcoded fallback');
         selectedDocs.push('Attorney_Notes.txt', 'Adverse_Action_Letter_Cap_One.pdf', 'Civil_Cover_Sheet.txt', 'Complaint_Final.docx');
     }
     
