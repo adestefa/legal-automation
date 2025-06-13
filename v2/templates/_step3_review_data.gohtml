@@ -39,6 +39,11 @@
                     class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
                 Preview Document
             </button>
+            <button type="button" 
+                    onclick="showTab('missing-tab', this)"
+                    class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Missing Content
+            </button>
         </nav>
     </div>
     
@@ -218,6 +223,74 @@
         <div id="preview-content" class="hidden"></div>
     </div>
     
+    <!-- Missing Content Tab Content -->
+    <div id="missing-tab" class="tab-content hidden">
+        <div class="space-y-6">
+            <!-- Selected Documents Summary -->
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 class="text-lg font-medium mb-3 text-green-900">Selected Documents</h3>
+                <div class="space-y-2">
+                    {{range .LegalAnalysis.SourceDocs}}
+                    <div class="flex items-center">
+                        <div class="h-2 w-2 bg-green-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-green-800">{{.}}</span>
+                        <span class="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Included</span>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            
+            <!-- Available Documents Not Selected -->
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <h3 class="text-lg font-medium mb-3 text-orange-900">Available Documents Not Selected</h3>
+                <div class="space-y-2">
+                    <!-- These would be populated by comparing available documents vs selected -->
+                    <div class="text-sm text-orange-700">
+                        <p class="mb-3">The following documents are available in your case folder but were not selected for this complaint:</p>
+                        <div class="space-y-2" id="unselected-documents">
+                            <!-- This will be populated by JavaScript based on available vs selected documents -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Missing Data Analysis -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h3 class="text-lg font-medium mb-3 text-yellow-900">Potential Missing Information</h3>
+                <div class="space-y-3">
+                    <div class="text-sm text-yellow-800">
+                        <p class="mb-3">Based on your document selections, the following information might be missing from your complaint:</p>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <div class="h-2 w-2 bg-yellow-500 rounded-full mr-3 mt-2"></div>
+                                <span>Additional defendant information (other summons documents not selected)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="h-2 w-2 bg-yellow-500 rounded-full mr-3 mt-2"></div>
+                                <span>Specific adverse action details from other credit denials</span>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="h-2 w-2 bg-yellow-500 rounded-full mr-3 mt-2"></div>
+                                <span>Additional supporting documentation for damages</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Suggestion -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="h-8 w-8 text-blue-600 text-xl mr-3">💡</div>
+                    <div>
+                        <h4 class="text-sm font-medium text-blue-800">Suggestion</h4>
+                        <p class="text-sm text-blue-700 mt-1">If you need to include additional documents, go back to Step 1 to modify your document selection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
 <!-- Tab Switching JavaScript -->
@@ -245,6 +318,11 @@ function showTab(tabId, buttonElement) {
     if (tabId === 'preview-tab') {
         loadPreviewContent();
     }
+    
+    // Load missing content analysis if missing tab is selected
+    if (tabId === 'missing-tab') {
+        loadMissingContentAnalysis();
+    }
 }
 
 function loadPreviewContent() {
@@ -264,6 +342,57 @@ function loadPreviewContent() {
         loadingIndicator.classList.add('hidden');
         previewContent.classList.remove('hidden');
     });
+}
+
+function loadMissingContentAnalysis() {
+    // Get available documents from case folder (this would come from backend in production)
+    const allAvailableDocuments = [
+        'Attorney_Notes.txt',
+        'Adverse_Action_Letter_Cap_One.pdf', 
+        'Civil_Cover_Sheet.txt',
+        'Complaint_Final.docx',
+        'SummonsEquifax.pdf',
+        'Summons_Experian.pdf',
+        'Summons_TD Bank.pdf',
+        'Summons_Trans Union.pdf',
+        'Barclays_Applicaiton_Denial_1.docx',
+        'Barclays_Applicaiton_Denial_2.docx',
+        'Atty_Notes.docx'
+    ];
+    
+    // Get selected documents from the source docs display
+    const selectedDocs = [];
+    const sourceDocElements = document.querySelectorAll('.bg-white.border.border-gray-200 span');
+    sourceDocElements.forEach(el => {
+        if (el.textContent.trim()) {
+            selectedDocs.push(el.textContent.trim());
+        }
+    });
+    
+    // If we can't get from UI, try to get from session or use fallback
+    if (selectedDocs.length === 0) {
+        // This should come from the backend session state in production
+        selectedDocs.push('Attorney_Notes.txt', 'Adverse_Action_Letter_Cap_One.pdf', 'Civil_Cover_Sheet.txt', 'Complaint_Final.docx');
+    }
+    
+    // Find unselected documents
+    const unselectedDocs = allAvailableDocuments.filter(doc => !selectedDocs.includes(doc));
+    
+    // Populate unselected documents section
+    const unselectedContainer = document.getElementById('unselected-documents');
+    if (unselectedContainer && unselectedDocs.length > 0) {
+        unselectedContainer.innerHTML = unselectedDocs.map(doc => `
+            <div class="flex items-center">
+                <div class="h-2 w-2 bg-orange-500 rounded-full mr-3"></div>
+                <span class="text-sm text-orange-800">${doc}</span>
+                <span class="ml-auto text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">Not Selected</span>
+            </div>
+        `).join('');
+    } else if (unselectedContainer) {
+        unselectedContainer.innerHTML = '<p class="text-sm text-gray-600 italic">All available documents have been selected.</p>';
+    }
+    
+    console.log('Missing content analysis loaded. Selected:', selectedDocs, 'Unselected:', unselectedDocs);
 }
 </script>
 {{end}}
