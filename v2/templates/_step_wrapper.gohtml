@@ -1,5 +1,10 @@
 {{define "_step_wrapper.gohtml"}}
-<!-- Step Content Only - Removing OOB update temporarily for debugging -->
+<!-- Progress Steps Update via OOB -->
+<div hx-swap-oob="true" id="progress-steps">
+    {{template "_progress_steps_content.gohtml" .}}
+</div>
+
+<!-- Step Content -->
 {{if eq .CurrentStep 0}}
     {{template "_step0_case_setup.gohtml" .}}
 {{else if eq .CurrentStep 1}}
