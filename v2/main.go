@@ -227,7 +227,7 @@ func main() {
 	}
 
 	// Start the server
-	log.Println("[INFO] Starting Mallon Legal Server v2.9.0 on :8080")
+	log.Println("[INFO] Starting Mallon Legal Server v2.9.1 on :8080")
 	log.Printf("[INFO] Features: Dynamic Template Population Engine (Task 4), Persistent Sessions, Real Document Extraction")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
