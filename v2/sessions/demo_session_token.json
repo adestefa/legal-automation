@@ -11,13 +11,7 @@
       "/CASES/Eman_Youseef/Atty_Notes.docx",
       "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_1.docx",
       "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_2.docx",
-      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf",
-      "/CASES/Eman_Youseef/Complaint_Final.docx",
-      "/CASES/Eman_Youseef/SummonsEquifax.pdf",
-      "/CASES/Eman_Youseef/Summons_Experian.pdf",
-      "/CASES/Eman_Youseef/Summons_TD Bank.pdf",
-      "/CASES/Eman_Youseef/Summons_Trans Union.pdf",
-      "/CASES/Eman_Youseef/generated_complaint_eman_youssef_20250602_105238.pdf"
+      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf"
     ],
     "selectedTemplate": "fcra-credit-card-fraud",
     "processingResult": {
@@ -72,6 +66,8 @@
       "clientName": "",
       "contactInfo": "",
       "residenceLocation": "",
+      "courtJurisdiction": "",
+      "caseNumber": "",
       "financialInstitution": "",
       "accountOpenDate": "0001-01-01T00:00:00Z",
       "creditLimit": "",
@@ -82,6 +78,7 @@
       "fraudStartDate": "0001-01-01T00:00:00Z",
       "fraudEndDate": "0001-01-01T00:00:00Z",
       "fraudDetails": "",
+      "fraudDetailsStructured": null,
       "discoveryDate": "0001-01-01T00:00:00Z",
       "disputeCount": 0,
       "disputeMethods": null,
@@ -94,14 +91,17 @@
         "Trans Union"
       ],
       "creditBureauDisputeDate": "0001-01-01T00:00:00Z",
+      "creditBureauInteractions": null,
+      "defendants": null,
+      "estimatedDamages": 0,
       "additionalEvidence": "",
       "creditImpact": ""
     },
     "currentStep": 3,
-    "lastUpdated": "2025-06-14T14:18:32.002556-04:00",
+    "lastUpdated": "2025-06-14T15:28:45.336076-04:00",
     "username": ""
   },
   "createdAt": "2025-06-14T14:11:45.018426-04:00",
-  "lastAccessed": "2025-06-14T14:18:32.002556-04:00",
+  "lastAccessed": "2025-06-14T15:28:45.336076-04:00",
   "expiresAt": "2025-06-15T14:11:45.018426-04:00"
 }

@@ -47,27 +47,56 @@ type DocumentProcessingResult struct {
 
 // ClientCase represents the structured data extracted from documents
 type ClientCase struct {
+	// Basic client information
 	ClientName               string    `json:"clientName"`
 	ContactInfo              string    `json:"contactInfo"`
 	ResidenceLocation        string    `json:"residenceLocation"`
+	
+	// Court and case information
+	CourtJurisdiction        string    `json:"courtJurisdiction"`
+	CaseNumber               string    `json:"caseNumber"`
+	
+	// Financial institution information
 	FinancialInstitution     string    `json:"financialInstitution"`
 	AccountOpenDate          time.Time `json:"accountOpenDate"`
 	CreditLimit              string    `json:"creditLimit"`
+	
+	// Travel information
 	TravelLocation           string    `json:"travelLocation"`
 	TravelStartDate          time.Time `json:"travelStartDate"`
 	TravelEndDate            time.Time `json:"travelEndDate"`
+	
+	// Fraud information (legacy fields for compatibility)
 	FraudAmount              string    `json:"fraudAmount"`
 	FraudStartDate           time.Time `json:"fraudStartDate"`
 	FraudEndDate             time.Time `json:"fraudEndDate"`
 	FraudDetails             string    `json:"fraudDetails"`
+	
+	// Enhanced fraud information
+	FraudDetailsStructured   []FraudDetail `json:"fraudDetailsStructured"`
+	
+	// Discovery and dispute information
 	DiscoveryDate            time.Time `json:"discoveryDate"`
 	DisputeCount             int       `json:"disputeCount"`
 	DisputeMethods           []string  `json:"disputeMethods"`
 	BankResponse             string    `json:"bankResponse"`
+	
+	// Police report information
 	PoliceReportFiled        bool      `json:"policeReportFiled"`
 	PoliceReportDetails      string    `json:"policeReportDetails"`
+	
+	// Credit bureau information (legacy)
 	CreditBureauDisputes     []string  `json:"creditBureauDisputes"`
 	CreditBureauDisputeDate  time.Time `json:"creditBureauDisputeDate"`
+	
+	// Enhanced credit bureau information
+	CreditBureauInteractions []CreditBureauInteraction `json:"creditBureauInteractions"`
+	
+	// Legal case information
+	Defendants               []Defendant `json:"defendants"`
+	EstimatedDamages         float64     `json:"estimatedDamages"`
+	
+	// Additional evidence and impact
 	AdditionalEvidence       string    `json:"additionalEvidence"`
 	CreditImpact             string    `json:"creditImpact"`
 }
@@ -78,6 +107,7 @@ type DocumentService struct {
 	testCasesDir     string
 	extractor        *DocumentExtractor
 	contentAnalyzer  *ContentAnalyzer
+	templateEngine   *TemplateEngine
 	extractionPatterns map[string]interface{}
 }
 
@@ -97,6 +127,10 @@ func NewDocumentService() *DocumentService {
 	} else {
 		service.contentAnalyzer = analyzer
 	}
+	
+	// Initialize template engine
+	service.templateEngine = NewTemplateEngine()
+	log.Printf("[DOCUMENT_SERVICE] Initialized with dynamic template engine")
 	
 	// Load extraction patterns
 	service.loadExtractionPatterns()
@@ -847,4 +881,147 @@ func removeDuplicates(slice []string) []string {
 	}
 	
 	return result
+}
+
+// GenerateComplaint generates a legal complaint using the dynamic template engine
+func (s *DocumentService) GenerateComplaint(templateID string, clientCase *ClientCase) (*GeneratedDocument, error) {
+	if s.templateEngine == nil {
+		return nil, fmt.Errorf("template engine not initialized")
+	}
+	
+	log.Printf("[DOCUMENT_SERVICE] Generating complaint using template: %s for client: %s", templateID, clientCase.ClientName)
+	
+	// Convert ClientCase to enhanced format for template engine
+	enhancedClientCase := s.convertToEnhancedClientCase(clientCase)
+	
+	// Generate document using template engine
+	document, err := s.templateEngine.GenerateDocument(templateID, enhancedClientCase)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate document: %v", err)
+	}
+	
+	log.Printf("[DOCUMENT_SERVICE] Generated complaint: %d sections, %.1f%% complete", 
+		len(document.Sections), document.Metadata.Completeness*100)
+	
+	return document, nil
+}
+
+// convertToEnhancedClientCase converts the basic ClientCase to the enhanced format
+func (s *DocumentService) convertToEnhancedClientCase(basic *ClientCase) *ClientCase {
+	// Create enhanced ClientCase with additional fields for template engine
+	enhanced := &ClientCase{
+		ClientName:        basic.ClientName,
+		ContactInfo:       basic.ContactInfo,
+		ResidenceLocation: s.determineResidenceLocation(basic),
+		CourtJurisdiction: s.determineCourtJurisdiction(basic),
+		CaseNumber:        s.generateCaseNumber(),
+	}
+	
+	// Convert fraud details to structured format
+	if basic.FraudAmount != "" || basic.FraudDetails != "" {
+		enhanced.FraudDetailsStructured = []FraudDetail{
+			{
+				Institution: basic.FinancialInstitution,
+				Amount:      basic.FraudAmount,
+				Description: basic.FraudDetails,
+				Date:        basic.FraudStartDate,
+			},
+		}
+	}
+	
+	// Convert credit bureau interactions
+	if len(basic.CreditBureauDisputes) > 0 {
+		enhanced.CreditBureauInteractions = []CreditBureauInteraction{}
+		for _, bureau := range basic.CreditBureauDisputes {
+			enhanced.CreditBureauInteractions = append(enhanced.CreditBureauInteractions, CreditBureauInteraction{
+				Bureau:   bureau,
+				Type:     "dispute",
+				Date:     basic.CreditBureauDisputeDate.Format("January 2, 2006"),
+				Response: basic.BankResponse,
+			})
+		}
+	}
+	
+	// Add defendants based on available information
+	enhanced.Defendants = s.generateDefendants(basic)
+	
+	return enhanced
+}
+
+// determineResidenceLocation determines the client's residence location
+func (s *DocumentService) determineResidenceLocation(clientCase *ClientCase) string {
+	if clientCase.ResidenceLocation != "" {
+		return clientCase.ResidenceLocation
+	}
+	
+	// Default residence location if not specified
+	return "New York, New York"
+}
+
+// determineCourtJurisdiction determines the appropriate court jurisdiction
+func (s *DocumentService) determineCourtJurisdiction(clientCase *ClientCase) string {
+	// For now, default to Southern District of New York
+	// In production, this would be based on client location and case specifics
+	return "SOUTHERN DISTRICT OF NEW YORK"
+}
+
+// generateCaseNumber generates a placeholder case number
+func (s *DocumentService) generateCaseNumber() string {
+	// In production, this would integrate with court systems
+	return "[TO BE ASSIGNED]"
+}
+
+// generateDefendants creates defendant information based on the case
+func (s *DocumentService) generateDefendants(clientCase *ClientCase) []Defendant {
+	defendants := []Defendant{}
+	
+	// Add credit bureaus as defendants
+	creditBureaus := []struct {
+		name    string
+		address string
+	}{
+		{"EXPERIAN INFORMATION SOLUTIONS, INC.", "475 Anton Blvd., Costa Mesa, CA 92626"},
+		{"TRANS UNION LLC", "555 W. Adams Street, Chicago, IL 60661"},
+		{"EQUIFAX INFORMATION SERVICES LLC", "1550 Peachtree Street, N.W., Atlanta, GA 30309"},
+	}
+	
+	for _, bureau := range creditBureaus {
+		defendants = append(defendants, Defendant{
+			Name:       bureau.name,
+			EntityType: "corporation",
+			Address:    bureau.address,
+		})
+	}
+	
+	// Add financial institution if specified
+	if clientCase.FinancialInstitution != "" {
+		defendants = append(defendants, Defendant{
+			Name:       strings.ToUpper(clientCase.FinancialInstitution),
+			EntityType: "financial institution",
+			Address:    "[ADDRESS TO BE DETERMINED]",
+		})
+	}
+	
+	return defendants
+}
+
+// Additional types needed for enhanced ClientCase
+type FraudDetail struct {
+	Institution string    `json:"institution"`
+	Amount      string    `json:"amount"`
+	Description string    `json:"description"`
+	Date        time.Time `json:"date"`
+}
+
+type CreditBureauInteraction struct {
+	Bureau   string `json:"bureau"`
+	Type     string `json:"type"`
+	Date     string `json:"date"`
+	Response string `json:"response"`
+}
+
+type Defendant struct {
+	Name       string `json:"name"`
+	EntityType string `json:"entityType"`
+	Address    string `json:"address"`
 }
