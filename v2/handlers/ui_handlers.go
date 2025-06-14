@@ -838,10 +838,26 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 	}
 	legalAnalysis := h.generateLegalAnalysis(selectedDocNames)
 	
+	// Load available documents for Missing Content analysis
+	state := h.getWorkflowState(c)
+	var allDocuments []services.ICloudDocument
+	if state.SelectedCaseFolder != "" {
+		documents, err := h.icloudService.GetDocuments("", "", state.SelectedCaseFolder)
+		if err != nil {
+			log.Printf("[ERROR] Failed to load documents for Missing Content analysis in SelectTemplate: %v", err)
+		} else {
+			allDocuments = documents
+			log.Printf("[DEBUG] SelectTemplate: Loaded %d available documents for Missing Content analysis", len(allDocuments))
+		}
+	} else {
+		log.Printf("[WARNING] SelectTemplate: No case folder selected, cannot load documents for Missing Content analysis")
+	}
+	
 	data := PageData{
 		CurrentStep:        3,
 		Username:           username,
 		ICloudConnected:    true,
+		Documents:          allDocuments,       // Add available documents for Missing Content tab
 		LegalAnalysis:      legalAnalysis,
 		ProcessingResult:   processingResult,  // Add dynamic processing result
 		ClientCase:         clientCase,        // Add dynamic client case data
