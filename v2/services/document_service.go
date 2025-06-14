@@ -1,10 +1,12 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -72,14 +74,45 @@ type ClientCase struct {
 
 // DocumentService handles document operations
 type DocumentService struct {
-	documentsDir string
+	documentsDir     string
+	testCasesDir     string
+	extractor        *DocumentExtractor
+	extractionPatterns map[string]interface{}
 }
 
 // NewDocumentService creates a new document service instance
 func NewDocumentService() *DocumentService {
-	return &DocumentService{
+	service := &DocumentService{
 		documentsDir: "/Users/corelogic/satori-dev/clients/proj-mallon/artifacts",
+		testCasesDir: "/Users/corelogic/satori-dev/clients/proj-mallon/test_icloud/CASES",
+		extractor:    NewDocumentExtractor(),
 	}
+	
+	// Load extraction patterns
+	service.loadExtractionPatterns()
+	
+	return service
+}
+
+// loadExtractionPatterns loads the JSON patterns for data extraction
+func (s *DocumentService) loadExtractionPatterns() {
+	patternsPath := "/Users/corelogic/satori-dev/clients/proj-mallon/v2/config/extraction_patterns.json"
+	
+	data, err := os.ReadFile(patternsPath)
+	if err != nil {
+		log.Printf("[DOCUMENT_SERVICE] Warning: Could not load extraction patterns: %v", err)
+		s.extractionPatterns = make(map[string]interface{})
+		return
+	}
+	
+	err = json.Unmarshal(data, &s.extractionPatterns)
+	if err != nil {
+		log.Printf("[DOCUMENT_SERVICE] Warning: Could not parse extraction patterns: %v", err)
+		s.extractionPatterns = make(map[string]interface{})
+		return
+	}
+	
+	log.Printf("[DOCUMENT_SERVICE] Loaded extraction patterns successfully")
 }
 
 // GetDocuments returns all available documents
@@ -171,174 +204,64 @@ func (s *DocumentService) GetTemplates() ([]Template, error) {
 
 // ProcessSelectedDocuments processes documents selected in Step 1 and generates dynamic case data
 func (s *DocumentService) ProcessSelectedDocuments(selectedDocIDs []string, templateID string) (*DocumentProcessingResult, *ClientCase, error) {
-	// Get all documents to resolve selected IDs
-	allDocs, err := s.GetDocuments()
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get documents: %v", err)
-	}
+	log.Printf("[DOCUMENT_SERVICE] Processing %d selected documents with real text extraction", len(selectedDocIDs))
 	
-	// Build map of documents by ID for lookup
-	docsByID := make(map[string]Document)
-	for _, doc := range allDocs {
-		docsByID[doc.ID] = doc
-	}
-	
-	// Process selected documents and extract relevant data
+	// Initialize result structures
 	selectedDocs := []Document{}
-	hasAttorneyNotes := false
-	hasAdverseAction := false
-	hasCivilCover := false
-	hasSummons := false
-	
-	// Identify selected documents and their types
-	for _, docID := range selectedDocIDs {
-		if doc, exists := docsByID[docID]; exists {
-			selectedDocs = append(selectedDocs, doc)
-			
-			switch doc.ContentType {
-			case "civil_cover_sheet":
-				hasCivilCover = true
-				log.Printf("Civil Cover Sheet selected: %s", doc.Name)
-			case "attorney_notes":
-				hasAttorneyNotes = true
-				log.Printf("Attorney Notes selected: %s", doc.Name)
-			case "adverse_action":
-				hasAdverseAction = true
-				log.Printf("Adverse Action Letter selected: %s", doc.Name)
-			case "summons", "summons_equifax":
-				hasSummons = true
-				log.Printf("Summons selected: %s", doc.Name)
-			}
-		}
-	}
-	
-	// Create case based on selected documents - only populate data from documents that were selected
-	missingContent := []MissingContent{}
 	extractedData := make(map[string]interface{})
+	missingContent := []MissingContent{}
+	allExtractedText := make(map[string]string)
 	
-	// Initialize ClientCase with dynamic data based on selected documents only
-	clientCase := ClientCase{
-		ClientName:           "",
-		ContactInfo:          "",
-		ResidenceLocation:    "",
-		FinancialInstitution: "",
-		CreditLimit:          "",
-		TravelLocation:       "",
-		FraudAmount:          "",
-		FraudDetails:         "",
-		BankResponse:         "",
-		PoliceReportDetails:  "",
-		CreditImpact:         "",
-	}
+	// Initialize ClientCase with empty values
+	clientCase := ClientCase{}
 	
-	// Only populate data if attorney notes were selected
-	if hasAttorneyNotes {
-		// These fields come from attorney notes
-		clientCase.ClientName = "Eman Youssef"
-		clientCase.ContactInfo = "347.891.5584"
-		clientCase.ResidenceLocation = "Queens"
-		clientCase.FinancialInstitution = "TD Bank"
-		clientCase.AccountOpenDate = s.parseDate("July 2023")
-		clientCase.CreditLimit = "$8,000"
-		clientCase.TravelLocation = "Egypt"
-		clientCase.TravelStartDate = s.parseDate("June 30, 2024")
-		clientCase.TravelEndDate = s.parseDate("July 30, 2024")
-		clientCase.FraudAmount = "$7,500"
-		clientCase.FraudStartDate = s.parseDate("July 15, 2024")
-		clientCase.FraudEndDate = s.parseDate("July 31, 2024")
-		clientCase.FraudDetails = "Majority of charges were made at three different camera stores on July 17, July 23 and July 26."
-		clientCase.DiscoveryDate = s.parseDate("August 2024")
-		clientCase.DisputeCount = 5
-		clientCase.DisputeMethods = []string{"in person", "over the phone", "via fax"}
-		clientCase.BankResponse = "It must have been her son who made the charges"
-		clientCase.PoliceReportFiled = true
-		clientCase.PoliceReportDetails = "Police obtained video footage of the thieves (two males) making a fraudulent charge at a McDonalds"
+	// Track what types of documents we have
+	documentTypes := make(map[string]bool)
+	
+	// Process each selected document with real text extraction
+	for _, docPath := range selectedDocIDs {
+		log.Printf("[DOCUMENT_SERVICE] Processing document: %s", docPath)
 		
-		extractedData["attorneyNotes"] = true
-	} else {
-		// Mark attorney notes data as missing
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Client Information",
-			Description: "Client name, contact info, and residence location",
-			Source:      "Attorney Notes",
-			Required:    true,
-		})
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Fraud Details",
-			Description: "Fraud amount, dates, and specific transaction details",
-			Source:      "Attorney Notes",
-			Required:    true,
-		})
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Dispute History",
-			Description: "Number and methods of disputes with bank",
-			Source:      "Attorney Notes",
-			Required:    true,
-		})
+		// Extract text from the document
+		content, err := s.extractor.ExtractText(docPath)
+		if err != nil {
+			log.Printf("[DOCUMENT_SERVICE] Error extracting text from %s: %v", docPath, err)
+			continue
+		}
+		
+		// Store extracted text for cross-reference
+		fileName := filepath.Base(docPath)
+		allExtractedText[fileName] = content.RawText
+		
+		// Create Document object
+		fileInfo, _ := os.Stat(docPath)
+		size := int64(0)
+		if fileInfo != nil {
+			size = fileInfo.Size()
+		}
+		
+		doc := Document{
+			ID:          fmt.Sprintf("doc_%d", len(selectedDocs)+1),
+			Name:        fileName,
+			Type:        strings.ToLower(filepath.Ext(fileName)),
+			Path:        docPath,
+			ContentType: s.determineContentType(fileName),
+			Size:        size,
+		}
+		selectedDocs = append(selectedDocs, doc)
+		
+		// Track document types
+		documentTypes[doc.ContentType] = true
+		
+		// Extract structured data based on document type
+		s.extractDataFromDocument(content.RawText, doc.ContentType, &clientCase, extractedData)
 	}
 	
-	// Only populate adverse action data if document was selected
-	if hasAdverseAction {
-		clientCase.CreditBureauDisputes = []string{"Experian", "Equifax", "Trans Union"}
-		clientCase.CreditBureauDisputeDate = s.parseDate("December 9, 2024")
-		clientCase.CreditImpact = "being denied credit, having her current credit limits reduced"
-		extractedData["adverseAction"] = true
-	} else {
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Credit Impact",
-			Description: "Details of credit denials and impact on client",
-			Source:      "Adverse Action Letters",
-			Required:    true,
-		})
-	}
+	// Analyze missing content based on what was actually extracted
+	missingContent = s.analyzeMissingContent(&clientCase, documentTypes, extractedData)
 	
-	// Only populate court/attorney data if Civil Cover Sheet was selected
-	if hasCivilCover {
-		// In a real implementation, would extract this from the actual PDF
-		extractedData["civilCoverSheet"] = true
-	} else {
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Court Information",
-			Description: "Court jurisdiction, division, and case classification",
-			Source:      "Civil Cover Sheet",
-			Required:    false,
-		})
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Attorney Information",
-			Description: "Attorney name, bar number, and contact details",
-			Source:      "Civil Cover Sheet",
-			Required:    false,
-		})
-	}
-	
-	// Only add credit bureau defendants if adverse action letters or summons selected
-	if !(hasAdverseAction || hasSummons) {
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Credit Bureau Defendants",
-			Description: "Credit bureau entity information for defendants",
-			Source:      "Adverse Action Letters / Summons Documents",
-			Required:    true,
-		})
-	}
-	
-	// Only populate causes of action if we have sufficient document support
-	if !(hasAttorneyNotes && (hasAdverseAction || hasSummons)) {
-		missingContent = append(missingContent, MissingContent{
-			Field:       "Legal Claims",
-			Description: "Causes of action require both attorney notes and credit bureau documentation",
-			Source:      "Attorney Notes + Adverse Action/Summons Documents",
-			Required:    true,
-		})
-	}
-	
-	// Calculate data coverage percentage
-	totalFields := 25 // Approximate number of key fields
-	populatedFields := 0
-	if hasAttorneyNotes { populatedFields += 15 }
-	if hasAdverseAction { populatedFields += 3 }
-	if hasCivilCover { populatedFields += 6 }
-	if hasSummons { populatedFields += 1 }
-	dataCoverage := float64(populatedFields) / float64(totalFields) * 100
+	// Calculate data coverage based on populated fields
+	dataCoverage := s.calculateDataCoverage(&clientCase, extractedData)
 	
 	// Create processing result
 	processingResult := &DocumentProcessingResult{
@@ -348,9 +271,284 @@ func (s *DocumentService) ProcessSelectedDocuments(selectedDocIDs []string, temp
 		DataCoverage:      dataCoverage,
 	}
 	
-	log.Printf("Processed %d selected documents with %.1f%% data coverage", len(selectedDocs), dataCoverage)
+	log.Printf("[DOCUMENT_SERVICE] Extraction complete - %d documents processed, %.1f%% data coverage", 
+		len(selectedDocs), dataCoverage)
 	
 	return processingResult, &clientCase, nil
+}
+
+// determineContentType identifies the type of legal document based on filename
+func (s *DocumentService) determineContentType(fileName string) string {
+	fileName = strings.ToLower(fileName)
+	
+	if strings.Contains(fileName, "attorney") || strings.Contains(fileName, "atty") {
+		return "attorney_notes"
+	}
+	if strings.Contains(fileName, "adverse") || strings.Contains(fileName, "denial") {
+		return "adverse_action"
+	}
+	if strings.Contains(fileName, "civil") && strings.Contains(fileName, "cover") {
+		return "civil_cover_sheet"
+	}
+	if strings.Contains(fileName, "summons") {
+		if strings.Contains(fileName, "equifax") {
+			return "summons_equifax"
+		}
+		return "summons"
+	}
+	if strings.Contains(fileName, "complaint") {
+		return "complaint_form"
+	}
+	
+	return "unknown"
+}
+
+// extractDataFromDocument extracts structured data from document text
+func (s *DocumentService) extractDataFromDocument(text string, contentType string, clientCase *ClientCase, extractedData map[string]interface{}) {
+	log.Printf("[DOCUMENT_SERVICE] Extracting data from %s document (%d chars)", contentType, len(text))
+	
+	switch contentType {
+	case "attorney_notes":
+		s.extractFromAttorneyNotes(text, clientCase, extractedData)
+	case "adverse_action":
+		s.extractFromAdverseAction(text, clientCase, extractedData)
+	case "civil_cover_sheet":
+		s.extractFromCivilCoverSheet(text, clientCase, extractedData)
+	case "summons", "summons_equifax":
+		s.extractFromSummons(text, clientCase, extractedData)
+	default:
+		log.Printf("[DOCUMENT_SERVICE] Unknown document type: %s", contentType)
+	}
+}
+
+// extractFromAttorneyNotes extracts client and case information from attorney notes
+func (s *DocumentService) extractFromAttorneyNotes(text string, clientCase *ClientCase, extractedData map[string]interface{}) {
+	// Extract client name
+	namePatterns := []string{
+		`Client:\s*([A-Z][a-z]+\s+[A-Z][a-z]+)`,
+		`Case for\s*([A-Z][a-z]+\s+[A-Z][a-z]+)`,
+		`([A-Z][a-z]+\s+[A-Z][a-z]+)\s+Case`,
+	}
+	
+	if name := s.extractFirstMatch(text, namePatterns); name != "" {
+		clientCase.ClientName = name
+		extractedData["clientName"] = name
+		log.Printf("[DOCUMENT_SERVICE] Extracted client name: %s", name)
+	}
+	
+	// Extract contact information
+	phonePatterns := []string{
+		`(\d{3}\.\d{3}\.\d{4})`,
+		`(\d{3})-(\d{3})-(\d{4})`,
+		`\((\d{3})\)\s*(\d{3})-(\d{4})`,
+	}
+	
+	if phone := s.extractFirstMatch(text, phonePatterns); phone != "" {
+		clientCase.ContactInfo = phone
+		extractedData["contactInfo"] = phone
+		log.Printf("[DOCUMENT_SERVICE] Extracted contact: %s", phone)
+	}
+	
+	// Extract travel information
+	travelPatterns := []string{
+		`Travel Dates:\s*([A-Za-z0-9\s,-]+)`,
+		`traveling.*in\s+([A-Z][a-z]+)`,
+		`while.*was.*in\s+([A-Z][a-z]+)`,
+	}
+	
+	if travel := s.extractFirstMatch(text, travelPatterns); travel != "" {
+		clientCase.TravelLocation = travel
+		extractedData["travelLocation"] = travel
+		log.Printf("[DOCUMENT_SERVICE] Extracted travel location: %s", travel)
+	}
+	
+	// Extract fraud amount
+	amountPatterns := []string{
+		`Fraud Amount:\s*\$([0-9,]+)`,
+		`\$([0-9,]+)`,
+		`([0-9,]+)\s*dollars?`,
+	}
+	
+	if amount := s.extractFirstMatch(text, amountPatterns); amount != "" {
+		clientCase.FraudAmount = "$" + amount
+		extractedData["fraudAmount"] = "$" + amount
+		log.Printf("[DOCUMENT_SERVICE] Extracted fraud amount: $%s", amount)
+	}
+	
+	// Extract bank information
+	bankPatterns := []string{
+		`Bank:\s*([A-Z][a-z\s]+)`,
+		`(TD Bank|Chase|Capital One|Citibank|Wells Fargo|Bank of America)`,
+	}
+	
+	if bank := s.extractFirstMatch(text, bankPatterns); bank != "" {
+		clientCase.FinancialInstitution = bank
+		extractedData["financialInstitution"] = bank
+		log.Printf("[DOCUMENT_SERVICE] Extracted bank: %s", bank)
+	}
+	
+	// Mark attorney notes as processed
+	extractedData["attorneyNotes"] = true
+}
+
+// extractFromAdverseAction extracts credit impact information from adverse action letters
+func (s *DocumentService) extractFromAdverseAction(text string, clientCase *ClientCase, extractedData map[string]interface{}) {
+	// Extract credit impact details
+	impactPatterns := []string{
+		`denied credit`,
+		`credit.*reduced`,
+		`credit.*limit.*reduced`,
+		`application.*denied`,
+	}
+	
+	impacts := []string{}
+	for _, pattern := range impactPatterns {
+		if matched, _ := regexp.MatchString(pattern, strings.ToLower(text)); matched {
+			impacts = append(impacts, pattern)
+		}
+	}
+	
+	if len(impacts) > 0 {
+		clientCase.CreditImpact = strings.Join(impacts, ", ")
+		extractedData["creditImpact"] = clientCase.CreditImpact
+		log.Printf("[DOCUMENT_SERVICE] Extracted credit impact: %s", clientCase.CreditImpact)
+	}
+	
+	// Set default credit bureaus if adverse action exists
+	clientCase.CreditBureauDisputes = []string{"Experian", "Equifax", "Trans Union"}
+	extractedData["adverseAction"] = true
+}
+
+// extractFromCivilCoverSheet extracts court and legal information
+func (s *DocumentService) extractFromCivilCoverSheet(text string, clientCase *ClientCase, extractedData map[string]interface{}) {
+	// For now, just mark that we have civil cover sheet data
+	// In a full implementation, would extract court jurisdiction, case classification, etc.
+	extractedData["civilCoverSheet"] = true
+	log.Printf("[DOCUMENT_SERVICE] Civil cover sheet processed")
+}
+
+// extractFromSummons extracts defendant information from summons documents
+func (s *DocumentService) extractFromSummons(text string, clientCase *ClientCase, extractedData map[string]interface{}) {
+	// Extract credit bureau names from summons
+	bureauPatterns := []string{
+		`Equifax`,
+		`Experian`, 
+		`Trans Union`,
+		`TransUnion`,
+	}
+	
+	bureaus := []string{}
+	for _, pattern := range bureauPatterns {
+		if matched, _ := regexp.MatchString(pattern, text); matched {
+			bureaus = append(bureaus, pattern)
+		}
+	}
+	
+	if len(bureaus) > 0 {
+		clientCase.CreditBureauDisputes = bureaus
+		extractedData["creditBureaus"] = bureaus
+		log.Printf("[DOCUMENT_SERVICE] Extracted credit bureaus: %v", bureaus)
+	}
+	
+	extractedData["summons"] = true
+}
+
+// extractFirstMatch finds the first matching pattern in text
+func (s *DocumentService) extractFirstMatch(text string, patterns []string) string {
+	for _, pattern := range patterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			return strings.TrimSpace(matches[1])
+		}
+	}
+	return ""
+}
+
+// analyzeMissingContent determines what data is missing based on extraction results
+func (s *DocumentService) analyzeMissingContent(clientCase *ClientCase, documentTypes map[string]bool, extractedData map[string]interface{}) []MissingContent {
+	missing := []MissingContent{}
+	
+	// Check for missing client information
+	if clientCase.ClientName == "" {
+		missing = append(missing, MissingContent{
+			Field:       "Client Name",
+			Description: "Client name is required for legal documents",
+			Source:      "Attorney Notes",
+			Required:    true,
+		})
+	}
+	
+	if clientCase.ContactInfo == "" {
+		missing = append(missing, MissingContent{
+			Field:       "Contact Information",
+			Description: "Client contact information",
+			Source:      "Attorney Notes",
+			Required:    true,
+		})
+	}
+	
+	if clientCase.FraudAmount == "" {
+		missing = append(missing, MissingContent{
+			Field:       "Fraud Amount",
+			Description: "Amount of fraudulent charges",
+			Source:      "Attorney Notes",
+			Required:    true,
+		})
+	}
+	
+	if clientCase.FinancialInstitution == "" {
+		missing = append(missing, MissingContent{
+			Field:       "Financial Institution",
+			Description: "Bank or credit card company involved",
+			Source:      "Attorney Notes",
+			Required:    true,
+		})
+	}
+	
+	// Check for missing document types
+	if !documentTypes["attorney_notes"] {
+		missing = append(missing, MissingContent{
+			Field:       "Attorney Notes",
+			Description: "Attorney notes containing case details",
+			Source:      "Attorney Notes Document",
+			Required:    true,
+		})
+	}
+	
+	if !documentTypes["adverse_action"] && clientCase.CreditImpact == "" {
+		missing = append(missing, MissingContent{
+			Field:       "Credit Impact Details",
+			Description: "Documentation of credit denials or impacts",
+			Source:      "Adverse Action Letters",
+			Required:    true,
+		})
+	}
+	
+	return missing
+}
+
+// calculateDataCoverage calculates the percentage of required data that was extracted
+func (s *DocumentService) calculateDataCoverage(clientCase *ClientCase, extractedData map[string]interface{}) float64 {
+	totalFields := 10 // Key required fields
+	populatedFields := 0
+	
+	if clientCase.ClientName != "" { populatedFields++ }
+	if clientCase.ContactInfo != "" { populatedFields++ }
+	if clientCase.FraudAmount != "" { populatedFields++ }
+	if clientCase.FinancialInstitution != "" { populatedFields++ }
+	if clientCase.TravelLocation != "" { populatedFields++ }
+	if clientCase.CreditImpact != "" { populatedFields++ }
+	if len(clientCase.CreditBureauDisputes) > 0 { populatedFields++ }
+	if extractedData["attorneyNotes"] != nil { populatedFields++ }
+	if extractedData["adverseAction"] != nil { populatedFields++ }
+	if extractedData["civilCoverSheet"] != nil { populatedFields++ }
+	
+	return float64(populatedFields) / float64(totalFields) * 100
 }
 
 // parseDate parses date strings into time.Time
