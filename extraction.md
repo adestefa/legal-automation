@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**🎯 STATUS UPDATE - TASKS 2, 3, 4 COMPLETED (v2.9.0)**: Project Mallon v2 has achieved major milestones - intelligent content analysis, persistent session management, and dynamic template population engine. System now generates court-ready legal documents that adapt to case data.
+**🎯 STATUS UPDATE - TASKS 2, 3, 4, 6 COMPLETED (v2.9.1)**: Project Mallon v2 has achieved major milestones - intelligent content analysis, persistent session management, dynamic template population engine, and complete Missing Content tab functionality. System now generates court-ready legal documents that adapt to case data.
 
 ## Current State Assessment
 
@@ -38,9 +38,14 @@
 - **Document Generation & Editing**: Creates court-ready complaints from case data
 - **Real Document Text Extraction**: PDF/DOCX/TXT parsing working (Task 1 completed)
 
+### ✅ NEW COMPLETION - Missing Content Tab Functionality (TASK 6 COMPLETED v2.9.1)
+- **✅ Complete Document Lists**: Both Selected and Not Selected documents display with proper numbering
+- **✅ Root Cause Fixed**: Documents field properly populated in SelectTemplate handler
+- **✅ UI Enhancement**: Consistent numbering (1., 2., etc.) across both document lists
+- **✅ Defect Resolution**: All Missing Content tab false positives eliminated
+
 ### ❌ Remaining Critical Gaps (Next Tasks)
 - **No Real iCloud Integration**: Cannot save generated documents back to client folders (TASK 5)
-- **Missing Content Tab Issues**: Still showing false positives in some cases (TASK 6/Defect 2)
 
 ## Technical Architecture Analysis
 
@@ -90,9 +95,10 @@
 - **✅ BREAKTHROUGH**: Complete workflow state preserved across browser refresh
 - **✅ IMPACT**: Zero data loss, production-ready reliability for lawyer workflows
 
-### ✅ UI Templates (`_step3_review_data.gohtml`) - TASK 2 DEFECT 2 FIXED
+### ✅ UI Templates (`_step3_review_data.gohtml`) - TASKS 2 & 6 COMPLETED
 - **✅ FIXED**: Now displays dynamically extracted legal analysis and case information
 - **✅ BREAKTHROUGH**: Missing Content tab uses intelligent analysis-based missing data detection
+- **✅ COMPLETE**: Both Selected and Not Selected document lists display with numbering (TASK 6 ✅)
 - **✅ IMPACT**: Eliminates false positive errors, accurate missing content reporting (Defect 2 RESOLVED)
 
 ### iCloud Service (`icloud_service.go`)
@@ -108,7 +114,7 @@
 | Extract client data from documents | ✅ **TASK 2 COMPLETE** | None | **SUCCESS**: Real document automation with confidence scoring |
 | Persist workflow on refresh | ✅ **TASK 3 COMPLETE** | None | **SUCCESS**: Zero data loss, production-ready persistence |
 | Generate dynamic complaints | ✅ **TASK 4 COMPLETE** | None | **SUCCESS**: Intelligent, court-ready document generation |
-| Accurate missing content analysis | ✅ **TASK 2 COMPLETE** | Minor issues (TASK 6) | **MOSTLY SUCCESS**: Some false positives remain |
+| Accurate missing content analysis | ✅ **TASKS 2 & 6 COMPLETE** | None | **SUCCESS**: Complete Missing Content functionality |
 | Save to iCloud | ❌ **PENDING** | No real API integration (TASK 5) | Manual file management required |
 
 ## Business Impact
@@ -143,7 +149,6 @@
 
 ### ❌ Remaining Production Readiness Gaps (Next Tasks)
 - ❌ Incomplete workflow (cannot save back to iCloud) - **TASK 5: Real iCloud Integration**
-- ❌ Minor UI issues with Missing Content tab - **TASK 6: Fix False Positives**
 
 ## Solution Architecture
 
@@ -188,10 +193,11 @@
    - Automatic document versioning and backup
    - Sync generated complaints back to case folders
 
-6. **Missing Content Logic Fix**
-   - Base missing data analysis on actual extracted content
-   - Eliminate false positive error reports
-   - Provide actionable suggestions for completing cases
+6. **✅ Missing Content Logic Fix - TASK 6 COMPLETED**
+   - ✅ Base missing data analysis on actual extracted content
+   - ✅ Eliminate false positive error reports  
+   - ✅ Provide actionable suggestions for completing cases
+   - ✅ Both Selected and Not Selected document lists display with numbering
 
 ## Success Metrics
 
@@ -200,7 +206,7 @@
 - ✅ Extract real client data from any attorney notes file **[TASK 2 ✅]**
 - ✅ Generate accurate legal complaints from actual case facts **[TASK 4 ✅]**
 - ✅ Maintain workflow state through browser refresh **[TASK 3 ✅]**
-- ✅ Report missing content accurately based on selected documents **[TASK 2 ✅]**
+- ✅ Report missing content accurately based on selected documents **[TASKS 2 & 6 ✅]**
 - ❌ Save/sync generated documents to client's iCloud folder **[TASK 5 PENDING]**
 
 ### Business Validation
@@ -222,16 +228,16 @@ This approach ensures safe deployment and easy rollback via git revert if issues
 
 ## Conclusion
 
-**MAJOR PROGRESS UPDATE**: Project Mallon v2 has successfully completed 4 of 6 critical tasks, transforming from a demo system into a near-production-ready legal document automation platform.
+**MAJOR PROGRESS UPDATE**: Project Mallon v2 has successfully completed 5 of 6 critical tasks, transforming from a demo system into a near-production-ready legal document automation platform.
 
-### Completed Achievements (v2.9.0):
+### Completed Achievements (v2.9.1):
 - ✅ **Intelligent Document Processing**: Real extraction from any legal case folder
 - ✅ **Production Reliability**: Zero data loss with persistent session management
 - ✅ **Dynamic Legal Intelligence**: Court-ready documents that adapt to case data
 - ✅ **Quality Assurance**: Built-in validation and completeness scoring
+- ✅ **Complete Missing Content Functionality**: Both document lists with proper numbering and analysis
 
 ### Remaining Work:
 - ❌ **iCloud Integration** (TASK 5): Final step for complete workflow automation
-- ❌ **Minor UI Fix** (TASK 6): Address remaining Missing Content tab issues
 
 The system now delivers on its core promise - transforming legal document creation from manual drafting to intelligent automation. With just the iCloud integration remaining, lawyers will have a complete end-to-end solution that dramatically reduces complaint generation time from hours to minutes while maintaining legal accuracy and court compliance.

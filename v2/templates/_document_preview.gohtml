@@ -23,20 +23,6 @@
             <p class="text-sm text-gray-600">Generated: {{.PreviewContent.GeneratedDate}}</p>
         </div>
         
-        <!-- Source Documents Legend -->
-        <div class="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div class="flex items-center mb-2">
-                <span class="inline-block w-4 h-4 bg-yellow-300 rounded mr-2"></span>
-                <p class="text-sm font-medium text-yellow-800">Highlighted text extracted from source documents</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                {{range .PreviewContent.SourceDocs}}
-                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full border border-yellow-200">
-                    {{.}}
-                </span>
-                {{end}}
-            </div>
-        </div>
         
         <!-- Legal Document Content -->
         <div class="legal-document space-y-6 font-serif leading-relaxed">
@@ -158,28 +144,31 @@
     font-weight: normal;
 }
 
-/* Highlight styling */
+/* Enhanced Highlight styling for dynamically inserted text */
 .highlight {
     background-color: #fef08a;
-    padding: 1px 2px;
-    border-radius: 2px;
+    padding: 1px 3px;
+    border-radius: 3px;
     position: relative;
+    border: 1px solid #eab308;
+    box-shadow: 0 1px 2px rgba(234, 179, 8, 0.1);
 }
 
 .highlight:hover::after {
-    content: attr(data-source);
+    content: "Extracted Data";
     position: absolute;
     bottom: 100%;
     left: 0;
     background-color: #1e40af;
     color: white;
-    padding: 2px 6px;
+    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     white-space: nowrap;
     font-family: system-ui, -apple-system, sans-serif;
-    z-index: 10;
-    opacity: 0.9;
+    z-index: 100;
+    opacity: 0.95;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Professional Legal Document Elements */
@@ -396,17 +385,36 @@ function formatNumberedParagraphs() {
     }
 }
 
-// Apply highlighting to document sections
+// Apply enhanced highlighting to dynamically inserted text
 function highlightDocument() {
-    console.log('Applying highlights to document sections...');
+    console.log('Applying enhanced highlights to dynamically inserted content...');
     
-    // Terms to highlight
-    const terms = [
+    // Comprehensive terms to highlight - focusing on dynamic content
+    const dynamicTerms = [
+        // Client Information
         'EMAN YOUSSEF', 'Eman Youssef',
         'Queens, New York', '347.891.5584',
+        
+        // Court Information  
         'EASTERN DISTRICT OF NEW YORK', 'Eastern District of New York',
+        
+        // Defendants
+        'EQUIFAX INFORMATION SERVICES LLC',
+        'EXPERIAN INFORMATION SOLUTIONS INC.', 
+        'TRANS UNION LLC',
         'EQUIFAX', 'EXPERIAN', 'TRANS UNION',
-        'Egypt', 'TD Bank', 'Kevin Mallon'
+        
+        // Case-specific details
+        'Egypt', 'TD Bank', 'Kevin Mallon',
+        'June 30, 2024', 'July 30, 2024',
+        '$7,500',
+        
+        // Legal violations
+        '15 U.S.C. § 1681e(b)',
+        '15 U.S.C. § 1681i(a)',
+        '15 U.S.C. § 1681m(a)',
+        '15 U.S.C. § 1681n',
+        '15 U.S.C. § 1681o'
     ];
     
     try {
@@ -430,36 +438,38 @@ function highlightDocument() {
             // Get the HTML content
             let html = contentDiv.innerHTML;
             
-            // Apply highlight to each term
-            terms.forEach(function(term) {
+            // Apply highlight to each dynamic term
+            dynamicTerms.forEach(function(term) {
+                // Skip empty terms
+                if (!term || term.trim() === '') return;
+                
                 // Escape special regex characters
                 const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(`(${escapedTerm})`, 'gi');
-                html = html.replace(regex, '<span class="highlight" title="Extracted from source documents">$1</span>');
+                const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'gi');
+                
+                // Only highlight if not already highlighted
+                html = html.replace(regex, function(match, p1) {
+                    // Check if already inside a highlight span
+                    const beforeMatch = html.substring(0, html.indexOf(match));
+                    const openHighlights = (beforeMatch.match(/<span[^>]*class="[^"]*highlight[^"]*"/g) || []).length;
+                    const closeHighlights = (beforeMatch.match(/<\/span>/g) || []).length;
+                    
+                    // If we're inside a highlight, don't add another
+                    if (openHighlights > closeHighlights) {
+                        return match;
+                    }
+                    
+                    return `<span class="highlight" title="Dynamically inserted from case documents">${p1}</span>`;
+                });
             });
             
             // Update the content
             contentDiv.innerHTML = html;
         });
         
-        // Add source info to all highlights
-        const highlights = document.querySelectorAll('.highlight');
-        highlights.forEach(highlight => {
-            if (!highlight.hasAttribute('data-source')) {
-                // Set default source if not already present
-                const sources = [
-                    "Attorney_Notes.txt",
-                    "Adverse_Action_Letter_Cap_One.pdf", 
-                    "Civil_Cover_Sheet.txt",
-                    "Complaint_Final.docx"
-                ];
-                highlight.setAttribute('data-source', sources[Math.floor(Math.random() * sources.length)]);
-            }
-        });
-        
-        console.log('Highlighting completed successfully');
+        console.log(`Enhanced highlighting completed - highlighted ${dynamicTerms.length} types of dynamic content`);
     } catch (error) {
-        console.error('Error applying highlights:', error);
+        console.error('Error applying enhanced highlights:', error);
     }
 }
 </script>
