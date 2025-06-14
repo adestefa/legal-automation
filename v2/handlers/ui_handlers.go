@@ -352,6 +352,17 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 			log.Printf("Loaded %d templates for step 2", len(templates))
 		}
 	case 3:
+		// Load available documents for Missing Content analysis early
+		if state.SelectedCaseFolder != "" {
+			documents, err := h.icloudService.GetDocuments("", "", state.SelectedCaseFolder)
+			if err != nil {
+				log.Printf("[ERROR] Failed to load documents for Missing Content analysis: %v", err)
+			} else {
+				data.Documents = documents
+				log.Printf("[DEBUG] Loaded %d available documents for Missing Content analysis", len(documents))
+			}
+		}
+		
 		// Validate prerequisites for step 3
 		if state.SelectedTemplate == "" && !isReturningUser {
 			log.Printf("[WARNING] Attempting to access step 3 without template selection")
@@ -408,8 +419,14 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 			data.ClientCase = state.ClientCase
 		}
 		
-		// Load legal analysis for step 3
-		legalAnalysis := h.generateLegalAnalysis()
+		// Load legal analysis for step 3 with selected documents
+		// Extract document names from paths for legal analysis
+		selectedDocNames := make([]string, len(state.SelectedDocuments))
+		for i, docPath := range state.SelectedDocuments {
+			parts := strings.Split(docPath, "/")
+			selectedDocNames[i] = parts[len(parts)-1]
+		}
+		legalAnalysis := h.generateLegalAnalysis(selectedDocNames)
 		data.LegalAnalysis = legalAnalysis
 		
 		// Ensure we have selected documents list
@@ -800,8 +817,14 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 		username = "User"
 	}
 	
-	// Generate legal analysis for Step 3 (keeping existing functionality)
-	legalAnalysis := h.generateLegalAnalysis()
+	// Generate legal analysis for Step 3 with selected documents
+	// Extract document names from selected document paths
+	selectedDocNames := make([]string, len(selectedDocs))
+	for i, docPath := range selectedDocs {
+		parts := strings.Split(docPath, "/")
+		selectedDocNames[i] = parts[len(parts)-1]
+	}
+	legalAnalysis := h.generateLegalAnalysis(selectedDocNames)
 	
 	data := PageData{
 		CurrentStep:        3,
@@ -860,18 +883,24 @@ func (h *UIHandlers) PreviewDocument(c *gin.Context) {
 }
 
 // generateLegalAnalysis creates legal analysis data from extracted information
-func (h *UIHandlers) generateLegalAnalysis() LegalAnalysis {
+func (h *UIHandlers) generateLegalAnalysis(selectedDocs []string) LegalAnalysis {
 	// For prototype: simulate legal analysis based on FCRA credit card fraud case
 	// In production: this would analyze actual extracted data from documents
 	
-	return LegalAnalysis{
-		ExtractionDate: "June 5, 2025",
-		SourceDocs: []string{
+	// Use actual selected documents, fallback to defaults if none provided
+	sourceDocs := selectedDocs
+	if len(sourceDocs) == 0 {
+		sourceDocs = []string{
 			"Attorney_Notes.txt",
 			"Adverse_Action_Letter_Cap_One.pdf", 
 			"Civil_Cover_Sheet.txt",
 			"Complaint_Final.docx",
-		},
+		}
+	}
+	
+	return LegalAnalysis{
+		ExtractionDate: "June 5, 2025",
+		SourceDocs: sourceDocs,
 		CauseOfAction: []CauseOfActionItem{
 			{
 				Title:          "Negligent Non-Compliance with FCRA",

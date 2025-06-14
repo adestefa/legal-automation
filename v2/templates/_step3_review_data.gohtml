@@ -229,6 +229,9 @@
         <script type="application/json" id="selected-documents-data">
         {{range $index, $doc := .LegalAnalysis.SourceDocs}}{{if $index}},{{end}}"{{$doc}}"{{end}}
         </script>
+        <script type="application/json" id="available-documents-data">
+        {{range $index, $doc := .Documents}}{{if $index}},{{end}}"{{$doc.Name}}"{{end}}
+        </script>
         <div class="space-y-6">
             <!-- Selected Documents Summary -->
             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -349,20 +352,20 @@ function loadPreviewContent() {
 }
 
 function loadMissingContentAnalysis() {
-    // Get available documents from case folder (this would come from backend in production)
-    const allAvailableDocuments = [
-        'Attorney_Notes.txt',
-        'Adverse_Action_Letter_Cap_One.pdf', 
-        'Civil_Cover_Sheet.txt',
-        'Complaint_Final.docx',
-        'SummonsEquifax.pdf',
-        'Summons_Experian.pdf',
-        'Summons_TD Bank.pdf',
-        'Summons_Trans Union.pdf',
-        'Barclays_Applicaiton_Denial_1.docx',
-        'Barclays_Applicaiton_Denial_2.docx',
-        'Atty_Notes.docx'
-    ];
+    // Get available documents from backend data (actual iCloud folder contents)
+    let allAvailableDocuments = [];
+    try {
+        const availableDataElement = document.getElementById('available-documents-data');
+        if (availableDataElement) {
+            const jsonData = '[' + availableDataElement.textContent.trim() + ']';
+            allAvailableDocuments = JSON.parse(jsonData);
+            console.log('Successfully loaded available documents from backend:', allAvailableDocuments);
+        }
+    } catch (e) {
+        console.warn('Failed to parse available documents data:', e);
+        // Fallback to empty array if can't parse
+        allAvailableDocuments = [];
+    }
     
     // Get selected documents from backend data (reliable source)
     let selectedDocs = [];
