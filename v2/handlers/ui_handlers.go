@@ -148,13 +148,13 @@ func NewUIHandlers() *UIHandlers {
 }
 
 // Session helper functions
-func (h *UIHandlers) getSessionService(c *gin.Context) *services.SessionService {
+func (h *UIHandlers) getSessionService(c *gin.Context) *services.PersistentSessionService {
 	sessionService, exists := c.Get("sessionService")
 	if !exists {
 		log.Printf("Session service not found in context")
 		return nil
 	}
-	return sessionService.(*services.SessionService)
+	return sessionService.(*services.PersistentSessionService)
 }
 
 func (h *UIHandlers) getSessionID(c *gin.Context) string {
@@ -167,6 +167,12 @@ func (h *UIHandlers) getSessionID(c *gin.Context) string {
 }
 
 func (h *UIHandlers) getWorkflowState(c *gin.Context) *services.WorkflowState {
+	// First check if we have a restored session from middleware
+	if restoredState, exists := c.Get("workflowState"); exists {
+		return restoredState.(*services.WorkflowState)
+	}
+	
+	// Fallback to session service
 	sessionService := h.getSessionService(c)
 	if sessionService == nil {
 		return &services.WorkflowState{CurrentStep: 0}
@@ -184,6 +190,9 @@ func (h *UIHandlers) updateWorkflowState(c *gin.Context, updateFunc func(*servic
 	
 	sessionID := h.getSessionID(c)
 	sessionService.UpdateSession(sessionID, updateFunc)
+	
+	// Log session state persistence for debugging
+	log.Printf("[DEBUG] Session state updated and persisted for %s", sessionID)
 }
 
 // ShowMainPage renders the main application page
@@ -196,6 +205,9 @@ func (h *UIHandlers) ShowMainPage(c *gin.Context) {
 	// Get current session state
 	state := h.getWorkflowState(c)
 	
+	// Check if this is a restored session
+	_, isRestored := c.Get("restoredSession")
+	
 	data := PageData{
 		CurrentStep:          state.CurrentStep,
 		Username:             username,
@@ -205,7 +217,7 @@ func (h *UIHandlers) ShowMainPage(c *gin.Context) {
 		SelectedDocuments:    state.SelectedDocuments,
 		SelectedTemplate:     state.SelectedTemplate,
 		SessionState:         state,
-		IsReturningUser:      state.CurrentStep > 0,
+		IsReturningUser:      state.CurrentStep > 0 || isRestored,
 	}
 	
 	err := h.templates.ExecuteTemplate(c.Writer, "index.gohtml", data)

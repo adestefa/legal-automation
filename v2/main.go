@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"mallon-legal-v2/handlers"
@@ -13,10 +14,17 @@ import (
 func main() {
 	router := gin.Default()
 
-	// Initialize session service with 24 hour TTL
-	sessionService := services.NewSessionService(24 * time.Hour)
+	// Initialize persistent session service with 24 hour TTL
+	sessionDir := filepath.Join(".", "sessions")
+	sessionService, err := services.NewPersistentSessionService(sessionDir, 24*time.Hour)
+	if err != nil {
+		log.Fatalf("Failed to initialize persistent session service: %v", err)
+	}
+	
+	// Ensure graceful shutdown of session service
+	defer sessionService.Shutdown()
 
-	// Session middleware - adds session to context
+	// Session restoration middleware
 	router.Use(func(c *gin.Context) {
 		sessionToken, err := c.Cookie("session_token")
 		if err != nil || sessionToken == "" {
@@ -28,6 +36,14 @@ func main() {
 		headerToken := c.GetHeader("X-Session-Token")
 		if headerToken != "" && headerToken != sessionToken {
 			log.Printf("[WARNING] Session token mismatch: cookie=%s, header=%s", sessionToken, headerToken)
+		}
+		
+		// Restore session data from persistent storage
+		sessionData := sessionService.RestoreSession(sessionToken)
+		if sessionData != nil {
+			c.Set("restoredSession", true)
+			c.Set("workflowState", sessionData.WorkflowState)
+			log.Printf("[INFO] Session restored for %s, step %d", sessionToken, sessionData.WorkflowState.CurrentStep)
 		}
 		
 		// Add session service and session ID to context
@@ -211,10 +227,11 @@ func main() {
 	}
 
 	// Start the server
-	log.Println("[INFO] Starting Mallon Legal Server v2.6.0 on :8080")
-	log.Printf("[INFO] Features: Real Document Text Extraction (Task 1), PDF/DOCX/TXT parsing, Dynamic data extraction")
+	log.Println("[INFO] Starting Mallon Legal Server v2.8.0 on :8080")
+	log.Printf("[INFO] Features: Persistent Session Management (Task 3), Real Document Text Extraction, PDF/DOCX/TXT parsing")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
-	log.Printf("[INFO] Session TTL: 24 hours with automatic cleanup")
+	log.Printf("[INFO] Session directory: %s", sessionDir)
+	log.Printf("[INFO] Session TTL: 24 hours with persistent file-based storage")
 	router.Run(":8080")
 }
