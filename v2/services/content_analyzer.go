@@ -1,0 +1,509 @@
+package services
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+// ContentAnalyzer provides intelligent analysis of extracted document text
+type ContentAnalyzer struct {
+	Patterns     map[string]interface{}
+	Extractors   map[string]FieldExtractor
+	Validators   map[string]ValidationFunc
+}
+
+// FieldExtractor interface for extracting specific field types
+type FieldExtractor interface {
+	Extract(text string) (value interface{}, confidence float64, err error)
+}
+
+// ValidationFunc validates extracted data
+type ValidationFunc func(value interface{}) bool
+
+// ExtractionResult represents the result of extracting a specific field
+type ExtractionResult struct {
+	Field      string      `json:"field"`
+	Value      interface{} `json:"value"`
+	Confidence float64     `json:"confidence"`
+	Source     string      `json:"source"`
+	Location   int         `json:"location"`
+	Method     string      `json:"method"`
+}
+
+// LegalAnalysisResult contains comprehensive analysis of legal documents
+type LegalAnalysisResult struct {
+	ClientData       map[string]ExtractionResult `json:"clientData"`
+	FraudDetails     map[string]ExtractionResult `json:"fraudDetails"`
+	LegalViolations  []string                    `json:"legalViolations"`
+	DocumentTypes    map[string]bool             `json:"documentTypes"`
+	OverallConfidence float64                    `json:"overallConfidence"`
+	MissingFields    []string                    `json:"missingFields"`
+	Suggestions      []string                    `json:"suggestions"`
+}
+
+// NewContentAnalyzer creates a new content analyzer with legal patterns
+func NewContentAnalyzer() (*ContentAnalyzer, error) {
+	analyzer := &ContentAnalyzer{
+		Extractors: make(map[string]FieldExtractor),
+		Validators: make(map[string]ValidationFunc),
+	}
+	
+	// Load legal patterns
+	err := analyzer.loadLegalPatterns()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load legal patterns: %v", err)
+	}
+	
+	// Initialize field extractors
+	analyzer.initializeExtractors()
+	
+	// Initialize validators
+	analyzer.initializeValidators()
+	
+	log.Printf("[CONTENT_ANALYZER] Initialized with legal document intelligence")
+	return analyzer, nil
+}
+
+// loadLegalPatterns loads pattern definitions from JSON configuration
+func (ca *ContentAnalyzer) loadLegalPatterns() error {
+	patternsPath := "/Users/corelogic/satori-dev/clients/proj-mallon/v2/config/legal_patterns.json"
+	
+	data, err := os.ReadFile(patternsPath)
+	if err != nil {
+		return fmt.Errorf("could not read patterns file: %v", err)
+	}
+	
+	err = json.Unmarshal(data, &ca.Patterns)
+	if err != nil {
+		return fmt.Errorf("could not parse patterns JSON: %v", err)
+	}
+	
+	log.Printf("[CONTENT_ANALYZER] Loaded legal patterns from %s", patternsPath)
+	return nil
+}
+
+// initializeExtractors sets up field-specific extractors
+func (ca *ContentAnalyzer) initializeExtractors() {
+	ca.Extractors["clientName"] = &NameExtractor{patterns: ca.getPatterns("clientInfo", "namePatterns")}
+	ca.Extractors["phoneNumber"] = &PhoneExtractor{patterns: ca.getPatterns("clientInfo", "phonePatterns")}
+	ca.Extractors["fraudAmount"] = &AmountExtractor{patterns: ca.getPatterns("fraudDetails", "amountPatterns")}
+	ca.Extractors["institution"] = &InstitutionExtractor{patterns: ca.getPatterns("fraudDetails", "institutionPatterns")}
+	ca.Extractors["travelLocation"] = &TravelExtractor{patterns: ca.getPatterns("fraudDetails", "travelPatterns")}
+}
+
+// initializeValidators sets up field validators
+func (ca *ContentAnalyzer) initializeValidators() {
+	ca.Validators["clientName"] = func(value interface{}) bool {
+		if str, ok := value.(string); ok {
+			return len(strings.Fields(str)) >= 2 // At least first and last name
+		}
+		return false
+	}
+	
+	ca.Validators["phoneNumber"] = func(value interface{}) bool {
+		if str, ok := value.(string); ok {
+			return regexp.MustCompile(`\d{10,}`).MatchString(strings.ReplaceAll(str, "[^0-9]", ""))
+		}
+		return false
+	}
+	
+	ca.Validators["fraudAmount"] = func(value interface{}) bool {
+		if str, ok := value.(string); ok {
+			// Remove $ and commas, check if it's a valid number
+			cleanAmount := strings.ReplaceAll(strings.ReplaceAll(str, "$", ""), ",", "")
+			if amount, err := strconv.ParseFloat(cleanAmount, 64); err == nil {
+				return amount > 0
+			}
+		}
+		return false
+	}
+}
+
+// getPatterns extracts pattern arrays from the configuration
+func (ca *ContentAnalyzer) getPatterns(category, patternType string) []string {
+	if categoryData, ok := ca.Patterns[category].(map[string]interface{}); ok {
+		if patterns, ok := categoryData[patternType].([]interface{}); ok {
+			result := make([]string, len(patterns))
+			for i, pattern := range patterns {
+				if str, ok := pattern.(string); ok {
+					result[i] = str
+				}
+			}
+			return result
+		}
+	}
+	return []string{}
+}
+
+// AnalyzeLegalContent performs comprehensive analysis of legal document text
+func (ca *ContentAnalyzer) AnalyzeLegalContent(text string, documentType string) (*LegalAnalysisResult, error) {
+	log.Printf("[CONTENT_ANALYZER] Analyzing %s document (%d chars)", documentType, len(text))
+	
+	result := &LegalAnalysisResult{
+		ClientData:    make(map[string]ExtractionResult),
+		FraudDetails:  make(map[string]ExtractionResult),
+		DocumentTypes: make(map[string]bool),
+	}
+	
+	// Extract client information
+	ca.extractClientData(text, result)
+	
+	// Extract fraud details
+	ca.extractFraudDetails(text, result)
+	
+	// Analyze legal violations
+	ca.analyzeLegalViolations(text, result)
+	
+	// Determine document types
+	ca.analyzeDocumentTypes(text, result)
+	
+	// Calculate overall confidence
+	result.OverallConfidence = ca.calculateOverallConfidence(result)
+	
+	// Identify missing fields
+	result.MissingFields = ca.identifyMissingFields(result)
+	
+	// Generate suggestions
+	result.Suggestions = ca.generateSuggestions(result, documentType)
+	
+	log.Printf("[CONTENT_ANALYZER] Analysis complete - %.1f%% confidence, %d missing fields", 
+		result.OverallConfidence, len(result.MissingFields))
+	
+	return result, nil
+}
+
+// extractClientData extracts client-specific information
+func (ca *ContentAnalyzer) extractClientData(text string, result *LegalAnalysisResult) {
+	// Extract client name
+	if extractor, ok := ca.Extractors["clientName"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.ClientData["clientName"] = ExtractionResult{
+				Field:      "Client Name",
+				Value:      value,
+				Confidence: confidence,
+				Source:     "Attorney Notes",
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract phone number
+	if extractor, ok := ca.Extractors["phoneNumber"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.ClientData["phoneNumber"] = ExtractionResult{
+				Field:      "Phone Number",
+				Value:      value,
+				Confidence: confidence,
+				Source:     "Attorney Notes",
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract additional client details using direct pattern matching
+	ca.extractWithPatterns(text, "clientInfo", "addressPatterns", "address", result.ClientData)
+	ca.extractWithPatterns(text, "clientInfo", "emailPatterns", "email", result.ClientData)
+}
+
+// extractFraudDetails extracts fraud-related information
+func (ca *ContentAnalyzer) extractFraudDetails(text string, result *LegalAnalysisResult) {
+	// Extract fraud amount
+	if extractor, ok := ca.Extractors["fraudAmount"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.FraudDetails["fraudAmount"] = ExtractionResult{
+				Field:      "Fraud Amount",
+				Value:      value,
+				Confidence: confidence,
+				Source:     "Attorney Notes",
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract financial institution
+	if extractor, ok := ca.Extractors["institution"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.FraudDetails["institution"] = ExtractionResult{
+				Field:      "Financial Institution",
+				Value:      value,
+				Confidence: confidence,
+				Source:     "Attorney Notes",
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract travel information
+	if extractor, ok := ca.Extractors["travelLocation"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.FraudDetails["travelLocation"] = ExtractionResult{
+				Field:      "Travel Location",
+				Value:      value,
+				Confidence: confidence,
+				Source:     "Attorney Notes",
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract dates
+	ca.extractWithPatterns(text, "fraudDetails", "datePatterns", "fraudDate", result.FraudDetails)
+}
+
+// extractWithPatterns extracts data using pattern lists
+func (ca *ContentAnalyzer) extractWithPatterns(text, category, patternType, field string, target map[string]ExtractionResult) {
+	patterns := ca.getPatterns(category, patternType)
+	
+	for _, pattern := range patterns {
+		re, err := regexp.Compile(`(?i)` + pattern) // Case insensitive
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			value := strings.TrimSpace(matches[1])
+			if value != "" {
+				target[field] = ExtractionResult{
+					Field:      field,
+					Value:      value,
+					Confidence: 0.8, // Default confidence for pattern matches
+					Source:     "Document Text",
+					Method:     "Regex Pattern",
+					Location:   re.FindStringIndex(text)[0],
+				}
+				break // Use first match
+			}
+		}
+	}
+}
+
+// analyzeLegalViolations identifies potential legal violations
+func (ca *ContentAnalyzer) analyzeLegalViolations(text string, result *LegalAnalysisResult) {
+	fcraViolations := ca.getPatterns("legalViolations", "fcraViolations")
+	
+	violations := []string{}
+	textLower := strings.ToLower(text)
+	
+	for _, violation := range fcraViolations {
+		if strings.Contains(textLower, strings.ToLower(violation)) {
+			violations = append(violations, violation)
+		}
+	}
+	
+	result.LegalViolations = violations
+}
+
+// analyzeDocumentTypes determines what types of documents are present
+func (ca *ContentAnalyzer) analyzeDocumentTypes(text string, result *LegalAnalysisResult) {
+	if docTypes, ok := ca.Patterns["documentTypes"].(map[string]interface{}); ok {
+		textLower := strings.ToLower(text)
+		
+		for docType, typeData := range docTypes {
+			if indicators, ok := typeData.(map[string]interface{})["indicators"].([]interface{}); ok {
+				for _, indicator := range indicators {
+					if indicatorStr, ok := indicator.(string); ok {
+						if strings.Contains(textLower, strings.ToLower(indicatorStr)) {
+							result.DocumentTypes[docType] = true
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// calculateOverallConfidence calculates overall confidence in extracted data
+func (ca *ContentAnalyzer) calculateOverallConfidence(result *LegalAnalysisResult) float64 {
+	totalConfidence := 0.0
+	totalFields := 0
+	
+	// Factor in client data confidence
+	for _, extraction := range result.ClientData {
+		totalConfidence += extraction.Confidence
+		totalFields++
+	}
+	
+	// Factor in fraud details confidence
+	for _, extraction := range result.FraudDetails {
+		totalConfidence += extraction.Confidence
+		totalFields++
+	}
+	
+	if totalFields == 0 {
+		return 0.0
+	}
+	
+	return (totalConfidence / float64(totalFields)) * 100
+}
+
+// identifyMissingFields identifies critical missing information
+func (ca *ContentAnalyzer) identifyMissingFields(result *LegalAnalysisResult) []string {
+	required := []string{"clientName", "fraudAmount", "institution"}
+	missing := []string{}
+	
+	for _, field := range required {
+		found := false
+		
+		// Check in client data
+		if _, exists := result.ClientData[field]; exists {
+			found = true
+		}
+		
+		// Check in fraud details
+		if _, exists := result.FraudDetails[field]; exists {
+			found = true
+		}
+		
+		if !found {
+			missing = append(missing, field)
+		}
+	}
+	
+	return missing
+}
+
+// generateSuggestions creates actionable suggestions for improving data completeness
+func (ca *ContentAnalyzer) generateSuggestions(result *LegalAnalysisResult, documentType string) []string {
+	suggestions := []string{}
+	
+	if len(result.MissingFields) > 0 {
+		suggestions = append(suggestions, "Consider adding Attorney Notes document for client information")
+	}
+	
+	if !result.DocumentTypes["adverseAction"] {
+		suggestions = append(suggestions, "Add Adverse Action letters to document credit impact")
+	}
+	
+	if !result.DocumentTypes["civilCoverSheet"] {
+		suggestions = append(suggestions, "Include Civil Cover Sheet for court information")
+	}
+	
+	if result.OverallConfidence < 70 {
+		suggestions = append(suggestions, "Review document quality - some information may be unclear")
+	}
+	
+	return suggestions
+}
+
+// Field Extractor Implementations
+
+// NameExtractor extracts client names from text
+type NameExtractor struct {
+	patterns []string
+}
+
+func (ne *NameExtractor) Extract(text string) (interface{}, float64, error) {
+	for _, pattern := range ne.patterns {
+		re, err := regexp.Compile(`(?i)` + pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			name := strings.TrimSpace(matches[1])
+			if len(strings.Fields(name)) >= 2 { // At least first and last name
+				return name, 0.9, nil
+			}
+		}
+	}
+	return nil, 0.0, fmt.Errorf("no name found")
+}
+
+// PhoneExtractor extracts phone numbers from text
+type PhoneExtractor struct {
+	patterns []string
+}
+
+func (pe *PhoneExtractor) Extract(text string) (interface{}, float64, error) {
+	for _, pattern := range pe.patterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			phone := strings.TrimSpace(matches[1])
+			return phone, 0.8, nil
+		}
+	}
+	return nil, 0.0, fmt.Errorf("no phone number found")
+}
+
+// AmountExtractor extracts monetary amounts from text
+type AmountExtractor struct {
+	patterns []string
+}
+
+func (ae *AmountExtractor) Extract(text string) (interface{}, float64, error) {
+	for _, pattern := range ae.patterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			amount := strings.TrimSpace(matches[1])
+			// Validate it's a reasonable amount
+			cleanAmount := strings.ReplaceAll(strings.ReplaceAll(amount, "$", ""), ",", "")
+			if _, err := strconv.ParseFloat(cleanAmount, 64); err == nil {
+				if !strings.HasPrefix(amount, "$") {
+					amount = "$" + amount
+				}
+				return amount, 0.9, nil
+			}
+		}
+	}
+	return nil, 0.0, fmt.Errorf("no valid amount found")
+}
+
+// InstitutionExtractor extracts financial institution names
+type InstitutionExtractor struct {
+	patterns []string
+}
+
+func (ie *InstitutionExtractor) Extract(text string) (interface{}, float64, error) {
+	for _, pattern := range ie.patterns {
+		re, err := regexp.Compile(`(?i)` + pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			institution := strings.TrimSpace(matches[1])
+			return institution, 0.8, nil
+		}
+	}
+	return nil, 0.0, fmt.Errorf("no institution found")
+}
+
+// TravelExtractor extracts travel information from text
+type TravelExtractor struct {
+	patterns []string
+}
+
+func (te *TravelExtractor) Extract(text string) (interface{}, float64, error) {
+	for _, pattern := range te.patterns {
+		re, err := regexp.Compile(`(?i)` + pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			travel := strings.TrimSpace(matches[1])
+			return travel, 0.7, nil
+		}
+	}
+	return nil, 0.0, fmt.Errorf("no travel information found")
+}
