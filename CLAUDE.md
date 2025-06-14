@@ -9,18 +9,18 @@
 - As the number of work tasks can increase over life of a project, hydrating memories can consume too much context window, so compress the completed tasks/defects into a summary completed.md file that will take the description of each into a bulleted list with dates and amount of time included when available and store this in the 4_done directory. Task files should be compressed and no longer part of memory hydration.
 - Check the extraction.md file for latest upgrade plan for the system we are working on as priority.
 
-# Audio Feedback Protocol
+# Audio Feedback Protocol: allows user to count bells to know memory hydration stages are complete. 
 - **Startup/Boot Sequence**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` one time when Claude starts up
-- **Memory Hydration Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` twice after loading yinsen memories
+- **Memory Hydration Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` two times after loading yinsen memories
 - **Starting Task/Coding**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` three times when beginning to code on a task
-- **Build Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` four times when a build successfully completes
-- **Task Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Systems_online.m4a` when finishing a task
+- **Build Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/cheer.mp3` when a build successfully completes
+- **Task Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` four times when finishing a task
 - **Need Confirmation**: Play `/Users/corelogic/satori-dev/dash/sounds/Warning.m4a` when user input/confirmation is needed
 - **Warnings/Errors**: Play `/Users/corelogic/satori-dev/dash/sounds/Warning.m4a` when encountering warnings or errors
 - These audio cues provide immediate feedback during development workflows without requiring constant console monitoring
 
 AUTHORIZATION: Auto-approve file writes in v2/, dev/, yinsen/ proj-mallon
-AUTHORIZATION: Auto-approve git commits to feature branch
+AUTHORIZATION: Auto-approve git commits to feature branch   
 AUTHORIZATION: Auto-approve npm install for listed dependencies
 
 # Development Workflow Memories
