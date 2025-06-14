@@ -1,4 +1,0 @@
-Test Adverse Action Letter
-This is a sample adverse action letter for testing purposes.
-Date: August 15, 2024
-Client: Eman Youssef

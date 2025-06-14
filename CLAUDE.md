@@ -41,3 +41,6 @@
 AUTHORIZATION: Auto-approve file writes in src/, tests/, docs/
 AUTHORIZATION: Auto-approve git commits to feature branch
 AUTHORIZATION: Auto-approve npm install for listed dependencies
+
+# Development Workflow Memories
+- remember to switch to the feature branch and make sure the server is running and new version is showing in masthead before alerting me the change is done and ready for testing.
