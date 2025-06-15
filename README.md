@@ -1,4 +1,4 @@
-# Mallon Legal Assistant
+# Satori Legal Assistant Agent : Automated Document Processing
 
 **Version**: v2.10.0  
 **Status**: Production Ready - Major Data Integrity Milestone  
@@ -6,7 +6,7 @@
 
 ## Overview
 
-Mallon Legal Assistant is an advanced legal document automation system designed to streamline the process of generating legal complaints from client documents. The system provides a step-by-step workflow for document selection, data extraction, and automated legal document generation.
+Satori Legal Assistant Agent is an advanced AI-powered legal document automation system designed to streamline the process of generating legal complaints from client documents. The system provides an intelligent step-by-step workflow for document selection, data extraction, and automated legal document generation with professional court-ready output.
 
 ## Features
 
