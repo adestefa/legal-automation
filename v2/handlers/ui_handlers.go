@@ -18,9 +18,13 @@ import (
 
 // UIHandlers contains the UI-related HTTP handlers
 type UIHandlers struct {
-	templates     *template.Template
-	icloudService *services.ICloudService
-	docService    *services.DocumentService
+	templates         *template.Template
+	icloudService     *services.ICloudService
+	docService        *services.DocumentService
+	summonsParser     *services.SummonsParser
+	courtAnalyzer     *services.CourtAnalyzer
+	defendantAnalyzer *services.DefendantAnalyzer
+	serviceValidator  *services.ServiceValidator
 }
 
 // PageData represents the data passed to templates
@@ -140,10 +144,31 @@ func NewUIHandlers() *UIHandlers {
 	// Parse template files
 	tmpl = template.Must(tmpl.ParseGlob("templates/*.gohtml"))
 	
+	// Initialize summons analysis services
+	summonsParser := services.NewSummonsParser()
+	
+	courtAnalyzer, err := services.NewCourtAnalyzer()
+	if err != nil {
+		log.Printf("Warning: Failed to initialize court analyzer: %v", err)
+		courtAnalyzer = nil
+	}
+	
+	defendantAnalyzer, err := services.NewDefendantAnalyzer()
+	if err != nil {
+		log.Printf("Warning: Failed to initialize defendant analyzer: %v", err)
+		defendantAnalyzer = nil
+	}
+	
+	serviceValidator := services.NewServiceValidator()
+	
 	return &UIHandlers{
-		templates:     tmpl,
-		icloudService: services.NewICloudService(),
-		docService:    services.NewDocumentService(),
+		templates:         tmpl,
+		icloudService:     services.NewICloudService(),
+		docService:        services.NewDocumentService(),
+		summonsParser:     summonsParser,
+		courtAnalyzer:     courtAnalyzer,
+		defendantAnalyzer: defendantAnalyzer,
+		serviceValidator:  serviceValidator,
 	}
 }
 
@@ -1869,4 +1894,288 @@ func (h *UIHandlers) loadDocumentsForStep1(c *gin.Context) ([]services.ICloudDoc
 	}
 	
 	return documents, nil
+}
+
+// AnalyzeSummons handles summons document analysis requests
+func (h *UIHandlers) AnalyzeSummons(c *gin.Context) {
+	documentPath := c.Query("document")
+	if documentPath == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Document path required"})
+		return
+	}
+
+	// Check if all required services are available
+	if h.summonsParser == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Summons parser not available"})
+		return
+	}
+
+	// Extract text from the document (placeholder - would use actual PDF extraction)
+	extractedText, err := h.extractTextFromDocument(documentPath)
+	if err != nil {
+		log.Printf("Error extracting text from document %s: %v", documentPath, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to extract text from document"})
+		return
+	}
+
+	// Parse the summons document
+	summonsDoc, err := h.summonsParser.ParseSummons(extractedText, documentPath)
+	if err != nil {
+		log.Printf("Error parsing summons document: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse summons document"})
+		return
+	}
+
+	// Analyze court information if court analyzer is available
+	var courtAnalysis *services.CourtAnalysisResult
+	if h.courtAnalyzer != nil {
+		courtAnalysis, err = h.courtAnalyzer.AnalyzeCourt(extractedText, &summonsDoc.Defendant)
+		if err != nil {
+			log.Printf("Error analyzing court information: %v", err)
+			// Continue without court analysis
+		}
+	}
+
+	// Validate service requirements if validator is available
+	var serviceValidation *services.ServiceValidationResult
+	if h.serviceValidator != nil && courtAnalysis != nil {
+		serviceValidation, err = h.serviceValidator.ValidateService(summonsDoc, courtAnalysis)
+		if err != nil {
+			log.Printf("Error validating service requirements: %v", err)
+			// Continue without service validation
+		}
+	}
+
+	// Prepare response data
+	response := gin.H{
+		"summonsDocument": summonsDoc,
+		"documentPath":    documentPath,
+	}
+
+	if courtAnalysis != nil {
+		response["courtAnalysis"] = courtAnalysis
+	}
+
+	if serviceValidation != nil {
+		response["serviceValidation"] = serviceValidation
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// AnalyzeMultipleDefendants handles multi-defendant analysis requests
+func (h *UIHandlers) AnalyzeMultipleDefendants(c *gin.Context) {
+	type AnalysisRequest struct {
+		DocumentPaths []string `json:"documentPaths"`
+	}
+
+	var req AnalysisRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		return
+	}
+
+	if len(req.DocumentPaths) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "At least one document path required"})
+		return
+	}
+
+	// Check if required services are available
+	if h.summonsParser == nil || h.defendantAnalyzer == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Required analysis services not available"})
+		return
+	}
+
+	// Parse all summons documents
+	var summonsDocuments []*services.SummonsDocument
+	for _, docPath := range req.DocumentPaths {
+		extractedText, err := h.extractTextFromDocument(docPath)
+		if err != nil {
+			log.Printf("Error extracting text from %s: %v", docPath, err)
+			continue
+		}
+
+		summonsDoc, err := h.summonsParser.ParseSummons(extractedText, docPath)
+		if err != nil {
+			log.Printf("Error parsing summons %s: %v", docPath, err)
+			continue
+		}
+
+		summonsDocuments = append(summonsDocuments, summonsDoc)
+	}
+
+	if len(summonsDocuments) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No valid summons documents found"})
+		return
+	}
+
+	// Perform multi-defendant analysis
+	analysis, err := h.defendantAnalyzer.AnalyzeDefendants(summonsDocuments)
+	if err != nil {
+		log.Printf("Error analyzing multiple defendants: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze defendants"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"multiDefendantAnalysis": analysis,
+		"processedDocuments":     len(summonsDocuments),
+		"totalDocuments":         len(req.DocumentPaths),
+	})
+}
+
+// extractTextFromDocument extracts text content from a document
+// This is a placeholder implementation - in production would use proper PDF/document parsing
+func (h *UIHandlers) extractTextFromDocument(documentPath string) (string, error) {
+	// For now, return sample summons text for testing
+	// In production, this would use PDF extraction libraries
+	
+	if strings.Contains(strings.ToLower(documentPath), "equifax") {
+		return h.getSampleEquifaxSummons(), nil
+	}
+	
+	if strings.Contains(strings.ToLower(documentPath), "experian") {
+		return h.getSampleExperianSummons(), nil
+	}
+	
+	if strings.Contains(strings.ToLower(documentPath), "transunion") || strings.Contains(strings.ToLower(documentPath), "trans_union") {
+		return h.getSampleTransUnionSummons(), nil
+	}
+	
+	if strings.Contains(strings.ToLower(documentPath), "td_bank") || strings.Contains(strings.ToLower(documentPath), "tdbank") {
+		return h.getSampleTDBankSummons(), nil
+	}
+	
+	// Default generic summons
+	return h.getSampleGenericSummons(), nil
+}
+
+// Sample summons text for testing - these would be replaced with actual PDF extraction
+func (h *UIHandlers) getSampleEquifaxSummons() string {
+	return `UNITED STATES DISTRICT COURT
+EASTERN DISTRICT OF NEW YORK
+
+JOHN DOE,
+                                    Plaintiff,
+v.                                                      Civil Action No. 25:2024-cv-12345
+
+EQUIFAX INFORMATION SERVICES, LLC,
+                                    Defendant.
+
+SUMMONS
+
+TO: EQUIFAX INFORMATION SERVICES, LLC
+    c/o Corporation Service Company
+    40 Technology Parkway South, Suite 300
+    Norcross, GA 30092
+
+YOU ARE HEREBY SUMMONED and required to serve upon plaintiff's attorney, whose address is stated below, an answer to the complaint which is herewith served upon you, within 21 days after service of this summons upon you, exclusive of the day of service. If you fail to do so, judgment by default will be taken against you for the relief demanded in the complaint.
+
+The complaint alleges violations of the Fair Credit Reporting Act, 15 U.S.C. § 1681e(b) and 15 U.S.C. § 1681i, arising from defendant's failure to follow reasonable procedures to assure maximum possible accuracy of consumer credit information and failure to conduct reasonable reinvestigation upon consumer dispute.
+
+Attorney for Plaintiff:
+Kevin Mallon, Esq.
+123 Legal Street
+New York, NY 10001`
+}
+
+func (h *UIHandlers) getSampleExperianSummons() string {
+	return `UNITED STATES DISTRICT COURT
+EASTERN DISTRICT OF NEW YORK
+
+JANE SMITH,
+                                    Plaintiff,
+v.                                                      Civil Action No. 25:2024-cv-12346
+
+EXPERIAN INFORMATION SOLUTIONS, INC.,
+                                    Defendant.
+
+SUMMONS
+
+TO: EXPERIAN INFORMATION SOLUTIONS, INC.
+    c/o Corporation Service Company
+    2710 Gateway Oaks Drive, Suite 150N
+    Sacramento, CA 95833
+
+YOU ARE HEREBY SUMMONED and required to serve upon plaintiff's attorney, whose address is stated below, an answer to the complaint which is herewith served upon you, within 21 days after service of this summons upon you, exclusive of the day of service. If you fail to do so, judgment by default will be taken against you for the relief demanded in the complaint.
+
+The complaint alleges violations of the Fair Credit Reporting Act, 15 U.S.C. § 1681e(b) and 15 U.S.C. § 1681i.
+
+Attorney for Plaintiff:
+Kevin Mallon, Esq.
+123 Legal Street
+New York, NY 10001`
+}
+
+func (h *UIHandlers) getSampleTransUnionSummons() string {
+	return `UNITED STATES DISTRICT COURT
+EASTERN DISTRICT OF NEW YORK
+
+ROBERT JOHNSON,
+                                    Plaintiff,
+v.                                                      Civil Action No. 25:2024-cv-12347
+
+TRANS UNION LLC,
+                                    Defendant.
+
+SUMMONS
+
+TO: TRANS UNION LLC
+    c/o Illinois Corporation Service Company
+    801 Adlai Stevenson Drive
+    Springfield, IL 62703
+
+YOU ARE HEREBY SUMMONED and required to serve upon plaintiff's attorney, whose address is stated below, an answer to the complaint which is herewith served upon you, within 21 days after service of this summons upon you, exclusive of the day of service. If you fail to do so, judgment by default will be taken against you for the relief demanded in the complaint.
+
+Attorney for Plaintiff:
+Kevin Mallon, Esq.
+123 Legal Street
+New York, NY 10001`
+}
+
+func (h *UIHandlers) getSampleTDBankSummons() string {
+	return `UNITED STATES DISTRICT COURT
+DISTRICT OF DELAWARE
+
+MARY WILLIAMS,
+                                    Plaintiff,
+v.                                                      Civil Action No. 25:2024-cv-54321
+
+TD BANK, N.A.,
+                                    Defendant.
+
+SUMMONS
+
+TO: TD BANK, N.A.
+    c/o Corporation Trust Company
+    1209 Orange Street
+    Wilmington, DE 19801
+
+YOU ARE HEREBY SUMMONED and required to serve upon plaintiff's attorney, whose address is stated below, an answer to the complaint which is herewith served upon you, within 30 days after service of this summons upon you, exclusive of the day of service.
+
+Attorney for Plaintiff:
+Kevin Mallon, Esq.
+123 Legal Street
+New York, NY 10001`
+}
+
+func (h *UIHandlers) getSampleGenericSummons() string {
+	return `UNITED STATES DISTRICT COURT
+EASTERN DISTRICT OF NEW YORK
+
+PLAINTIFF NAME,
+                                    Plaintiff,
+v.                                                      Civil Action No. TBD
+
+DEFENDANT NAME,
+                                    Defendant.
+
+SUMMONS
+
+YOU ARE HEREBY SUMMONED and required to serve upon plaintiff's attorney an answer to the complaint within 21 days after service of this summons upon you.
+
+Attorney for Plaintiff:
+Kevin Mallon, Esq.
+123 Legal Street
+New York, NY 10001`
 }

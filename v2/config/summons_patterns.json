@@ -1,0 +1,422 @@
+{
+  "documentIdentification": {
+    "summonsIndicators": [
+      "SUMMONS",
+      "SUMMONS AND COMPLAINT",
+      "CIVIL SUMMONS",
+      "NOTICE OF LAWSUIT",
+      "CITATION"
+    ],
+    "legalActionIndicators": [
+      "CIVIL ACTION",
+      "LAWSUIT",
+      "LEGAL PROCEEDING",
+      "COURT CASE",
+      "LITIGATION"
+    ]
+  },
+  "caseInformation": {
+    "caseNumberPatterns": [
+      "CASE\\s+NO\\.?\\s*:?\\s*([0-9]{1,2}:[0-9]{4}-CV-[0-9]{5})",
+      "CIVIL\\s+ACTION\\s+NO\\.?\\s*:?\\s*([0-9-]{8,})",
+      "DOCKET\\s+NO\\.?\\s*:?\\s*([0-9-]{8,})",
+      "INDEX\\s+NO\\.?\\s*:?\\s*([0-9/]{8,})",
+      "CASE\\s+NUMBER\\s*:?\\s*([A-Z0-9-]{6,})"
+    ],
+    "caseTitlePatterns": [
+      "([A-Z\\s,\\.]+)\\s+V\\.?\\s+([A-Z\\s,\\.]+)",
+      "([A-Z\\s,\\.]+)\\s+VS\\.?\\s+([A-Z\\s,\\.]+)",
+      "([A-Z\\s,\\.]+)\\s+VERSUS\\s+([A-Z\\s,\\.]+)"
+    ],
+    "caseTypeIndicators": [
+      "CIVIL RIGHTS",
+      "CONSUMER PROTECTION",
+      "FEDERAL QUESTION",
+      "DIVERSITY JURISDICTION",
+      "CONTRACT DISPUTE"
+    ]
+  },
+  "courtInformation": {
+    "federalCourtPatterns": {
+      "courtIdentification": [
+        "UNITED\\s+STATES\\s+DISTRICT\\s+COURT",
+        "U\\.S\\.\\s+DISTRICT\\s+COURT",
+        "DISTRICT\\s+COURT.*UNITED\\s+STATES",
+        "FEDERAL\\s+DISTRICT\\s+COURT"
+      ],
+      "districtPatterns": [
+        "EASTERN\\s+DISTRICT\\s+OF\\s+NEW\\s+YORK",
+        "SOUTHERN\\s+DISTRICT\\s+OF\\s+NEW\\s+YORK",
+        "NORTHERN\\s+DISTRICT\\s+OF\\s+NEW\\s+YORK",
+        "WESTERN\\s+DISTRICT\\s+OF\\s+NEW\\s+YORK",
+        "CENTRAL\\s+DISTRICT\\s+OF\\s+CALIFORNIA",
+        "NORTHERN\\s+DISTRICT\\s+OF\\s+CALIFORNIA",
+        "SOUTHERN\\s+DISTRICT\\s+OF\\s+CALIFORNIA",
+        "EASTERN\\s+DISTRICT\\s+OF\\s+CALIFORNIA",
+        "NORTHERN\\s+DISTRICT\\s+OF\\s+ILLINOIS",
+        "CENTRAL\\s+DISTRICT\\s+OF\\s+ILLINOIS",
+        "SOUTHERN\\s+DISTRICT\\s+OF\\s+ILLINOIS",
+        "DISTRICT\\s+OF\\s+COLUMBIA"
+      ],
+      "divisionPatterns": [
+        "BROOKLYN\\s+DIVISION",
+        "MANHATTAN\\s+DIVISION",
+        "WHITE\\s+PLAINS\\s+DIVISION",
+        "CENTRAL\\s+ISLIP\\s+DIVISION"
+      ]
+    },
+    "stateCourtPatterns": {
+      "stateCourtIdentification": [
+        "SUPREME\\s+COURT",
+        "SUPERIOR\\s+COURT",
+        "CIRCUIT\\s+COURT",
+        "DISTRICT\\s+COURT",
+        "COUNTY\\s+COURT"
+      ],
+      "countyPatterns": [
+        "(\\w+)\\s+COUNTY",
+        "COUNTY\\s+OF\\s+(\\w+)",
+        "IN\\s+AND\\s+FOR\\s+(\\w+)\\s+COUNTY"
+      ]
+    },
+    "judgePatterns": [
+      "HONORABLE\\s+([A-Z\\s\\.]+)",
+      "JUDGE\\s+([A-Z\\s\\.]+)",
+      "BEFORE\\s+([A-Z\\s\\.]+),\\s+JUDGE"
+    ]
+  },
+  "partyInformation": {
+    "plaintiffPatterns": [
+      "PLAINTIFF[S]?\\s*:?\\s*([A-Z\\s,\\.]+)",
+      "([A-Z\\s,\\.]+),?\\s+PLAINTIFF[S]?",
+      "PETITIONER[S]?\\s*:?\\s*([A-Z\\s,\\.]+)"
+    ],
+    "defendantPatterns": [
+      "DEFENDANT[S]?\\s*:?\\s*([A-Z\\s,\\.LLC]+)",
+      "([A-Z\\s,\\.LLC]+),?\\s+DEFENDANT[S]?",
+      "RESPONDENT[S]?\\s*:?\\s*([A-Z\\s,\\.]+)"
+    ],
+    "attorneyPatterns": [
+      "ATTORNEY\\s+FOR\\s+PLAINTIFF[S]?\\s*:?\\s*([A-Z\\s,\\.]+)",
+      "COUNSEL\\s+FOR\\s+PLAINTIFF[S]?\\s*:?\\s*([A-Z\\s,\\.]+)",
+      "([A-Z\\s,\\.]+),\\s+ESQ\\.",
+      "BAR\\s+NO\\.?\\s*:?\\s*([0-9]+)"
+    ]
+  },
+  "defendantIdentification": {
+    "creditBureauPatterns": {
+      "equifax": {
+        "namePatterns": [
+          "EQUIFAX\\s+INFORMATION\\s+SERVICES,?\\s+LLC",
+          "EQUIFAX\\s+INFORMATION\\s+SERVICES\\s+LLC",
+          "EQUIFAX\\s+INC\\.?",
+          "EQUIFAX,?\\s+LLC",
+          "EQUIFAX\\s+CREDIT\\s+INFORMATION\\s+SERVICES"
+        ],
+        "addressPatterns": [
+          "1550\\s+PEACHTREE.*ATLANTA.*GA",
+          "P\\.?O\\.?\\s+BOX.*ATLANTA.*GEORGIA",
+          "EQUIFAX.*ATLANTA.*30309",
+          "PEACHTREE\\s+STREET.*ATLANTA"
+        ],
+        "registeredAgentPatterns": [
+          "CORPORATION\\s+SERVICE\\s+COMPANY",
+          "CSC.*REGISTERED\\s+AGENT",
+          "CT\\s+CORPORATION.*ATLANTA",
+          "NATIONAL\\s+REGISTERED\\s+AGENTS"
+        ]
+      },
+      "experian": {
+        "namePatterns": [
+          "EXPERIAN\\s+INFORMATION\\s+SOLUTIONS,?\\s+INC\\.?",
+          "EXPERIAN\\s+INFORMATION\\s+SOLUTIONS\\s+INC\\.?",
+          "EXPERIAN\\s+INC\\.?",
+          "EXPERIAN.*LLC",
+          "EXPERIAN\\s+CREDIT\\s+SERVICES"
+        ],
+        "addressPatterns": [
+          "475\\s+ANTON.*COSTA\\s+MESA.*CA",
+          "P\\.?O\\.?\\s+BOX.*ALLEN.*TX",
+          "EXPERIAN.*COSTA\\s+MESA.*92626",
+          "ANTON\\s+BOULEVARD.*COSTA\\s+MESA"
+        ],
+        "registeredAgentPatterns": [
+          "CORPORATION\\s+SERVICE\\s+COMPANY",
+          "CSC.*REGISTERED\\s+AGENT",
+          "CT\\s+CORPORATION.*CALIFORNIA",
+          "COGENCY\\s+GLOBAL"
+        ]
+      },
+      "transunion": {
+        "namePatterns": [
+          "TRANS\\s+UNION\\s+LLC",
+          "TRANSUNION\\s+LLC",
+          "TRANS\\s+UNION\\s+INFORMATION\\s+SOLUTIONS",
+          "TRANSUNION.*LLC",
+          "TRANS\\s+UNION\\s+CREDIT\\s+INFORMATION"
+        ],
+        "addressPatterns": [
+          "555\\s+WEST\\s+ADAMS.*CHICAGO.*IL",
+          "P\\.?O\\.?\\s+BOX.*CHESTER.*PA",
+          "TRANSUNION.*CHICAGO.*60661",
+          "WEST\\s+ADAMS\\s+STREET.*CHICAGO"
+        ],
+        "registeredAgentPatterns": [
+          "CORPORATION\\s+SERVICE\\s+COMPANY",
+          "ILLINOIS\\s+CORPORATION\\s+SERVICE",
+          "CSC.*REGISTERED\\s+AGENT",
+          "CT\\s+CORPORATION.*ILLINOIS"
+        ]
+      }
+    },
+    "creditorPatterns": {
+      "tdBank": {
+        "namePatterns": [
+          "TD\\s+BANK,?\\s+N\\.A\\.",
+          "TD\\s+BANK",
+          "TD\\s+BANK,?\\s+NATIONAL\\s+ASSOCIATION",
+          "THE\\s+TORONTO-DOMINION\\s+BANK",
+          "COMMERCE\\s+BANK"
+        ],
+        "addressPatterns": [
+          "2035\\s+LIMESTONE.*WILMINGTON.*DE",
+          "LIMESTONE\\s+ROAD.*WILMINGTON",
+          "TD\\s+BANK.*WILMINGTON.*19808"
+        ],
+        "registeredAgentPatterns": [
+          "CORPORATION\\s+TRUST\\s+COMPANY",
+          "CT\\s+CORPORATION",
+          "1209\\s+ORANGE\\s+STREET.*WILMINGTON"
+        ]
+      },
+      "capitalOne": {
+        "namePatterns": [
+          "CAPITAL\\s+ONE\\s+BANK,?\\s+N\\.A\\.",
+          "CAPITAL\\s+ONE\\s+BANK",
+          "CAPITAL\\s+ONE\\s+FINANCIAL",
+          "CAPITAL\\s+ONE,?\\s+N\\.A\\."
+        ],
+        "addressPatterns": [
+          "1680\\s+CAPITAL\\s+ONE.*MCLEAN.*VA",
+          "CAPITAL\\s+ONE\\s+DRIVE.*MCLEAN"
+        ]
+      }
+    },
+    "corporateTypePatterns": [
+      "LLC",
+      "L\\.L\\.C\\.",
+      "INC\\.",
+      "INCORPORATED",
+      "CORPORATION",
+      "CORP\\.",
+      "LIMITED\\s+PARTNERSHIP",
+      "L\\.P\\.",
+      "LIMITED\\s+LIABILITY\\s+COMPANY"
+    ]
+  },
+  "serviceOfProcess": {
+    "serviceMethodPatterns": [
+      "SERVICE\\s+OF\\s+PROCESS",
+      "REGISTERED\\s+AGENT",
+      "CERTIFIED\\s+MAIL",
+      "PERSONAL\\s+SERVICE",
+      "SUBSTITUTED\\s+SERVICE"
+    ],
+    "serviceAddressPatterns": [
+      "SERVICE\\s+ADDRESS\\s*:?\\s*([^\\n]+)",
+      "SERVE\\s+AT\\s*:?\\s*([^\\n]+)",
+      "ADDRESS\\s+FOR\\s+SERVICE\\s*:?\\s*([^\\n]+)"
+    ],
+    "registeredAgentPatterns": [
+      "REGISTERED\\s+AGENT\\s*:?\\s*([A-Z\\s,\\.]+)",
+      "AGENT\\s+FOR\\s+SERVICE\\s*:?\\s*([A-Z\\s,\\.]+)",
+      "STATUTORY\\s+AGENT\\s*:?\\s*([A-Z\\s,\\.]+)"
+    ]
+  },
+  "responseRequirements": {
+    "deadlinePatterns": [
+      "(\\d+)\\s+DAYS?\\s+TO\\s+ANSWER",
+      "ANSWER\\s+WITHIN\\s+(\\d+)\\s+DAYS?",
+      "RESPOND\\s+WITHIN\\s+(\\d+)\\s+DAYS?",
+      "YOU\\s+HAVE\\s+(\\d+)\\s+DAYS?\\s+FROM\\s+SERVICE"
+    ],
+    "defaultWarningPatterns": [
+      "DEFAULT\\s+JUDGMENT",
+      "JUDGMENT\\s+BY\\s+DEFAULT",
+      "DEFAULT\\s+MAY\\s+BE\\s+ENTERED",
+      "FAILURE\\s+TO\\s+ANSWER.*DEFAULT"
+    ],
+    "responseInstructionPatterns": [
+      "ANSWER\\s+OR\\s+OTHER\\s+RESPONSE",
+      "WRITTEN\\s+ANSWER",
+      "RESPONSIVE\\s+PLEADING",
+      "MOTION\\s+OR\\s+ANSWER"
+    ]
+  },
+  "legalAllegations": {
+    "fcraViolationPatterns": {
+      "section1681e": {
+        "patterns": [
+          "15\\s+U\\.S\\.C\\.?\\s+§\\s+1681E\\(B\\)",
+          "SECTION\\s+1681E\\(B\\)",
+          "REASONABLE\\s+PROCEDURES.*MAXIMUM\\s+POSSIBLE\\s+ACCURACY",
+          "FAILED\\s+TO\\s+FOLLOW\\s+REASONABLE\\s+PROCEDURES",
+          "INACCURATE\\s+INFORMATION.*CONSUMER\\s+REPORT"
+        ],
+        "elements": [
+          "duty to maintain reasonable procedures",
+          "failure to assure maximum possible accuracy",
+          "reporting of inaccurate information",
+          "consumer reporting agency obligations"
+        ]
+      },
+      "section1681i": {
+        "patterns": [
+          "15\\s+U\\.S\\.C\\.?\\s+§\\s+1681I",
+          "SECTION\\s+1681I",
+          "REINVESTIGATION.*CONSUMER\\s+DISPUTE",
+          "FAILED\\s+TO.*REASONABLE\\s+REINVESTIGATION",
+          "DISPUTE\\s+PROCEDURE\\s+VIOLATION"
+        ],
+        "elements": [
+          "received consumer dispute",
+          "failed to conduct reasonable reinvestigation",
+          "continued reporting disputed information",
+          "improper dispute handling"
+        ]
+      },
+      "section1681c": {
+        "patterns": [
+          "15\\s+U\\.S\\.C\\.?\\s+§\\s+1681C",
+          "SECTION\\s+1681C",
+          "OBSOLETE\\s+INFORMATION",
+          "REPORTING\\s+PERIOD\\s+VIOLATION",
+          "OUTDATED\\s+INFORMATION.*CONSUMER\\s+REPORT"
+        ],
+        "elements": [
+          "reporting obsolete information",
+          "violation of reporting time limits",
+          "failure to remove outdated data"
+        ]
+      },
+      "section1681g": {
+        "patterns": [
+          "15\\s+U\\.S\\.C\\.?\\s+§\\s+1681G",
+          "SECTION\\s+1681G",
+          "DISCLOSURE\\s+VIOLATION",
+          "FAILED\\s+TO\\s+PROVIDE.*DISCLOSURE",
+          "CONSUMER\\s+DISCLOSURE\\s+REQUIREMENTS"
+        ],
+        "elements": [
+          "failure to provide required disclosures",
+          "inadequate consumer notification",
+          "disclosure format violations"
+        ]
+      }
+    },
+    "stateViolationPatterns": {
+      "consumerProtection": {
+        "patterns": [
+          "STATE\\s+CONSUMER\\s+PROTECTION\\s+ACT",
+          "UNFAIR\\s+TRADE\\s+PRACTICES",
+          "DECEPTIVE\\s+BUSINESS\\s+PRACTICES",
+          "CONSUMER\\s+FRAUD"
+        ],
+        "elements": [
+          "unfair business practices",
+          "deceptive consumer practices",
+          "state law violations"
+        ]
+      }
+    },
+    "violationDescriptorPatterns": [
+      "WILLFUL\\s+VIOLATION",
+      "NEGLIGENT\\s+VIOLATION",
+      "PATTERN\\s+OF\\s+VIOLATIONS",
+      "SYSTEMIC\\s+VIOLATIONS",
+      "REPEATED\\s+VIOLATIONS"
+    ]
+  },
+  "reliefSought": {
+    "monetaryReliefPatterns": [
+      "ACTUAL\\s+DAMAGES",
+      "COMPENSATORY\\s+DAMAGES",
+      "STATUTORY\\s+DAMAGES",
+      "PUNITIVE\\s+DAMAGES",
+      "LIQUIDATED\\s+DAMAGES",
+      "\\$([0-9,]+)\\s+IN\\s+DAMAGES"
+    ],
+    "injunctiveReliefPatterns": [
+      "INJUNCTIVE\\s+RELIEF",
+      "PERMANENT\\s+INJUNCTION",
+      "PRELIMINARY\\s+INJUNCTION",
+      "RESTRAINING\\s+ORDER",
+      "CEASE\\s+AND\\s+DESIST"
+    ],
+    "otherReliefPatterns": [
+      "ATTORNEY\\s+FEES",
+      "COSTS\\s+OF\\s+SUIT",
+      "PRE-JUDGMENT\\s+INTEREST",
+      "POST-JUDGMENT\\s+INTEREST",
+      "DECLARATORY\\s+RELIEF"
+    ],
+    "fcraStatutoryDamagePatterns": [
+      "\\$100\\s+TO\\s+\\$1,?000",
+      "STATUTORY\\s+DAMAGES.*\\$1,?000",
+      "NOT\\s+LESS\\s+THAN\\s+\\$100.*NOT\\s+MORE\\s+THAN\\s+\\$1,?000"
+    ]
+  },
+  "addressExtraction": {
+    "addressPatterns": [
+      "([0-9]+\\s+[A-Z\\s]+),\\s*([A-Z\\s]+),\\s*([A-Z]{2})\\s+([0-9]{5})",
+      "P\\.?O\\.?\\s+BOX\\s+([0-9]+),\\s*([A-Z\\s]+),\\s*([A-Z]{2})\\s+([0-9]{5})",
+      "([A-Z\\s]+\\s+STREET),\\s*([A-Z\\s]+),\\s*([A-Z]{2})\\s+([0-9]{5})"
+    ],
+    "stateAbbreviations": [
+      "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+      "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+      "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+      "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+      "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY", "DC"
+    ]
+  },
+  "documentValidation": {
+    "requiredElements": [
+      "SUMMONS",
+      "CASE\\s+NUMBER",
+      "COURT\\s+NAME",
+      "PLAINTIFF",
+      "DEFENDANT",
+      "SERVICE\\s+REQUIREMENTS"
+    ],
+    "optionalElements": [
+      "JUDGE\\s+NAME",
+      "ATTORNEY\\s+INFORMATION",
+      "CASE\\s+CAPTION",
+      "FILING\\s+DATE"
+    ],
+    "complianceIndicators": [
+      "RULE\\s+4",
+      "SERVICE\\s+OF\\s+PROCESS",
+      "PERSONAL\\s+JURISDICTION",
+      "SUBJECT\\s+MATTER\\s+JURISDICTION"
+    ]
+  },
+  "timeConstraints": {
+    "serviceDeadlinePatterns": [
+      "SERVE\\s+WITHIN\\s+(\\d+)\\s+DAYS",
+      "SERVICE\\s+MUST\\s+BE\\s+COMPLETED\\s+WITHIN\\s+(\\d+)\\s+DAYS",
+      "(\\d+)\\s+DAY\\s+SERVICE\\s+DEADLINE"
+    ],
+    "responseDeadlinePatterns": [
+      "ANSWER\\s+DUE\\s+WITHIN\\s+(\\d+)\\s+DAYS",
+      "RESPOND\\s+WITHIN\\s+(\\d+)\\s+DAYS\\s+OF\\s+SERVICE",
+      "(\\d+)\\s+DAY\\s+RESPONSE\\s+PERIOD"
+    ],
+    "extensionPatterns": [
+      "EXTENSION\\s+AVAILABLE",
+      "ADDITIONAL\\s+(\\d+)\\s+DAYS\\s+MAY\\s+BE\\s+GRANTED",
+      "COURT\\s+MAY\\s+EXTEND.*TIME"
+    ]
+  }
+}
