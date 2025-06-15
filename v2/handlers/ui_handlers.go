@@ -431,14 +431,8 @@ func (h *UIHandlers) GetStep(c *gin.Context) {
 			data.ClientCase = state.ClientCase
 		}
 		
-		// Load legal analysis for step 3 with selected documents
-		// Extract document names from paths for legal analysis
-		selectedDocNames := make([]string, len(state.SelectedDocuments))
-		for i, docPath := range state.SelectedDocuments {
-			parts := strings.Split(docPath, "/")
-			selectedDocNames[i] = parts[len(parts)-1]
-		}
-		legalAnalysis := h.generateLegalAnalysis(selectedDocNames)
+		// Load legal analysis for step 3 using actual extraction results
+		legalAnalysis := h.generateLegalAnalysisFromExtraction(state.ProcessingResult, state.ClientCase, state.SelectedDocuments)
 		data.LegalAnalysis = legalAnalysis
 		
 		// Ensure we have selected documents list
@@ -829,14 +823,8 @@ func (h *UIHandlers) SelectTemplate(c *gin.Context) {
 		username = "User"
 	}
 	
-	// Generate legal analysis for Step 3 with selected documents
-	// Extract document names from selected document paths
-	selectedDocNames := make([]string, len(selectedDocs))
-	for i, docPath := range selectedDocs {
-		parts := strings.Split(docPath, "/")
-		selectedDocNames[i] = parts[len(parts)-1]
-	}
-	legalAnalysis := h.generateLegalAnalysis(selectedDocNames)
+	// Generate legal analysis for Step 3 using actual extraction results
+	legalAnalysis := h.generateLegalAnalysisFromExtraction(processingResult, clientCase, selectedDocs)
 	
 	// Load available documents for Missing Content analysis
 	state := h.getWorkflowState(c)
@@ -1012,6 +1000,178 @@ func (h *UIHandlers) generateLegalAnalysis(selectedDocs []string) LegalAnalysis 
 			},
 		},
 	}
+}
+
+// generateLegalAnalysisFromExtraction creates legal analysis using actual extracted data
+func (h *UIHandlers) generateLegalAnalysisFromExtraction(processingResult *services.DocumentProcessingResult, clientCase *services.ClientCase, selectedDocs []string) LegalAnalysis {
+	if processingResult == nil || clientCase == nil {
+		log.Printf("[WARNING] Missing processing results, falling back to minimal analysis")
+		return h.generateMinimalLegalAnalysis(selectedDocs)
+	}
+	
+	// Debug log what data we actually have
+	log.Printf("[DEBUG] Generating legal analysis from actual extraction results")
+	log.Printf("[DEBUG] ClientCase data - Name: '%s', Contact: '%s', Residence: '%s', Institution: '%s', FraudAmount: '%s', TravelLocation: '%s'", 
+		clientCase.ClientName, clientCase.ContactInfo, clientCase.ResidenceLocation, 
+		clientCase.FinancialInstitution, clientCase.FraudAmount, clientCase.TravelLocation)
+	log.Printf("[DEBUG] ProcessingResult - DataCoverage: %.1f%%, ExtractedData keys: %d", 
+		processingResult.DataCoverage, len(processingResult.ExtractedData))
+	
+	// Extract document names for source references
+	sourceDocs := make([]string, len(selectedDocs))
+	for i, docPath := range selectedDocs {
+		parts := strings.Split(docPath, "/")
+		sourceDocs[i] = parts[len(parts)-1]
+	}
+	
+	// Build analysis based on actual extracted data
+	analysis := LegalAnalysis{
+		ExtractionDate: time.Now().Format("January 2, 2006"),
+		SourceDocs:     sourceDocs,
+		CauseOfAction:  []CauseOfActionItem{},
+		LegalViolations: []LegalViolationItem{},
+	}
+	
+	// Generate legal analysis based on available data and document types
+	hasLegalDocuments := h.hasLegalDocumentTypes(sourceDocs)
+	hasClientInfo := clientCase.ClientName != "" || clientCase.ContactInfo != ""
+	hasFraudInfo := clientCase.FraudAmount != "" || clientCase.TravelLocation != "" || clientCase.FinancialInstitution != ""
+	
+	// If we have legal documents (like summons, adverse action letters, etc.), generate analysis
+	if hasLegalDocuments || len(processingResult.ExtractedData) > 0 || hasClientInfo || hasFraudInfo {
+		
+		// Check if we have client information to build FCRA case
+		if hasClientInfo || hasLegalDocuments {
+			clientName := clientCase.ClientName
+			if clientName == "" {
+				clientName = "the consumer" // Generic reference when name not extracted
+			}
+			
+			analysis.CauseOfAction = append(analysis.CauseOfAction, CauseOfActionItem{
+				Title:          "Negligent Non-Compliance with FCRA",
+				Description:    fmt.Sprintf("Defendants negligently failed to follow reasonable procedures regarding %s's consumer credit information", clientName),
+				StatutoryBasis: "15 U.S.C. § 1681e(b)",
+				SourceDoc:      h.findSourceForClientData(sourceDocs),
+				Elements: []string{
+					"Duty to maintain reasonable procedures",
+					"Failure to assure maximum possible accuracy",
+					"Reporting of inaccurate information",
+					"Proximately caused damages to consumer",
+				},
+			})
+		}
+		
+		// Check if we have fraud details or legal documents indicating dispute
+		if hasFraudInfo || h.hasDisputeDocuments(sourceDocs) {
+			analysis.CauseOfAction = append(analysis.CauseOfAction, CauseOfActionItem{
+				Title:          "Willful Non-Compliance with FCRA",
+				Description:    "Defendants willfully failed to conduct reasonable reinvestigation upon consumer dispute",
+				StatutoryBasis: "15 U.S.C. § 1681i(a)",
+				SourceDoc:      h.findSourceForFraudData(sourceDocs),
+				Elements: []string{
+					"Received consumer dispute",
+					"Failed to conduct reasonable reinvestigation",
+					"Willful or reckless disregard for consumer rights",
+					"Continued reporting of disputed information",
+				},
+			})
+		}
+	}
+	
+	// Build legal violations based on actual evidence
+	if len(analysis.CauseOfAction) > 0 {
+		for _, cause := range analysis.CauseOfAction {
+			analysis.LegalViolations = append(analysis.LegalViolations, LegalViolationItem{
+				Statute:       cause.StatutoryBasis,
+				ViolationType: fmt.Sprintf("Violation - %s", cause.Title),
+				Description:   cause.Description,
+				SourceDoc:     cause.SourceDoc,
+				Penalties:     "Actual damages, attorney fees, and costs",
+			})
+		}
+	}
+	
+	log.Printf("[DEBUG] Generated legal analysis: %d causes of action, %d violations from actual extraction", 
+		len(analysis.CauseOfAction), len(analysis.LegalViolations))
+	
+	return analysis
+}
+
+// generateMinimalLegalAnalysis creates a minimal analysis when no extraction data is available
+func (h *UIHandlers) generateMinimalLegalAnalysis(selectedDocs []string) LegalAnalysis {
+	return LegalAnalysis{
+		ExtractionDate:  time.Now().Format("January 2, 2006"),
+		SourceDocs:      selectedDocs,
+		CauseOfAction:   []CauseOfActionItem{},
+		LegalViolations: []LegalViolationItem{},
+	}
+}
+
+// Helper functions to find appropriate source documents
+func (h *UIHandlers) findSourceForClientData(sourceDocs []string) string {
+	for _, doc := range sourceDocs {
+		if strings.Contains(strings.ToLower(doc), "attorney") || strings.Contains(strings.ToLower(doc), "atty") {
+			return doc
+		}
+	}
+	for _, doc := range sourceDocs {
+		if strings.Contains(strings.ToLower(doc), "civil") {
+			return doc
+		}
+	}
+	if len(sourceDocs) > 0 {
+		return sourceDocs[0]
+	}
+	return "Unknown Document"
+}
+
+func (h *UIHandlers) findSourceForFraudData(sourceDocs []string) string {
+	for _, doc := range sourceDocs {
+		if strings.Contains(strings.ToLower(doc), "attorney") || strings.Contains(strings.ToLower(doc), "atty") {
+			return doc
+		}
+	}
+	for _, doc := range sourceDocs {
+		if strings.Contains(strings.ToLower(doc), "adverse") {
+			return doc
+		}
+	}
+	if len(sourceDocs) > 0 {
+		return sourceDocs[0]
+	}
+	return "Unknown Document"
+}
+
+// hasLegalDocumentTypes checks if the document list contains legal document types
+func (h *UIHandlers) hasLegalDocumentTypes(sourceDocs []string) bool {
+	for _, doc := range sourceDocs {
+		docLower := strings.ToLower(doc)
+		if strings.Contains(docLower, "summons") ||
+		   strings.Contains(docLower, "adverse") ||
+		   strings.Contains(docLower, "denial") ||
+		   strings.Contains(docLower, "complaint") ||
+		   strings.Contains(docLower, "civil") ||
+		   strings.Contains(docLower, "attorney") ||
+		   strings.Contains(docLower, "atty") {
+			return true
+		}
+	}
+	return false
+}
+
+// hasDisputeDocuments checks if the document list contains documents indicating legal disputes
+func (h *UIHandlers) hasDisputeDocuments(sourceDocs []string) bool {
+	for _, doc := range sourceDocs {
+		docLower := strings.ToLower(doc)
+		if strings.Contains(docLower, "adverse") ||
+		   strings.Contains(docLower, "denial") ||
+		   strings.Contains(docLower, "attorney") ||
+		   strings.Contains(docLower, "atty") ||
+		   strings.Contains(docLower, "complaint") {
+			return true
+		}
+	}
+	return false
 }
 
 // generatePreviewDocument creates a complete legal document with highlighted content
