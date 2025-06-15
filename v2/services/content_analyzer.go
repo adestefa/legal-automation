@@ -12,9 +12,10 @@ import (
 
 // ContentAnalyzer provides intelligent analysis of extracted document text
 type ContentAnalyzer struct {
-	Patterns     map[string]interface{}
-	Extractors   map[string]FieldExtractor
-	Validators   map[string]ValidationFunc
+	Patterns           map[string]interface{}
+	Extractors         map[string]FieldExtractor
+	Validators         map[string]ValidationFunc
+	DocumentClassifier *DocumentClassifier
 }
 
 // FieldExtractor interface for extracting specific field types
@@ -37,13 +38,14 @@ type ExtractionResult struct {
 
 // LegalAnalysisResult contains comprehensive analysis of legal documents
 type LegalAnalysisResult struct {
-	ClientData       map[string]ExtractionResult `json:"clientData"`
-	FraudDetails     map[string]ExtractionResult `json:"fraudDetails"`
-	LegalViolations  []string                    `json:"legalViolations"`
-	DocumentTypes    map[string]bool             `json:"documentTypes"`
-	OverallConfidence float64                    `json:"overallConfidence"`
-	MissingFields    []string                    `json:"missingFields"`
-	Suggestions      []string                    `json:"suggestions"`
+	ClientData              map[string]ExtractionResult `json:"clientData"`
+	FraudDetails            map[string]ExtractionResult `json:"fraudDetails"`
+	LegalViolations         []string                    `json:"legalViolations"`
+	DocumentTypes           map[string]bool             `json:"documentTypes"`
+	DocumentClassifications []DocumentClassification    `json:"documentClassifications"`
+	OverallConfidence       float64                     `json:"overallConfidence"`
+	MissingFields           []string                    `json:"missingFields"`
+	Suggestions             []string                    `json:"suggestions"`
 }
 
 // NewContentAnalyzer creates a new content analyzer with legal patterns
@@ -59,6 +61,16 @@ func NewContentAnalyzer() (*ContentAnalyzer, error) {
 		return nil, fmt.Errorf("failed to load legal patterns: %v", err)
 	}
 	
+	// Initialize document classifier
+	classifier, err := NewDocumentClassifier(analyzer)
+	if err != nil {
+		log.Printf("[CONTENT_ANALYZER] Warning: Could not initialize document classifier: %v", err)
+		// Continue without classifier for backward compatibility
+	} else {
+		analyzer.DocumentClassifier = classifier
+		log.Printf("[CONTENT_ANALYZER] Initialized with document classification engine")
+	}
+	
 	// Initialize field extractors
 	analyzer.initializeExtractors()
 	
@@ -71,7 +83,13 @@ func NewContentAnalyzer() (*ContentAnalyzer, error) {
 
 // loadLegalPatterns loads pattern definitions from JSON configuration
 func (ca *ContentAnalyzer) loadLegalPatterns() error {
-	patternsPath := "/Users/corelogic/satori-dev/clients/proj-mallon/v2/config/legal_patterns.json"
+	patternsPath := "./config/legal_patterns_enhanced.json"
+	
+	// Fallback to original patterns if enhanced version doesn't exist
+	if _, err := os.Stat(patternsPath); os.IsNotExist(err) {
+		patternsPath = "./config/legal_patterns.json"
+		log.Printf("[CONTENT_ANALYZER] Using original patterns file as fallback")
+	}
 	
 	data, err := os.ReadFile(patternsPath)
 	if err != nil {
@@ -141,25 +159,39 @@ func (ca *ContentAnalyzer) getPatterns(category, patternType string) []string {
 }
 
 // AnalyzeLegalContent performs comprehensive analysis of legal document text
-func (ca *ContentAnalyzer) AnalyzeLegalContent(text string, documentType string) (*LegalAnalysisResult, error) {
-	log.Printf("[CONTENT_ANALYZER] Analyzing %s document (%d chars)", documentType, len(text))
+func (ca *ContentAnalyzer) AnalyzeLegalContent(text string, documentPath string) (*LegalAnalysisResult, error) {
+	log.Printf("[CONTENT_ANALYZER] Analyzing document %s (%d chars)", documentPath, len(text))
 	
 	result := &LegalAnalysisResult{
-		ClientData:    make(map[string]ExtractionResult),
-		FraudDetails:  make(map[string]ExtractionResult),
-		DocumentTypes: make(map[string]bool),
+		ClientData:              make(map[string]ExtractionResult),
+		FraudDetails:            make(map[string]ExtractionResult),
+		DocumentTypes:           make(map[string]bool),
+		DocumentClassifications: []DocumentClassification{},
 	}
 	
-	// Extract client information
-	ca.extractClientData(text, result)
+	// Classify document using new classification engine
+	if ca.DocumentClassifier != nil {
+		classification, err := ca.DocumentClassifier.ClassifyDocument(documentPath, text)
+		if err == nil {
+			result.DocumentClassifications = append(result.DocumentClassifications, *classification)
+			log.Printf("[CONTENT_ANALYZER] Document classified as %s with %.1f%% confidence", 
+				ca.DocumentClassifier.GetDocumentTypeName(classification.PrimaryType), 
+				classification.Confidence*100)
+		} else {
+			log.Printf("[CONTENT_ANALYZER] Warning: Document classification failed: %v", err)
+		}
+	}
 	
-	// Extract fraud details
-	ca.extractFraudDetails(text, result)
+	// Extract client information with document type context
+	ca.extractClientDataWithContext(text, result, documentPath)
 	
-	// Analyze legal violations
-	ca.analyzeLegalViolations(text, result)
+	// Extract fraud details with document type context
+	ca.extractFraudDetailsWithContext(text, result, documentPath)
 	
-	// Determine document types
+	// Analyze legal violations with enhanced patterns
+	ca.analyzeLegalViolationsEnhanced(text, result)
+	
+	// Determine document types (legacy support)
 	ca.analyzeDocumentTypes(text, result)
 	
 	// Calculate overall confidence
@@ -169,12 +201,205 @@ func (ca *ContentAnalyzer) AnalyzeLegalContent(text string, documentType string)
 	result.MissingFields = ca.identifyMissingFields(result)
 	
 	// Generate suggestions
-	result.Suggestions = ca.generateSuggestions(result, documentType)
+	result.Suggestions = ca.generateSuggestions(result, documentPath)
 	
 	log.Printf("[CONTENT_ANALYZER] Analysis complete - %.1f%% confidence, %d missing fields", 
-		result.OverallConfidence, len(result.MissingFields))
+		result.OverallConfidence*100, len(result.MissingFields))
 	
 	return result, nil
+}
+
+// extractClientDataWithContext extracts client information with document type context
+func (ca *ContentAnalyzer) extractClientDataWithContext(text string, result *LegalAnalysisResult, documentPath string) {
+	// Determine document type from classification or path
+	docType := ca.getDocumentTypeFromPath(documentPath)
+	
+	// Extract client name
+	if extractor, ok := ca.Extractors["clientName"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.ClientData["clientName"] = ExtractionResult{
+				Field:      "Client Name",
+				Value:      value,
+				Confidence: confidence,
+				Source:     docType,
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract phone number
+	if extractor, ok := ca.Extractors["phoneNumber"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.ClientData["phoneNumber"] = ExtractionResult{
+				Field:      "Phone Number",
+				Value:      value,
+				Confidence: confidence,
+				Source:     docType,
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract additional client data using enhanced patterns
+	ca.extractWithPatternsEnhanced(text, "clientInfo", "addressPatterns", "clientAddress", result.ClientData, docType)
+	ca.extractWithPatternsEnhanced(text, "clientInfo", "emailPatterns", "clientEmail", result.ClientData, docType)
+}
+
+// extractFraudDetailsWithContext extracts fraud information with document type context
+func (ca *ContentAnalyzer) extractFraudDetailsWithContext(text string, result *LegalAnalysisResult, documentPath string) {
+	docType := ca.getDocumentTypeFromPath(documentPath)
+	
+	// Extract fraud amount
+	if extractor, ok := ca.Extractors["fraudAmount"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.FraudDetails["fraudAmount"] = ExtractionResult{
+				Field:      "Fraud Amount",
+				Value:      value,
+				Confidence: confidence,
+				Source:     docType,
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract financial institution
+	if extractor, ok := ca.Extractors["institution"]; ok {
+		if value, confidence, err := extractor.Extract(text); err == nil && value != nil {
+			result.FraudDetails["institution"] = ExtractionResult{
+				Field:      "Financial Institution",
+				Value:      value,
+				Confidence: confidence,
+				Source:     docType,
+				Method:     "Pattern Matching",
+			}
+		}
+	}
+	
+	// Extract additional fraud details using enhanced patterns
+	ca.extractWithPatternsEnhanced(text, "fraudDetails", "datePatterns", "fraudDate", result.FraudDetails, docType)
+	ca.extractWithPatternsEnhanced(text, "fraudDetails", "travelPatterns", "travelLocation", result.FraudDetails, docType)
+}
+
+// analyzeLegalViolationsEnhanced identifies violations using enhanced patterns
+func (ca *ContentAnalyzer) analyzeLegalViolationsEnhanced(text string, result *LegalAnalysisResult) {
+	textLower := strings.ToLower(text)
+	violations := []string{}
+	
+	// Check for specific FCRA violations using enhanced patterns
+	specificViolations := map[string][]string{
+		"Negligent FCRA Noncompliance": ca.getEnhancedPatterns("legalViolations", "specificViolations", "negligentNoncompliance"),
+		"Willful FCRA Noncompliance": ca.getEnhancedPatterns("legalViolations", "specificViolations", "willfulNoncompliance"),
+		"Failure to Conduct Reasonable Investigation": ca.getEnhancedPatterns("legalViolations", "specificViolations", "failureToInvestigate"),
+		"Inaccurate Credit Reporting": ca.getEnhancedPatterns("legalViolations", "specificViolations", "inaccurateReporting"),
+		"Failure to Correct Disputed Information": ca.getEnhancedPatterns("legalViolations", "specificViolations", "failureToCorrect"),
+		"Improper Disclosure of Credit Information": ca.getEnhancedPatterns("legalViolations", "specificViolations", "improperDisclosure"),
+	}
+	
+	for violationType, patterns := range specificViolations {
+		for _, pattern := range patterns {
+			re, err := regexp.Compile("(?i)" + pattern)
+			if err != nil {
+				continue
+			}
+			if re.MatchString(textLower) {
+				violations = append(violations, violationType)
+				break // Only add each violation type once
+			}
+		}
+	}
+	
+	// Check for general FCRA violations
+	fcraViolations := ca.getPatterns("legalViolations", "fcraViolations")
+	for _, violation := range fcraViolations {
+		if strings.Contains(textLower, strings.ToLower(violation)) {
+			violations = append(violations, violation)
+		}
+	}
+	
+	// Check for credit impact patterns
+	creditImpacts := ca.getPatterns("legalViolations", "creditImpactPatterns")
+	for _, impact := range creditImpacts {
+		if strings.Contains(textLower, strings.ToLower(impact)) {
+			violations = append(violations, "Credit Impact: " + impact)
+		}
+	}
+	
+	result.LegalViolations = ca.removeDuplicates(violations)
+}
+
+// Helper methods
+func (ca *ContentAnalyzer) getDocumentTypeFromPath(documentPath string) string {
+	filename := strings.ToLower(documentPath)
+	if strings.Contains(filename, "attorney") || strings.Contains(filename, "atty") {
+		return "Attorney Notes"
+	}
+	if strings.Contains(filename, "adverse") || strings.Contains(filename, "denial") {
+		return "Adverse Action Letter"
+	}
+	if strings.Contains(filename, "summons") {
+		return "Summons"
+	}
+	if strings.Contains(filename, "civil") {
+		return "Civil Cover Sheet"
+	}
+	return "Unknown Document"
+}
+
+func (ca *ContentAnalyzer) getEnhancedPatterns(category, subcategory, patternType string) []string {
+	if categoryData, ok := ca.Patterns[category].(map[string]interface{}); ok {
+		if subData, ok := categoryData[subcategory].(map[string]interface{}); ok {
+			if patterns, ok := subData[patternType].([]interface{}); ok {
+				result := make([]string, len(patterns))
+				for i, pattern := range patterns {
+					if str, ok := pattern.(string); ok {
+						result[i] = str
+					}
+				}
+				return result
+			}
+		}
+	}
+	return []string{}
+}
+
+func (ca *ContentAnalyzer) extractWithPatternsEnhanced(text, category, patternType, field string, target map[string]ExtractionResult, docType string) {
+	patterns := ca.getPatterns(category, patternType)
+	
+	for _, pattern := range patterns {
+		re, err := regexp.Compile(`(?i)` + pattern)
+		if err != nil {
+			continue
+		}
+		
+		matches := re.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			value := strings.TrimSpace(matches[1])
+			if value != "" {
+				target[field] = ExtractionResult{
+					Field:      field,
+					Value:      value,
+					Confidence: 0.8,
+					Source:     docType,
+					Method:     "Enhanced Pattern Matching",
+					Location:   re.FindStringIndex(text)[0],
+				}
+				break
+			}
+		}
+	}
+}
+
+func (ca *ContentAnalyzer) removeDuplicates(slice []string) []string {
+	keys := make(map[string]bool)
+	result := []string{}
+	
+	for _, item := range slice {
+		if !keys[item] {
+			keys[item] = true
+			result = append(result, item)
+		}
+	}
+	return result
 }
 
 // extractClientData extracts client-specific information
