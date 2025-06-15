@@ -1,0 +1,30 @@
+{
+  "sessionId": "temp_session",
+  "workflowState": {
+    "icloudConnected": false,
+    "icloudUsername": "",
+    "selectedParentFolder": "",
+    "selectedCaseFolder": "/CASES/Eman_Youseef",
+    "availableDocuments": null,
+    "selectedDocuments": [
+      "/CASES/Eman_Youseef/Adverse_Action_Letter_Cap_One.pdf",
+      "/CASES/Eman_Youseef/Atty_Notes.docx",
+      "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_1.docx",
+      "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_2.docx",
+      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf",
+      "/CASES/Eman_Youseef/Complaint_Final.docx",
+      "/CASES/Eman_Youseef/SummonsEquifax.pdf",
+      "/CASES/Eman_Youseef/Summons_Experian.pdf",
+      "/CASES/Eman_Youseef/Summons_TD Bank.pdf",
+      "/CASES/Eman_Youseef/Summons_Trans Union.pdf",
+      "/CASES/Eman_Youseef/generated_complaint_eman_youssef_20250602_105238.pdf"
+    ],
+    "selectedTemplate": "fcra-credit-card-fraud",
+    "currentStep": 3,
+    "lastUpdated": "2025-06-14T22:10:42.163621-04:00",
+    "username": ""
+  },
+  "createdAt": "2025-06-14T17:23:46.945963-04:00",
+  "lastAccessed": "2025-06-14T22:10:42.163621-04:00",
+  "expiresAt": "2025-06-15T17:23:46.945963-04:00"
+}

@@ -1,0 +1,263 @@
+{
+  "natureOfSuitCodes": {
+    "190": {
+      "code": "190",
+      "description": "Other Contract Actions",
+      "category": "Contract",
+      "fcraApplicability": true,
+      "strategicBenefits": [
+        "Broad contract jurisdiction",
+        "Standard procedural timeline",
+        "Flexible pleading standards",
+        "No heightened proof requirements",
+        "Allows federal question and diversity jurisdiction"
+      ],
+      "typicalTimeline": "12-18 months",
+      "complexityLevel": "moderate"
+    },
+    "440": {
+      "code": "440",
+      "description": "Other Civil Rights",
+      "category": "Civil Rights", 
+      "fcraApplicability": true,
+      "strategicBenefits": [
+        "Enhanced damages potential",
+        "Attorney fee shifting under Section 1988",
+        "Jury appeal for civil rights violations",
+        "Potential punitive damages",
+        "Heightened statutory protections"
+      ],
+      "typicalTimeline": "18-24 months",
+      "complexityLevel": "complex"
+    },
+    "790": {
+      "code": "790",
+      "description": "Other Labor Litigation",
+      "category": "Labor",
+      "fcraApplicability": false,
+      "strategicBenefits": [
+        "Consumer protection emphasis",
+        "Workplace rights framework",
+        "Federal labor law protections"
+      ],
+      "typicalTimeline": "15-20 months",
+      "complexityLevel": "moderate"
+    },
+    "896": {
+      "code": "896",
+      "description": "Arbitration",
+      "category": "Alternative Dispute Resolution",
+      "fcraApplicability": false,
+      "strategicBenefits": [
+        "Expedited resolution",
+        "Lower costs",
+        "Private proceedings"
+      ],
+      "typicalTimeline": "6-12 months", 
+      "complexityLevel": "simple"
+    },
+    "370": {
+      "code": "370",
+      "description": "Other Fraud",
+      "category": "Fraud",
+      "fcraApplicability": true,
+      "strategicBenefits": [
+        "Fraud-based damages",
+        "Enhanced credibility with juries",
+        "Potential for punitive damages",
+        "Strong equitable relief"
+      ],
+      "typicalTimeline": "18-30 months",
+      "complexityLevel": "complex"
+    }
+  },
+  "fcraClassifications": {
+    "contract_actions": {
+      "code": "190",
+      "description": "Other Contract Actions",
+      "applicability": "FCRA cases as federal contract claims",
+      "strategicNotes": [
+        "Most common classification for FCRA cases",
+        "Broad classification allowing flexibility in legal theory",
+        "No special requirements or heightened pleading standards",
+        "Works for both willful and negligent FCRA violations"
+      ],
+      "damageImplications": [
+        "Actual damages under 15 U.S.C. § 1681o",
+        "Statutory damages $100-$1000 under 15 U.S.C. § 1681n",
+        "Attorney fees under 15 U.S.C. § 1681o(a)(3)",
+        "Punitive damages for willful violations"
+      ],
+      "proceduralAdvantages": [
+        "Standard discovery rules apply",
+        "No heightened motion to dismiss standards",
+        "Jury trials available",
+        "Class action potential under Rule 23"
+      ]
+    },
+    "civil_rights": {
+      "code": "440", 
+      "description": "Other Civil Rights",
+      "applicability": "FCRA as civil rights statute",
+      "strategicNotes": [
+        "Emphasizes consumer civil rights aspects of FCRA",
+        "May enhance jury appeal and damage awards",
+        "Potential for enhanced attorney fee awards",
+        "Aligns with civil rights statutory framework"
+      ],
+      "damageImplications": [
+        "Enhanced damages potential due to civil rights framing",
+        "Potential Section 1988 attorney fee enhancement",
+        "Punitive damages more likely with civil rights violations",
+        "Pain and suffering damages may be more acceptable"
+      ],
+      "proceduralAdvantages": [
+        "Civil rights procedural protections",
+        "Enhanced attorney fee shifting",
+        "Potential for expedited proceedings",
+        "Strong anti-retaliation protections"
+      ]
+    },
+    "fraud_actions": {
+      "code": "370",
+      "description": "Other Fraud", 
+      "applicability": "FCRA violations involving fraudulent credit reporting",
+      "strategicNotes": [
+        "Applicable when credit bureaus knowingly report false information",
+        "Strong jury appeal due to fraud allegations",
+        "Enhanced damages potential",
+        "Requires proof of fraudulent intent"
+      ],
+      "damageImplications": [
+        "Fraud-based damages including consequential losses",
+        "Enhanced punitive damages for fraudulent conduct",
+        "Emotional distress damages more likely",
+        "Business losses and opportunity costs recoverable"
+      ],
+      "proceduralAdvantages": [
+        "Fraud discovery rules may apply",
+        "Enhanced investigation powers",
+        "Potential for preliminary injunctive relief",
+        "Strong settlement leverage"
+      ]
+    }
+  },
+  "strategicAnalysis": {
+    "code_190_strategy": {
+      "benefits": [
+        "Maximum flexibility in legal theory development",
+        "No heightened pleading requirements",
+        "Broad discovery allowed",
+        "Standard procedural timeline",
+        "Well-established FCRA precedent under this classification"
+      ],
+      "drawbacks": [
+        "Less emotional appeal than civil rights framing",
+        "Standard damage limitations",
+        "No enhanced attorney fee provisions",
+        "May not emphasize consumer protection aspects"
+      ],
+      "selectionCriteria": [
+        "Straightforward FCRA violation without willful conduct evidence",
+        "Preference for standard procedural timeline",
+        "Focus on technical FCRA compliance issues",
+        "Multiple defendants with varying violation levels"
+      ],
+      "successFactors": [
+        "Clear FCRA violation documentation",
+        "Strong damages evidence",
+        "Technical compliance expertise",
+        "Efficient case management"
+      ]
+    },
+    "code_440_strategy": {
+      "benefits": [
+        "Enhanced jury appeal through civil rights framing",
+        "Potential for increased damages awards",
+        "Attorney fee enhancement under Section 1988",
+        "Strong anti-discrimination narrative",
+        "Enhanced procedural protections"
+      ],
+      "drawbacks": [
+        "Higher complexity and longer timeline",
+        "Potential heightened pleading requirements",
+        "Need to establish civil rights violation framework",
+        "More extensive discovery and motion practice"
+      ],
+      "selectionCriteria": [
+        "Strong evidence of willful FCRA violations",
+        "Discriminatory impact or intent evidence",
+        "High-damage case justifying complexity",
+        "Client willing to pursue longer litigation"
+      ],
+      "successFactors": [
+        "Clear willful violation evidence",
+        "Strong discriminatory impact documentation",
+        "Significant damages justifying enhanced approach",
+        "Expert civil rights litigation capability"
+      ]
+    },
+    "code_370_strategy": {
+      "benefits": [
+        "Fraud allegations enhance settlement leverage",
+        "Jury appeal through fraud narrative",
+        "Enhanced punitive damages potential",
+        "Broader consequential damages recovery",
+        "Strong equitable relief arguments"
+      ],
+      "drawbacks": [
+        "High burden of proof for fraud elements",
+        "Complex discovery and expert witness requirements",
+        "Longer litigation timeline",
+        "Risk of sanctions for unsupported fraud allegations"
+      ],
+      "selectionCriteria": [
+        "Clear evidence of knowing false reporting",
+        "Documentation of fraudulent intent",
+        "High-value case justifying fraud litigation",
+        "Strong evidence of deliberate misconduct"
+      ],
+      "successFactors": [
+        "Clear fraudulent intent documentation",
+        "Expert witnesses on industry standards",
+        "Comprehensive damages analysis",
+        "Strong investigation and discovery capabilities"
+      ]
+    }
+  },
+  "classificationRecommendations": {
+    "fcra_standard_case": {
+      "recommendedCode": "190",
+      "reasoning": "Most FCRA cases benefit from the flexibility and established precedent of Other Contract Actions",
+      "alternatives": ["440", "370"],
+      "decisionFactors": [
+        "Strength of willful violation evidence",
+        "Damages amount and complexity", 
+        "Client timeline preferences",
+        "Available litigation resources"
+      ]
+    },
+    "fcra_willful_violations": {
+      "recommendedCode": "440",
+      "reasoning": "Strong willful violation evidence supports civil rights classification for enhanced damages",
+      "alternatives": ["190", "370"],
+      "decisionFactors": [
+        "Quality of willful violation evidence",
+        "Discriminatory impact potential",
+        "Damages justifying complexity",
+        "Attorney fee recovery importance"
+      ]
+    },
+    "fcra_fraud_cases": {
+      "recommendedCode": "370",
+      "reasoning": "Clear fraudulent intent justifies fraud classification for maximum damages and settlement leverage",
+      "alternatives": ["190", "440"],
+      "decisionFactors": [
+        "Strength of fraudulent intent evidence",
+        "Damages sufficient to justify complexity",
+        "Client risk tolerance",
+        "Available fraud litigation expertise"
+      ]
+    }
+  }
+}

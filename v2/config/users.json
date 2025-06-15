@@ -1,6 +1,16 @@
 {
   "users": [
     {
+      "id": "3",
+      "username": "demo",
+      "password": "password",
+      "email": "demo@mallon-law.com",
+      "role": "user",
+      "active": true,
+      "created": "2025-06-13T00:00:00Z",
+      "lastLogin": null
+    },
+    {
       "id": "1",
       "username": "admin",
       "password": "password",
@@ -8,7 +18,7 @@
       "role": "admin",
       "active": true,
       "created": "2025-06-13T00:00:00Z",
-      "lastLogin": "2025-06-14T15:27:50.175935-04:00"
+      "lastLogin": "2025-06-15T18:16:11.213667-04:00"
     },
     {
       "id": "2",
@@ -16,16 +26,6 @@
       "password": "password",
       "email": "kmallon@mallon-law.com",
       "role": "lawyer",
-      "active": true,
-      "created": "2025-06-13T00:00:00Z",
-      "lastLogin": null
-    },
-    {
-      "id": "3",
-      "username": "demo",
-      "password": "password",
-      "email": "demo@mallon-law.com",
-      "role": "user",
       "active": true,
       "created": "2025-06-13T00:00:00Z",
       "lastLogin": null

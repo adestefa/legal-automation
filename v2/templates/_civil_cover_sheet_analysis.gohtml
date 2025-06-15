@@ -1,0 +1,281 @@
+{{if .civil_cover_sheet_analysis}}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V4H6z" clip-rule="evenodd"/>
+            <path d="M8 6h4v2H8V6zm0 4h4v2H8v-2z"/>
+        </svg>
+        Civil Cover Sheet Legal Analysis
+    </h3>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Case Information -->
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-medium text-gray-900 mb-2">Case Information</h4>
+                <div class="bg-gray-50 rounded p-3 space-y-2">
+                    {{with .civil_cover_sheet_analysis.CaseInformation}}
+                    {{if .CaseNumber}}<p><span class="font-medium">Case Number:</span> {{.CaseNumber}}</p>{{end}}
+                    {{if .CaseTitle}}<p><span class="font-medium">Case Title:</span> {{.CaseTitle}}</p>{{end}}
+                    {{if .Court}}<p><span class="font-medium">Court:</span> {{.Court}}</p>{{end}}
+                    {{if .District}}<p><span class="font-medium">District:</span> {{.District}}</p>{{end}}
+                    {{end}}
+                </div>
+            </div>
+            
+            <!-- Nature of Suit Classification -->
+            <div>
+                <h4 class="font-medium text-gray-900 mb-2">Nature of Suit Classification</h4>
+                <div class="bg-gray-50 rounded p-3 space-y-2">
+                    {{with .civil_cover_sheet_analysis.NatureOfSuit}}
+                    {{if .PrimaryCode}}
+                    <p><span class="font-medium">Code:</span> 
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{.PrimaryCode}}
+                        </span>
+                    </p>
+                    {{end}}
+                    {{if .PrimaryDescription}}<p><span class="font-medium">Description:</span> {{.PrimaryDescription}}</p>{{end}}
+                    {{if .ComplexityLevel}}<p><span class="font-medium">Complexity:</span> {{.ComplexityLevel}}</p>{{end}}
+                    {{if .FCRASpecific}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        FCRA Specific Case
+                    </span></p>
+                    {{end}}
+                    {{if .ClassActionPotential}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        Class Action Potential
+                    </span></p>
+                    {{end}}
+                    {{if .StrategicImplications}}
+                    <div class="mt-2">
+                        <p class="font-medium text-sm">Strategic Implications:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1">
+                            {{range .StrategicImplications}}
+                            <li>{{.}}</li>
+                            {{end}}
+                        </ul>
+                    </div>
+                    {{end}}
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Jurisdiction Analysis -->
+        <div class="space-y-4">
+            <div>
+                <h4 class="font-medium text-gray-900 mb-2">Jurisdiction Analysis</h4>
+                <div class="bg-gray-50 rounded p-3 space-y-2">
+                    {{with .civil_cover_sheet_analysis.JurisdictionAnalysis}}
+                    {{if .BasisType}}<p><span class="font-medium">Basis:</span> {{.BasisType}}</p>{{end}}
+                    {{if .FederalQuestion}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Federal Question Jurisdiction
+                    </span></p>
+                    {{end}}
+                    {{if .DiversityJurisdiction}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Diversity Jurisdiction
+                    </span></p>
+                    {{end}}
+                    {{if .AmountInControversy}}
+                    <p><span class="font-medium">Amount in Controversy:</span> ${{printf "%.2f" .AmountInControversy}}</p>
+                    {{end}}
+                    {{if .FederalStatutes}}
+                    <div class="mt-2">
+                        <p class="font-medium text-sm">Federal Statutes:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1">
+                            {{range .FederalStatutes}}
+                            <li>{{.}}</li>
+                            {{end}}
+                        </ul>
+                    </div>
+                    {{end}}
+                    {{if .JurisdictionConfidence}}
+                    <div class="mt-2">
+                        <p class="font-medium text-sm">Confidence Score:</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{printf "%.0f" (mul .JurisdictionConfidence 100)}}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">{{printf "%.1f" (mul .JurisdictionConfidence 100)}}% confident</p>
+                    </div>
+                    {{end}}
+                    {{end}}
+                </div>
+            </div>
+            
+            <!-- Procedural Requirements -->
+            <div>
+                <h4 class="font-medium text-gray-900 mb-2">Procedural Requirements</h4>
+                <div class="bg-gray-50 rounded p-3 space-y-2">
+                    {{with .civil_cover_sheet_analysis.ProceduralRequirements}}
+                    {{if .JuryDemand}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Jury Trial Demanded
+                    </span></p>
+                    {{else}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Bench Trial
+                    </span></p>
+                    {{end}}
+                    {{if ne .ClassActionStatus "none"}}
+                    <p><span class="font-medium">Class Action Status:</span> {{.ClassActionStatus}}</p>
+                    {{end}}
+                    {{if .MDLStatus}}
+                    <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        MDL Potential
+                    </span></p>
+                    {{end}}
+                    {{if .RelatedCaseExists}}
+                    <p><span class="font-medium">Related Cases:</span> Yes</p>
+                    {{if .RelatedCaseNumbers}}
+                    <ul class="list-disc list-inside text-sm text-gray-600 mt-1">
+                        {{range .RelatedCaseNumbers}}
+                        <li>{{.}}</li>
+                        {{end}}
+                    </ul>
+                    {{end}}
+                    {{end}}
+                    {{if .ProceduralNotes}}
+                    <div class="mt-2">
+                        <p class="font-medium text-sm">Procedural Notes:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-1">
+                            {{range .ProceduralNotes}}
+                            <li>{{.}}</li>
+                            {{end}}
+                        </ul>
+                    </div>
+                    {{end}}
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Venue Analysis -->
+    {{with .civil_cover_sheet_analysis.VenueAnalysis}}
+    <div class="mt-6">
+        <h4 class="font-medium text-gray-900 mb-2">Venue Analysis</h4>
+        <div class="bg-gray-50 rounded p-3 space-y-2">
+            {{if .VenueProper}}
+            <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Venue Proper
+            </span></p>
+            {{else}}
+            <p><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                Venue Questionable
+            </span></p>
+            {{end}}
+            {{if .VenueStrength}}<p><span class="font-medium">Venue Strength:</span> {{.VenueStrength}}</p>{{end}}
+            {{if .VenueBasis}}
+            <div class="mt-2">
+                <p class="font-medium text-sm">Venue Basis:</p>
+                <ul class="list-disc list-inside text-sm text-gray-600 mt-1">
+                    {{range .VenueBasis}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+            </div>
+            {{end}}
+            {{if .VenueConfidence}}
+            <div class="mt-2">
+                <p class="font-medium text-sm">Venue Confidence:</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: {{printf "%.0f" (mul .VenueConfidence 100)}}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">{{printf "%.1f" (mul .VenueConfidence 100)}}% confident</p>
+            </div>
+            {{end}}
+            {{if .AlternativeVenues}}
+            <div class="mt-2">
+                <p class="font-medium text-sm">Alternative Venues:</p>
+                <ul class="list-disc list-inside text-sm text-gray-600 mt-1">
+                    {{range .AlternativeVenues}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+            </div>
+            {{end}}
+            {{if .TransferPotential.TransferLikely}}
+            <div class="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
+                <p class="text-sm font-medium text-yellow-800">⚠️ Transfer Motion Risk</p>
+                {{if .TransferPotential.TransferReasons}}
+                <ul class="list-disc list-inside text-sm text-yellow-700 mt-1">
+                    {{range .TransferPotential.TransferReasons}}
+                    <li>{{.}}</li>
+                    {{end}}
+                </ul>
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+    
+    <!-- Strategic Analysis -->
+    {{with .civil_cover_sheet_analysis.StrategicAnalysis}}
+    <div class="mt-6">
+        <h4 class="font-medium text-gray-900 mb-2">Strategic Analysis</h4>
+        <div class="bg-gray-50 rounded p-3 space-y-3">
+            {{if .CaseStrength}}
+            <div>
+                <p class="font-medium text-sm">Case Strength Score:</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{printf "%.0f" (mul .CaseStrength 100)}}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">{{printf "%.1f" (mul .CaseStrength 100)}}% strength</p>
+            </div>
+            {{end}}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{if .StrategicAdvantages}}
+                <div>
+                    <p class="font-medium text-sm text-green-800">Strategic Advantages:</p>
+                    <ul class="list-disc list-inside text-sm text-green-700 mt-1">
+                        {{range .StrategicAdvantages}}
+                        <li>{{.}}</li>
+                        {{end}}
+                    </ul>
+                </div>
+                {{end}}
+                
+                {{if .PotentialWeaknesses}}
+                <div>
+                    <p class="font-medium text-sm text-red-800">Potential Weaknesses:</p>
+                    <ul class="list-disc list-inside text-sm text-red-700 mt-1">
+                        {{range .PotentialWeaknesses}}
+                        <li>{{.}}</li>
+                        {{end}}
+                    </ul>
+                </div>
+                {{end}}
+            </div>
+            
+            {{if .RecommendedStrategy}}
+            <div class="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
+                <p class="font-medium text-sm text-blue-800">Recommended Strategy:</p>
+                <p class="text-sm text-blue-700 mt-1">{{.RecommendedStrategy}}</p>
+            </div>
+            {{end}}
+            
+            {{if .LitigationTimeline}}
+            <p><span class="font-medium">Expected Timeline:</span> {{.LitigationTimeline}}</p>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+    
+    <!-- Analysis Metadata -->
+    <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">
+                Analysis completed with {{printf "%.1f" (mul .civil_cover_sheet_analysis.AnalysisMetadata.ConfidenceScore 100)}}% confidence
+            </p>
+            <p class="text-sm text-gray-500">
+                Processing time: {{.civil_cover_sheet_analysis.AnalysisMetadata.ProcessingTime}}
+            </p>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,110 @@
+{
+  "sessionId": "demo_session_token",
+  "workflowState": {
+    "icloudConnected": true,
+    "icloudUsername": "anthony.destefano@gmail.com",
+    "selectedParentFolder": "/CASES",
+    "selectedCaseFolder": "/CASES/Eman_Youseef",
+    "availableDocuments": null,
+    "selectedDocuments": [
+      "/CASES/Eman_Youseef/Adverse_Action_Letter_Cap_One.pdf",
+      "/CASES/Eman_Youseef/Atty_Notes.docx",
+      "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_1.docx",
+      "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_2.docx",
+      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf",
+      "/CASES/Eman_Youseef/Complaint_Final.docx",
+      "/CASES/Eman_Youseef/SummonsEquifax.pdf",
+      "/CASES/Eman_Youseef/Summons_Experian.pdf"
+    ],
+    "selectedTemplate": "fcra-credit-card-fraud",
+    "processingResult": {
+      "selectedDocuments": [],
+      "extractedData": {
+        "analysisResults": {},
+        "dynamicExtraction": true,
+        "extractedViolations": [],
+        "totalConfidence": 0
+      },
+      "missingContent": [
+        {
+          "field": "Client Name",
+          "description": "Client name is required for legal documents",
+          "source": "Attorney Notes",
+          "required": true
+        },
+        {
+          "field": "Contact Information",
+          "description": "Client contact information",
+          "source": "Attorney Notes",
+          "required": true
+        },
+        {
+          "field": "Fraud Amount",
+          "description": "Amount of fraudulent charges",
+          "source": "Attorney Notes or Adverse Action Letters",
+          "required": true
+        },
+        {
+          "field": "Financial Institution",
+          "description": "Bank or credit card company involved",
+          "source": "Attorney Notes or Documents",
+          "required": true
+        },
+        {
+          "field": "Attorney Notes",
+          "description": "Attorney notes containing case details and client information",
+          "source": "Attorney Notes Document",
+          "required": true
+        },
+        {
+          "field": "Credit Impact Details",
+          "description": "Documentation of credit denials or impacts",
+          "source": "Adverse Action Letters",
+          "required": true
+        }
+      ],
+      "dataCoverage": 12.5
+    },
+    "clientCase": {
+      "clientName": "",
+      "contactInfo": "",
+      "residenceLocation": "",
+      "courtJurisdiction": "",
+      "caseNumber": "",
+      "financialInstitution": "",
+      "accountOpenDate": "0001-01-01T00:00:00Z",
+      "creditLimit": "",
+      "travelLocation": "",
+      "travelStartDate": "0001-01-01T00:00:00Z",
+      "travelEndDate": "0001-01-01T00:00:00Z",
+      "fraudAmount": "",
+      "fraudStartDate": "0001-01-01T00:00:00Z",
+      "fraudEndDate": "0001-01-01T00:00:00Z",
+      "fraudDetails": "",
+      "fraudDetailsStructured": null,
+      "discoveryDate": "0001-01-01T00:00:00Z",
+      "disputeCount": 0,
+      "disputeMethods": null,
+      "bankResponse": "",
+      "policeReportFiled": false,
+      "policeReportDetails": "",
+      "creditBureauDisputes": [
+        "Experian",
+        "Equifax",
+        "Trans Union"
+      ],
+      "creditBureauDisputeDate": "0001-01-01T00:00:00Z",
+      "creditBureauInteractions": null,
+      "defendants": null,
+      "estimatedDamages": 0,
+      "additionalEvidence": "",
+      "creditImpact": ""
+    },
+    "currentStep": 3,
+    "lastUpdated": "2025-06-14T17:26:01.355399-04:00",
+    "username": ""
+  },
+  "createdAt": "2025-06-14T14:11:45.018426-04:00",
+  "lastAccessed": "2025-06-14T17:26:01.355399-04:00",
+  "expiresAt": "2025-06-15T14:11:45.018426-04:00"
+}

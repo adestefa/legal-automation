@@ -1,0 +1,297 @@
+{
+  "venueStatutoryFramework": {
+    "primaryStatute": "28 U.S.C. § 1391",
+    "applicableSubsections": {
+      "1391_b_1": {
+        "description": "District where any defendant resides, if all defendants reside in same state",
+        "applicability": "general_venue_rule",
+        "weight": 0.4,
+        "requirements": [
+          "all_defendants_reside_same_state",
+          "district_within_state_of_residence"
+        ]
+      },
+      "1391_b_2": {
+        "description": "District where substantial part of events or omissions occurred",
+        "applicability": "event_based_venue",
+        "weight": 0.4,
+        "requirements": [
+          "substantial_part_events_in_district",
+          "events_material_to_claims"
+        ]
+      },
+      "1391_b_3": {
+        "description": "Any district where any defendant is subject to personal jurisdiction",
+        "applicability": "fallback_venue",
+        "weight": 0.2,
+        "requirements": [
+          "no_other_venue_available",
+          "personal_jurisdiction_exists"
+        ]
+      }
+    }
+  },
+  "fcraSpecificVenueFactors": {
+    "consumer_residence_venue": {
+      "description": "District where consumer plaintiff resides",
+      "strength": "very_strong",
+      "weight": 0.5,
+      "basis": "28 U.S.C. § 1391(b)(2) - substantial part of events",
+      "reasoning": [
+        "consumer_receives_credit_report_at_residence",
+        "harm_occurs_where_consumer_lives",
+        "credit_decisions_affect_local_activities",
+        "fcra_designed_to_protect_consumers_locally"
+      ],
+      "caselaw": [
+        "consumers_typically_receive_reports_at_home",
+        "credit_decisions_impact_local_community",
+        "fcra_consumer_protection_focus"
+      ]
+    },
+    "defendant_headquarters": {
+      "description": "District where defendant has principal place of business",
+      "strength": "strong",
+      "weight": 0.3,
+      "basis": "28 U.S.C. § 1391(b)(1) - defendant residence",
+      "corporateResidenceRules": {
+        "corporation": "principal_place_of_business",
+        "llc": "principal_place_of_business", 
+        "partnership": "principal_place_of_business",
+        "individual": "domicile"
+      }
+    },
+    "data_processing_location": {
+      "description": "District where credit reporting data is processed",
+      "strength": "moderate",
+      "weight": 0.15,
+      "basis": "28 U.S.C. § 1391(b)(2) - substantial part of events",
+      "considerations": [
+        "where_credit_report_generated",
+        "where_data_aggregated",
+        "where_decisions_made_regarding_reporting"
+      ]
+    },
+    "creditor_location": {
+      "description": "District where furnishing creditor operates", 
+      "strength": "weak",
+      "weight": 0.05,
+      "basis": "28 U.S.C. § 1391(b)(2) - events contributing to claim",
+      "applicability": "when_creditor_also_defendant"
+    }
+  },
+  "venueStrengthAnalysis": {
+    "very_strong_venue": {
+      "criteria": [
+        "consumer_residence_with_supporting_facts",
+        "all_defendants_subject_to_jurisdiction",
+        "no_obvious_transfer_motion_grounds"
+      ],
+      "confidence": 0.9,
+      "transferRisk": "low"
+    },
+    "strong_venue": {
+      "criteria": [
+        "defendant_principal_place_business",
+        "substantial_events_in_district", 
+        "personal_jurisdiction_clear"
+      ],
+      "confidence": 0.75,
+      "transferRisk": "low_to_moderate"
+    },
+    "moderate_venue": {
+      "criteria": [
+        "fallback_jurisdiction_only",
+        "some_events_in_district",
+        "alternative_venues_available"
+      ],
+      "confidence": 0.5,
+      "transferRisk": "moderate"
+    },
+    "weak_venue": {
+      "criteria": [
+        "minimal_connection_to_district",
+        "stronger_alternative_venues_exist",
+        "convenience_factors_favor_transfer"
+      ],
+      "confidence": 0.25,
+      "transferRisk": "high"
+    }
+  },
+  "transferAnalysisFactors": {
+    "section_1404_factors": {
+      "plaintiff_choice": {
+        "description": "Plaintiff's choice of forum entitled to deference",
+        "weight": 0.2,
+        "favorTransfer": false,
+        "considerations": [
+          "strong_deference_when_venue_proper",
+          "less_deference_if_forum_shopping",
+          "reduced_weight_for_non_resident_plaintiffs"
+        ]
+      },
+      "convenience_of_parties": {
+        "description": "Ease of access for parties and witnesses",
+        "weight": 0.25,
+        "factors": [
+          "party_residence_proximity",
+          "witness_location_and_availability",
+          "cost_of_attendance",
+          "ability_to_compel_attendance"
+        ]
+      },
+      "convenience_of_witnesses": {
+        "description": "Location and availability of witnesses",
+        "weight": 0.2,
+        "factors": [
+          "third_party_witness_location",
+          "cost_of_witness_attendance",
+          "subpoena_power_limitations",
+          "witness_willingness_to_travel"
+        ]
+      },
+      "location_of_relevant_documents": {
+        "description": "Where key documents and evidence located",
+        "weight": 0.1,
+        "modernFactors": [
+          "electronic_document_storage",
+          "cloud_based_systems_reduce_relevance",
+          "physical_evidence_still_relevant"
+        ]
+      },
+      "public_interest_factors": {
+        "description": "Interest of forum state in resolution",
+        "weight": 0.25,
+        "factors": [
+          "local_interest_in_controversy",
+          "familiarity_with_governing_law",
+          "relative_court_congestion",
+          "local_resolution_preference"
+        ]
+      }
+    }
+  },
+  "fcraVenueStrategies": {
+    "consumer_residence_strategy": {
+      "recommended": true,
+      "advantages": [
+        "strongest_venue_argument_under_1391_b_2",
+        "harm_occurs_where_consumer_lives",
+        "local_jury_sympathy_for_consumer",
+        "convenience_for_individual_plaintiff"
+      ],
+      "requirementss": [
+        "plaintiff_residence_well_documented",
+        "credit_report_received_at_residence",
+        "harm_manifested_locally"
+      ],
+      "transferDefenses": [
+        "emphasize_local_harm_to_consumer",
+        "highlight_inconvenience_to_individual_plaintiff",
+        "demonstrate_local_witness_availability",
+        "show_local_interest_in_consumer_protection"
+      ]
+    },
+    "multi_defendant_strategy": {
+      "challenge": "defendants_in_different_states",
+      "solutions": [
+        "focus_on_primary_defendant_location",
+        "emphasize_consumer_residence_venue",
+        "argue_judicial_economy_keeping_together"
+      ],
+      "riskMitigation": [
+        "anticipate_transfer_motions",
+        "prepare_convenience_arguments",
+        "document_local_connections"
+      ]
+    },
+    "credit_bureau_venue": {
+      "equifax": {
+        "primaryVenue": "Northern District of Georgia (Atlanta)",
+        "alternativeVenues": ["consumer_residence_districts"],
+        "transferLikelihood": "moderate_if_not_consumer_residence"
+      },
+      "experian": {
+        "primaryVenue": "Central District of California (Costa Mesa)",
+        "alternativeVenues": ["consumer_residence_districts"],
+        "transferLikelihood": "moderate_if_not_consumer_residence"
+      },
+      "transUnion": {
+        "primaryVenue": "Northern District of Illinois (Chicago)",
+        "alternativeVenues": ["consumer_residence_districts"],
+        "transferLikelihood": "moderate_if_not_consumer_residence"
+      }
+    }
+  },
+  "venueValidationChecklist": {
+    "statutory_requirements": [
+      {
+        "requirement": "venue_proper_under_1391",
+        "validation": "check_residence_and_events_analysis"
+      },
+      {
+        "requirement": "personal_jurisdiction_exists", 
+        "validation": "confirm_minimum_contacts_and_due_process"
+      },
+      {
+        "requirement": "subject_matter_jurisdiction_proper",
+        "validation": "verify_federal_question_or_diversity"
+      }
+    ],
+    "strategic_considerations": [
+      {
+        "consideration": "transfer_motion_likelihood",
+        "assessment": "evaluate_1404_factors_strength"
+      },
+      {
+        "consideration": "local_jury_favorability",
+        "assessment": "research_district_consumer_verdict_history"
+      },
+      {
+        "consideration": "judicial_efficiency",
+        "assessment": "consider_related_cases_and_mdl_potential"
+      }
+    ]
+  },
+  "commonVenueIssues": {
+    "improper_venue": {
+      "description": "Venue does not satisfy 28 U.S.C. § 1391 requirements",
+      "consequences": [
+        "motion_to_dismiss_under_rule_12_b_3",
+        "transfer_to_proper_venue",
+        "waiver_if_not_timely_raised"
+      ],
+      "prevention": [
+        "careful_statutory_analysis",
+        "document_venue_basis_clearly",
+        "consider_alternative_venue_options"
+      ]
+    },
+    "inconvenient_venue": {
+      "description": "Venue proper but inconvenient under § 1404(a)",
+      "consequences": [
+        "discretionary_transfer_motion_granted",
+        "increased_litigation_costs",
+        "potential_delay_in_proceedings"
+      ],
+      "prevention": [
+        "choose_venue_considering_convenience_factors",
+        "document_local_connections",
+        "prepare_transfer_opposition_early"
+      ]
+    },
+    "forum_shopping_allegations": {
+      "description": "Choice appears motivated by tactical advantage",
+      "consequences": [
+        "reduced_deference_to_plaintiff_choice",
+        "increased_transfer_likelihood",
+        "negative_judicial_perception"
+      ],
+      "prevention": [
+        "document_legitimate_venue_basis",
+        "emphasize_substantive_connections",
+        "avoid_obvious_tactical_choices"
+      ]
+    }
+  }
+}

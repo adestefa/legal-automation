@@ -139,6 +139,9 @@ func NewUIHandlers() *UIHandlers {
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"mul": func(a, b float64) float64 {
+			return a * b
+		},
 	})
 	
 	// Parse template files
