@@ -1,0 +1,349 @@
+{
+  "creditBureaus": {
+    "equifax": {
+      "officialName": "Equifax Information Services, LLC",
+      "aliases": [
+        "Equifax Information Services LLC",
+        "Equifax Inc.",
+        "Equifax, LLC",
+        "Equifax Information Services"
+      ],
+      "corporateStructure": {
+        "entityType": "Limited Liability Company",
+        "stateOfIncorporation": "Georgia",
+        "parentCompany": "Equifax Inc.",
+        "businessType": "Consumer Reporting Agency"
+      },
+      "contactInformation": {
+        "headquarters": {
+          "street": "1550 Peachtree Street NE",
+          "city": "Atlanta",
+          "state": "GA",
+          "zipCode": "30309",
+          "country": "USA"
+        },
+        "mailingAddress": {
+          "street": "P.O. Box 740256",
+          "city": "Atlanta",
+          "state": "GA",
+          "zipCode": "30374",
+          "country": "USA"
+        },
+        "registeredAgent": {
+          "name": "Corporation Service Company",
+          "address": {
+            "street": "40 Technology Parkway South",
+            "suite": "300",
+            "city": "Norcross",
+            "state": "GA",
+            "zipCode": "30092"
+          }
+        }
+      },
+      "legalInformation": {
+        "federalTaxId": "58-0401110",
+        "businessRegistration": "Georgia LLC",
+        "primaryBusiness": "Consumer credit reporting and information services",
+        "regulatoryOversight": ["CFPB", "FTC", "State Attorneys General"]
+      },
+      "serviceRequirements": {
+        "preferredMethod": "Registered Agent Service",
+        "alternativeMethods": ["Certified Mail to Headquarters", "Personal Service"],
+        "serviceAddress": {
+          "street": "40 Technology Parkway South, Suite 300",
+          "city": "Norcross",
+          "state": "GA",
+          "zipCode": "30092",
+          "attentionTo": "Corporation Service Company (Registered Agent)"
+        }
+      },
+      "commonViolations": [
+        "15 U.S.C. § 1681e(b) - Reasonable Procedures",
+        "15 U.S.C. § 1681i - Reinvestigation Requirements",
+        "15 U.S.C. § 1681c - Reporting Period Limitations",
+        "15 U.S.C. § 1681g - Disclosure Requirements"
+      ]
+    },
+    "experian": {
+      "officialName": "Experian Information Solutions, Inc.",
+      "aliases": [
+        "Experian Information Solutions Inc.",
+        "Experian Inc.",
+        "Experian, LLC",
+        "Experian Information Solutions"
+      ],
+      "corporateStructure": {
+        "entityType": "Corporation",
+        "stateOfIncorporation": "Delaware",
+        "parentCompany": "Experian plc",
+        "businessType": "Consumer Reporting Agency"
+      },
+      "contactInformation": {
+        "headquarters": {
+          "street": "475 Anton Boulevard",
+          "city": "Costa Mesa",
+          "state": "CA",
+          "zipCode": "92626",
+          "country": "USA"
+        },
+        "mailingAddress": {
+          "street": "P.O. Box 9595",
+          "city": "Allen",
+          "state": "TX",
+          "zipCode": "75013",
+          "country": "USA"
+        },
+        "registeredAgent": {
+          "name": "Corporation Service Company",
+          "address": {
+            "street": "2710 Gateway Oaks Drive",
+            "suite": "150N",
+            "city": "Sacramento",
+            "state": "CA",
+            "zipCode": "95833"
+          }
+        }
+      },
+      "legalInformation": {
+        "federalTaxId": "95-2706287",
+        "businessRegistration": "Delaware Corporation",
+        "primaryBusiness": "Consumer credit reporting and information services",
+        "regulatoryOversight": ["CFPB", "FTC", "State Attorneys General"]
+      },
+      "serviceRequirements": {
+        "preferredMethod": "Registered Agent Service",
+        "alternativeMethods": ["Certified Mail to Headquarters", "Personal Service"],
+        "serviceAddress": {
+          "street": "2710 Gateway Oaks Drive, Suite 150N",
+          "city": "Sacramento",
+          "state": "CA",
+          "zipCode": "95833",
+          "attentionTo": "Corporation Service Company (Registered Agent)"
+        }
+      },
+      "commonViolations": [
+        "15 U.S.C. § 1681e(b) - Reasonable Procedures",
+        "15 U.S.C. § 1681i - Reinvestigation Requirements",
+        "15 U.S.C. § 1681c - Reporting Period Limitations",
+        "15 U.S.C. § 1681g - Disclosure Requirements"
+      ]
+    },
+    "transunion": {
+      "officialName": "Trans Union LLC",
+      "aliases": [
+        "TransUnion LLC",
+        "Trans Union Information Solutions",
+        "TransUnion Information Solutions",
+        "Trans Union, LLC"
+      ],
+      "corporateStructure": {
+        "entityType": "Limited Liability Company",
+        "stateOfIncorporation": "Delaware",
+        "parentCompany": "TransUnion Intermediate Holdings Inc.",
+        "businessType": "Consumer Reporting Agency"
+      },
+      "contactInformation": {
+        "headquarters": {
+          "street": "555 West Adams Street",
+          "city": "Chicago",
+          "state": "IL",
+          "zipCode": "60661",
+          "country": "USA"
+        },
+        "mailingAddress": {
+          "street": "P.O. Box 1000",
+          "city": "Chester",
+          "state": "PA",
+          "zipCode": "19016",
+          "country": "USA"
+        },
+        "registeredAgent": {
+          "name": "Illinois Corporation Service Company",
+          "address": {
+            "street": "801 Adlai Stevenson Drive",
+            "city": "Springfield",
+            "state": "IL",
+            "zipCode": "62703"
+          }
+        }
+      },
+      "legalInformation": {
+        "federalTaxId": "87-0596769",
+        "businessRegistration": "Delaware LLC",
+        "primaryBusiness": "Consumer credit reporting and information services",
+        "regulatoryOversight": ["CFPB", "FTC", "State Attorneys General"]
+      },
+      "serviceRequirements": {
+        "preferredMethod": "Registered Agent Service",
+        "alternativeMethods": ["Certified Mail to Headquarters", "Personal Service"],
+        "serviceAddress": {
+          "street": "801 Adlai Stevenson Drive",
+          "city": "Springfield",
+          "state": "IL",
+          "zipCode": "62703",
+          "attentionTo": "Illinois Corporation Service Company (Registered Agent)"
+        }
+      },
+      "commonViolations": [
+        "15 U.S.C. § 1681e(b) - Reasonable Procedures",
+        "15 U.S.C. § 1681i - Reinvestigation Requirements",
+        "15 U.S.C. § 1681c - Reporting Period Limitations",
+        "15 U.S.C. § 1681g - Disclosure Requirements"
+      ]
+    }
+  },
+  "creditors": {
+    "tdBank": {
+      "officialName": "TD Bank, N.A.",
+      "aliases": [
+        "TD Bank",
+        "TD Bank, National Association",
+        "The Toronto-Dominion Bank",
+        "Commerce Bank"
+      ],
+      "corporateStructure": {
+        "entityType": "National Banking Association",
+        "stateOfIncorporation": "Federal Charter",
+        "parentCompany": "The Toronto-Dominion Bank",
+        "businessType": "Financial Institution"
+      },
+      "contactInformation": {
+        "headquarters": {
+          "street": "2035 Limestone Road",
+          "city": "Wilmington",
+          "state": "DE",
+          "zipCode": "19808",
+          "country": "USA"
+        },
+        "registeredAgent": {
+          "name": "Corporation Trust Company",
+          "address": {
+            "street": "1209 Orange Street",
+            "city": "Wilmington",
+            "state": "DE",
+            "zipCode": "19801"
+          }
+        }
+      },
+      "legalInformation": {
+        "federalTaxId": "04-2743527",
+        "businessRegistration": "National Banking Association",
+        "primaryBusiness": "Banking and financial services",
+        "regulatoryOversight": ["OCC", "FDIC", "Federal Reserve", "CFPB"]
+      },
+      "serviceRequirements": {
+        "preferredMethod": "Registered Agent Service",
+        "alternativeMethods": ["Certified Mail to Headquarters", "Personal Service"],
+        "serviceAddress": {
+          "street": "1209 Orange Street",
+          "city": "Wilmington",
+          "state": "DE",
+          "zipCode": "19801",
+          "attentionTo": "Corporation Trust Company (Registered Agent)"
+        }
+      },
+      "commonViolations": [
+        "15 U.S.C. § 1681s-2 - Furnisher Responsibilities",
+        "15 U.S.C. § 1692 - Fair Debt Collection Practices",
+        "State Consumer Protection Laws"
+      ]
+    }
+  },
+  "serviceOfProcessRequirements": {
+    "federalCourt": {
+      "methods": [
+        "Personal Service on Registered Agent",
+        "Certified Mail to Registered Agent",
+        "Personal Service on Corporate Officer"
+      ],
+      "timeRequirements": {
+        "standardDeadline": "21 days after service",
+        "extendedDeadline": "60 days for good cause"
+      },
+      "complianceChecks": [
+        "Proper defendant identification",
+        "Correct registered agent information",
+        "Valid service address",
+        "Proof of service filed"
+      ]
+    },
+    "stateCourt": {
+      "methods": [
+        "Personal Service on Registered Agent",
+        "Certified Mail Return Receipt Requested",
+        "Personal Service on Corporate Officer"
+      ],
+      "timeRequirements": {
+        "standardDeadline": "20-30 days depending on jurisdiction",
+        "extendedDeadline": "As permitted by state law"
+      },
+      "complianceChecks": [
+        "State-specific service requirements",
+        "Registered agent current status",
+        "Proper venue determination",
+        "Affidavit of service"
+      ]
+    }
+  },
+  "jurisdictionAnalysis": {
+    "personalJurisdiction": {
+      "creditBureaus": {
+        "factors": [
+          "Continuous business operations in forum state",
+          "Credit reports furnished to forum state residents",
+          "Systematic business contacts with forum state",
+          "Registration to do business in forum state"
+        ],
+        "presumptiveJurisdiction": [
+          "State of incorporation",
+          "State of principal place of business",
+          "States where registered to do business"
+        ]
+      }
+    },
+    "venue": {
+      "federalVenue": {
+        "properVenue": [
+          "District where defendant resides",
+          "District where substantial part of events occurred",
+          "District where defendant is subject to personal jurisdiction"
+        ]
+      },
+      "stateVenue": {
+        "properVenue": [
+          "County where defendant resides or does business",
+          "County where cause of action arose",
+          "County where defendant may be found"
+        ]
+      }
+    }
+  },
+  "complianceValidation": {
+    "requiredElements": {
+      "defendantIdentification": [
+        "Complete legal name",
+        "Corporate type (LLC, Inc., etc.)",
+        "State of incorporation",
+        "Principal place of business"
+      ],
+      "serviceInformation": [
+        "Registered agent name and address",
+        "Service method used",
+        "Date and manner of service",
+        "Proof of service documentation"
+      ],
+      "courtRequirements": [
+        "Proper court jurisdiction",
+        "Appropriate venue",
+        "Correct case caption",
+        "Filing fee payment"
+      ]
+    },
+    "validationRules": {
+      "nameAccuracy": "Defendant name must match corporate records exactly",
+      "addressCurrency": "Registered agent address must be current and valid",
+      "serviceCompliance": "Service method must comply with applicable rules",
+      "jurisdictionProper": "Court must have personal jurisdiction over defendant"
+    }
+  }
+}

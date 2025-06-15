@@ -120,6 +120,10 @@ func main() {
 		ui.GET("/view-document", uiHandlers.ViewDocument)
 		ui.GET("/edit-document", uiHandlers.EditDocument)
 		ui.POST("/save-document", uiHandlers.SaveDocument)
+		
+		// Summons analysis endpoints
+		ui.GET("/analyze-summons", uiHandlers.AnalyzeSummons)
+		ui.POST("/analyze-multiple-defendants", uiHandlers.AnalyzeMultipleDefendants)
 	}
 
 	// Initialize user service
@@ -227,8 +231,8 @@ func main() {
 	}
 
 	// Start the server
-	log.Println("[INFO] Starting Satori Legal Assistant Agent v2.10.0 on :8080")
-	log.Printf("[INFO] Features: Dynamic Template Population Engine (Task 4), Persistent Sessions, Real Document Extraction")
+	log.Println("[INFO] Starting Satori Legal Assistant Agent v2.13.0 on :8080")
+	log.Printf("[INFO] Features: Summons Document Analysis Engine (Task 11), Dynamic Template Population Engine (Task 4), Persistent Sessions")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
 	log.Printf("[INFO] Session directory: %s", sessionDir)
