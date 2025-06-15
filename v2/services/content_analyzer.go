@@ -12,10 +12,11 @@ import (
 
 // ContentAnalyzer provides intelligent analysis of extracted document text
 type ContentAnalyzer struct {
-	Patterns           map[string]interface{}
-	Extractors         map[string]FieldExtractor
-	Validators         map[string]ValidationFunc
-	DocumentClassifier *DocumentClassifier
+	Patterns              map[string]interface{}
+	Extractors            map[string]FieldExtractor
+	Validators            map[string]ValidationFunc
+	DocumentClassifier    *DocumentClassifier
+	AdverseActionParser   *AdverseActionParser
 }
 
 // FieldExtractor interface for extracting specific field types
@@ -43,6 +44,7 @@ type LegalAnalysisResult struct {
 	LegalViolations         []string                    `json:"legalViolations"`
 	DocumentTypes           map[string]bool             `json:"documentTypes"`
 	DocumentClassifications []DocumentClassification    `json:"documentClassifications"`
+	AdverseActionLetters    []AdverseActionLetter       `json:"adverseActionLetters"`
 	OverallConfidence       float64                     `json:"overallConfidence"`
 	MissingFields           []string                    `json:"missingFields"`
 	Suggestions             []string                    `json:"suggestions"`
@@ -69,6 +71,16 @@ func NewContentAnalyzer() (*ContentAnalyzer, error) {
 	} else {
 		analyzer.DocumentClassifier = classifier
 		log.Printf("[CONTENT_ANALYZER] Initialized with document classification engine")
+	}
+
+	// Initialize adverse action parser
+	adverseActionParser, err := NewAdverseActionParser()
+	if err != nil {
+		log.Printf("[CONTENT_ANALYZER] Warning: Could not initialize adverse action parser: %v", err)
+		// Continue without parser for backward compatibility
+	} else {
+		analyzer.AdverseActionParser = adverseActionParser
+		log.Printf("[CONTENT_ANALYZER] Initialized with adverse action parsing engine")
 	}
 	
 	// Initialize field extractors
@@ -167,18 +179,39 @@ func (ca *ContentAnalyzer) AnalyzeLegalContent(text string, documentPath string)
 		FraudDetails:            make(map[string]ExtractionResult),
 		DocumentTypes:           make(map[string]bool),
 		DocumentClassifications: []DocumentClassification{},
+		AdverseActionLetters:    []AdverseActionLetter{},
 	}
 	
 	// Classify document using new classification engine
+	var primaryDocType DocumentType = DocumentTypeUnknown
 	if ca.DocumentClassifier != nil {
 		classification, err := ca.DocumentClassifier.ClassifyDocument(documentPath, text)
 		if err == nil {
 			result.DocumentClassifications = append(result.DocumentClassifications, *classification)
+			primaryDocType = classification.PrimaryType
 			log.Printf("[CONTENT_ANALYZER] Document classified as %s with %.1f%% confidence", 
 				ca.DocumentClassifier.GetDocumentTypeName(classification.PrimaryType), 
 				classification.Confidence*100)
 		} else {
 			log.Printf("[CONTENT_ANALYZER] Warning: Document classification failed: %v", err)
+		}
+	}
+
+	// Process adverse action letters with specialized parser
+	if primaryDocType == DocumentTypeAdverseActionLetter && ca.AdverseActionParser != nil {
+		adverseActionLetter, err := ca.AdverseActionParser.ParseAdverseActionLetter(documentPath, text)
+		if err == nil {
+			result.AdverseActionLetters = append(result.AdverseActionLetters, *adverseActionLetter)
+			
+			// Merge adverse action violations into overall violations list
+			for _, violation := range adverseActionLetter.ExtractedViolations {
+				result.LegalViolations = append(result.LegalViolations, violation.ViolationType)
+			}
+			
+			log.Printf("[CONTENT_ANALYZER] Adverse action letter parsed - %.1f%% confidence, %d violations",
+				adverseActionLetter.ParsingConfidence*100, len(adverseActionLetter.ExtractedViolations))
+		} else {
+			log.Printf("[CONTENT_ANALYZER] Warning: Adverse action parsing failed: %v", err)
 		}
 	}
 	
