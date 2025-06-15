@@ -395,9 +395,171 @@
     "statutoryMatch": 0.95,
     "structureMatch": 0.8
   },
+  "adverseActionPatterns": {
+    "identificationPatterns": {
+      "headerPatterns": [
+        "ADVERSE ACTION NOTICE",
+        "NOTICE OF ADVERSE ACTION",
+        "CREDIT DECISION NOTICE",
+        "NOTICE OF CREDIT DECISION",
+        "APPLICATION DECISION NOTICE",
+        "DENIAL NOTICE",
+        "CREDIT DENIAL NOTIFICATION"
+      ],
+      "actionPatterns": [
+        "your.*application.*has been.*denied",
+        "we are unable to.*approve",
+        "credit.*application.*declined",
+        "your request.*cannot be approved",
+        "application.*not approved",
+        "we cannot.*extend.*credit",
+        "your.*application.*unsuccessful",
+        "regret.*inform.*denied"
+      ],
+      "legalReferences": [
+        "Fair Credit Reporting Act",
+        "FCRA",
+        "15 U\\.S\\.C.*1681",
+        "15 USC.*1681",
+        "consumer reporting agency",
+        "credit bureau",
+        "consumer report"
+      ]
+    },
+    "creditorPatterns": {
+      "namePatterns": [
+        "From:\\s*([A-Z][A-Za-z\\s&.,]+(?:Bank|Credit|Financial|Card|Capital|Services))",
+        "([A-Z][A-Za-z\\s&.,]+(?:Bank|Credit Union|Financial|Card Services))",
+        "(Chase|Wells Fargo|Bank of America|Capital One|Citibank|Discover|American Express|Barclays|TD Bank|PNC|US Bank)",
+        "Sincerely,\\s*([A-Z][A-Za-z\\s&.,]+)"
+      ],
+      "addressPatterns": [
+        "([0-9]+.*[A-Z][a-z]+.*[A-Z]{2}.*[0-9]{5}(?:-[0-9]{4})?)",
+        "P\\.?O\\.? Box [0-9]+.*[A-Z]{2}.*[0-9]{5}(?:-[0-9]{4})?",
+        "([A-Z][a-z]+.*[A-Z]{2} [0-9]{5}(?:-[0-9]{4})?)"
+      ],
+      "phonePatterns": [
+        "(?:Phone|Tel|Call|Contact)[:.]?\\s*([0-9\\-\\(\\)\\s\\.]{10,})",
+        "([0-9]{3}[\\-\\.]?[0-9]{3}[\\-\\.]?[0-9]{4})",
+        "\\(([0-9]{3})\\)\\s*([0-9]{3})[\\-\\.]?([0-9]{4})",
+        "(?:Customer Service|Questions).*?([0-9\\-\\(\\)\\s\\.]{10,})"
+      ],
+      "accountPatterns": [
+        "(?i)(?:account|application|reference).*?(?:number|#|no)\\.?\\s*([A-Z0-9\\-]{6,})",
+        "(?i)(?:account|app|ref)\\.?\\s*#?\\s*([A-Z0-9\\-]{6,})"
+      ]
+    },
+    "actionDetailsPatterns": {
+      "actionTypePatterns": [
+        "(denied|declined|rejected|not approved)",
+        "(reduced|lowered|decreased)",
+        "(modified|changed|adjusted)"
+      ],
+      "reasonPatterns": [
+        "(?i)(?:reason|because|due to)[^.]*([^.]{20,100})",
+        "(?i)(insufficient (?:credit history|income)[^.]*)",
+        "(?i)(too many (?:inquiries|accounts)[^.]*)",
+        "(?i)(debt[- ]to[- ]income ratio[^.]*)",
+        "(?i)(credit score (?:too low|below)[^.]*)",
+        "(?i)(limited credit history[^.]*)",
+        "(?i)(high credit utilization[^.]*)"
+      ],
+      "reasonCodePatterns": [
+        "(?i)reason codes?\\s*[:\\-]?\\s*([0-9,\\s]+)",
+        "(?i)code\\s*[:\\-]?\\s*([0-9]+)"
+      ],
+      "creditScorePatterns": [
+        "(?i)(?:credit score|score).*?(\\d{3})",
+        "(?i)score.*?(\\d{3})"
+      ],
+      "amountPatterns": [
+        "(?i)(?:requested|applied for).*?\\$([0-9,]+)",
+        "(?i)(?:approved|granted).*?\\$([0-9,]+)",
+        "(?i)credit limit.*?\\$([0-9,]+)"
+      ]
+    },
+    "creditBureauPatterns": {
+      "bureauNames": [
+        "(Equifax.*Information.*Services)",
+        "(Experian.*Information.*Solutions)",
+        "(Trans\\s?Union.*LLC?)",
+        "(TransUnion.*LLC?)",
+        "Equifax",
+        "Experian", 
+        "TransUnion",
+        "Trans Union"
+      ],
+      "bureauAddresses": [
+        "Equifax.*P\\.?O\\.? Box.*Atlanta.*GA",
+        "Experian.*P\\.?O\\.? Box.*Allen.*TX",
+        "Trans[\\s]?Union.*P\\.?O\\.? Box.*Chester.*PA"
+      ],
+      "bureauPhones": [
+        "Equifax.*800[\\-\\.]?685[\\-\\.]?1111",
+        "Experian.*888[\\-\\.]?397[\\-\\.]?3742",
+        "Trans[\\s]?Union.*800[\\-\\.]?916[\\-\\.]?8800",
+        "800[\\-\\.]?685[\\-\\.]?1111",
+        "888[\\-\\.]?397[\\-\\.]?3742",
+        "800[\\-\\.]?916[\\-\\.]?8800"
+      ]
+    },
+    "consumerRightsPatterns": {
+      "freeReportRights": [
+        "free copy",
+        "free credit report",
+        "obtain.*free.*report",
+        "no charge.*report",
+        "free.*copy.*credit report",
+        "entitled.*free.*report"
+      ],
+      "disputeRights": [
+        "dispute.*accuracy",
+        "dispute.*information",
+        "contest.*information",
+        "challenge.*report",
+        "right to dispute",
+        "dispute.*credit report",
+        "question.*accuracy"
+      ],
+      "reinvestigationRights": [
+        "reinvestigation",
+        "investigate.*dispute",
+        "review.*dispute",
+        "verify.*information",
+        "re-investigate"
+      ],
+      "rightsDisclosurePatterns": [
+        "(you have the right[^.]*\\.(?:[^.]*\\.){0,3})",
+        "(under the fair credit reporting act[^.]*\\.(?:[^.]*\\.){0,3})",
+        "(consumer rights[^.]*\\.(?:[^.]*\\.){0,3})",
+        "(your rights under[^.]*\\.(?:[^.]*\\.){0,3})"
+      ]
+    },
+    "compliancePatterns": {
+      "requiredElements": [
+        "adverse action",
+        "credit report",
+        "consumer reporting agency",
+        "fair credit reporting act"
+      ],
+      "timingIndicators": [
+        "within.*days",
+        "promptly",
+        "immediately",
+        "as soon as"
+      ],
+      "violationIndicators": [
+        "failure.*provide.*notice",
+        "inadequate.*disclosure",
+        "missing.*information",
+        "incomplete.*rights",
+        "untimely.*notification"
+      ]
+    }
+  },
   "extractionPriority": {
     "attorneyNotes": ["clientInfo", "fraudDetails", "legalAnalysis"],
-    "adverseActionLetter": ["institutionInfo", "denialReason", "creditBureauInfo"],
+    "adverseActionLetter": ["creditorInfo", "actionDetails", "creditBureauInfo", "consumerRights", "complianceAnalysis"],
     "summons": ["courtInfo", "defendantInfo", "deadlines"],
     "civilCoverSheet": ["caseType", "parties", "jurisdiction"],
     "complaint": ["allegations", "causesOfAction", "relief"],
