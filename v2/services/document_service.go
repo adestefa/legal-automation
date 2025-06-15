@@ -103,12 +103,13 @@ type ClientCase struct {
 
 // DocumentService handles document operations
 type DocumentService struct {
-	documentsDir     string
-	testCasesDir     string
-	extractor        *DocumentExtractor
-	contentAnalyzer  *ContentAnalyzer
-	templateEngine   *TemplateEngine
-	extractionPatterns map[string]interface{}
+	documentsDir        string
+	testCasesDir        string
+	extractor           *DocumentExtractor
+	contentAnalyzer     *ContentAnalyzer
+	attorneyNotesAnalyzer *AttorneyNotesAnalyzer
+	templateEngine      *TemplateEngine
+	extractionPatterns  map[string]interface{}
 }
 
 // NewDocumentService creates a new document service instance
@@ -126,6 +127,16 @@ func NewDocumentService() *DocumentService {
 		// Continue without analyzer for now
 	} else {
 		service.contentAnalyzer = analyzer
+	}
+	
+	// Initialize attorney notes analyzer
+	attorneyAnalyzer, err := NewAttorneyNotesAnalyzer()
+	if err != nil {
+		log.Printf("[DOCUMENT_SERVICE] Warning: Could not initialize attorney notes analyzer: %v", err)
+		// Continue without attorney analyzer for now
+	} else {
+		service.attorneyNotesAnalyzer = attorneyAnalyzer
+		log.Printf("[DOCUMENT_SERVICE] Initialized with Attorney Notes Intelligence Engine")
 	}
 	
 	// Initialize template engine
@@ -307,6 +318,20 @@ func (s *DocumentService) ProcessSelectedDocuments(selectedDocIDs []string, temp
 		if err != nil {
 			log.Printf("[DOCUMENT_SERVICE] Error analyzing %s: %v", fileName, err)
 			continue
+		}
+		
+		// Enhanced attorney notes analysis
+		if doc.ContentType == "attorney_notes" && s.attorneyNotesAnalyzer != nil {
+			log.Printf("[DOCUMENT_SERVICE] Performing specialized attorney notes analysis for %s", fileName)
+			attorneyAnalysis, err := s.attorneyNotesAnalyzer.AnalyzeAttorneyNotes(docPath, content.RawText)
+			if err != nil {
+				log.Printf("[DOCUMENT_SERVICE] Warning: Attorney notes analysis failed for %s: %v", fileName, err)
+			} else {
+				// Enhance the analysis with attorney intelligence
+				analysis = s.enhanceAnalysisWithAttorneyIntelligence(analysis, attorneyAnalysis)
+				log.Printf("[DOCUMENT_SERVICE] Enhanced %s with attorney intelligence - %.1f%% confidence", 
+					fileName, attorneyAnalysis.ConfidenceScores.OverallConfidence)
+			}
 		}
 		
 		allAnalysisResults[fileName] = analysis
@@ -1024,4 +1049,106 @@ type Defendant struct {
 	Name       string `json:"name"`
 	EntityType string `json:"entityType"`
 	Address    string `json:"address"`
+}
+
+// enhanceAnalysisWithAttorneyIntelligence merges attorney notes analysis with standard content analysis
+func (s *DocumentService) enhanceAnalysisWithAttorneyIntelligence(analysis *LegalAnalysisResult, attorneyAnalysis *AttorneyNotesAnalysis) *LegalAnalysisResult {
+	if analysis == nil || attorneyAnalysis == nil {
+		return analysis
+	}
+	
+	log.Printf("[DOCUMENT_SERVICE] Enhancing analysis with attorney intelligence")
+	
+	// Enhance legal violations with attorney-documented violations
+	if len(attorneyAnalysis.ViolationAssessment.IdentifiedViolations) > 0 {
+		for _, violation := range attorneyAnalysis.ViolationAssessment.IdentifiedViolations {
+			// Add attorney-documented violations to the analysis
+			violationDesc := fmt.Sprintf("Attorney Analysis: %s (%s) - %s", 
+				violation.ViolationType, violation.Statute, violation.ViolationDescription)
+			analysis.LegalViolations = append(analysis.LegalViolations, violationDesc)
+		}
+		log.Printf("[DOCUMENT_SERVICE] Added %d attorney-documented violations", 
+			len(attorneyAnalysis.ViolationAssessment.IdentifiedViolations))
+	}
+	
+	// Enhance client data with attorney consultation information
+	if attorneyAnalysis.ClientConsultation.ConsultationDate.Year() > 1 {
+		// Add consultation information to client data
+		if analysis.ClientData == nil {
+			analysis.ClientData = make(map[string]ExtractionResult)
+		}
+		
+		analysis.ClientData["ConsultationDate"] = ExtractionResult{
+			Field:      "ConsultationDate",
+			Value:      attorneyAnalysis.ClientConsultation.ConsultationDate.Format("January 2, 2006"),
+			Confidence: attorneyAnalysis.ClientConsultation.Confidence,
+			Source:     "Attorney Notes",
+			Method:     "Attorney Intelligence Analysis",
+		}
+	}
+	
+	// Enhance with attorney's legal theory
+	if attorneyAnalysis.LegalAnalysis.LegalTheory != "" {
+		analysis.ClientData["LegalTheory"] = ExtractionResult{
+			Field:      "LegalTheory",
+			Value:      attorneyAnalysis.LegalAnalysis.LegalTheory,
+			Confidence: attorneyAnalysis.LegalAnalysis.Confidence,
+			Source:     "Attorney Legal Analysis",
+			Method:     "Attorney Intelligence Analysis",
+		}
+	}
+	
+	// Enhance with case strategy
+	if attorneyAnalysis.CaseStrategy.LegalStrategy != "" {
+		analysis.ClientData["CaseStrategy"] = ExtractionResult{
+			Field:      "CaseStrategy",
+			Value:      attorneyAnalysis.CaseStrategy.LegalStrategy,
+			Confidence: attorneyAnalysis.CaseStrategy.Confidence,
+			Source:     "Attorney Strategic Analysis",
+			Method:     "Attorney Intelligence Analysis",
+		}
+	}
+	
+	// Enhance with damage assessment
+	if attorneyAnalysis.DamageAssessment.TotalDamageRange.EstimatedAmount > 0 {
+		analysis.ClientData["EstimatedDamages"] = ExtractionResult{
+			Field:      "EstimatedDamages",
+			Value:      fmt.Sprintf("$%.2f", attorneyAnalysis.DamageAssessment.TotalDamageRange.EstimatedAmount),
+			Confidence: attorneyAnalysis.DamageAssessment.Confidence,
+			Source:     "Attorney Damage Analysis",
+			Method:     "Attorney Intelligence Analysis",
+		}
+	}
+	
+	// Enhance with attorney's case strength assessment
+	if attorneyAnalysis.LegalAnalysis.CaseStrength.OverallStrength != "" {
+		analysis.ClientData["CaseStrength"] = ExtractionResult{
+			Field:      "CaseStrength",
+			Value:      attorneyAnalysis.LegalAnalysis.CaseStrength.OverallStrength,
+			Confidence: attorneyAnalysis.LegalAnalysis.CaseStrength.LegalMerits,
+			Source:     "Attorney Case Assessment",
+			Method:     "Attorney Intelligence Analysis",
+		}
+	}
+	
+	// Enhance suggestions with attorney next steps
+	if len(attorneyAnalysis.NextSteps) > 0 {
+		for _, step := range attorneyAnalysis.NextSteps {
+			analysis.Suggestions = append(analysis.Suggestions, 
+				fmt.Sprintf("Attorney Action Item: %s (Priority: %s)", step.Task, step.Priority))
+		}
+	}
+	
+	// Update overall confidence with weighted average including attorney analysis
+	attorneyWeight := 0.4  // Give attorney analysis significant weight
+	standardWeight := 0.6
+	
+	weightedConfidence := (analysis.OverallConfidence * standardWeight) + 
+						  (attorneyAnalysis.ConfidenceScores.OverallConfidence * attorneyWeight)
+	analysis.OverallConfidence = weightedConfidence
+	
+	log.Printf("[DOCUMENT_SERVICE] Enhanced analysis - overall confidence: %.2f, violations: %d", 
+		analysis.OverallConfidence, len(analysis.LegalViolations))
+	
+	return analysis
 }
