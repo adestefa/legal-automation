@@ -1,0 +1,407 @@
+{
+  "clientInfo": {
+    "namePatterns": [
+      "Client:\\s*([A-Z][a-z]+\\s+[A-Z][a-z]+)",
+      "Case for\\s*([A-Z][a-z]+\\s+[A-Z][a-z]+)",
+      "([A-Z][a-z]+\\s+[A-Z][a-z]+)\\s+Case",
+      "Plaintiff:\\s*([A-Z][a-z]+\\s+[A-Z][a-z]+)",
+      "RE:\\s*([A-Z][a-z]+\\s+[A-Z][a-z]+)",
+      "regarding\\s+([A-Z][a-z]+\\s+[A-Z][a-z]+)",
+      "on behalf of\\s+([A-Z][a-z]+\\s+[A-Z][a-z]+)"
+    ],
+    "phonePatterns": [
+      "(\\d{3})[.-](\\d{3})[.-](\\d{4})",
+      "\\((\\d{3})\\)\\s*(\\d{3})-(\\d{4})",
+      "(\\d{3})\\s+(\\d{3})\\s+(\\d{4})",
+      "(\\d{3})\\.\\s*(\\d{3})\\.\\s*(\\d{4})"
+    ],
+    "addressPatterns": [
+      "residing in ([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+      "located in ([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+      "lives in ([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+      "Address:\\s*([A-Z][a-z0-9\\s,]+)",
+      "([0-9]+\\s+[A-Za-z\\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct)[\\s,]+[A-Za-z\\s]+,?\\s+[A-Z]{2}\\s+[0-9]{5})"
+    ],
+    "emailPatterns": [
+      "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})"
+    ]
+  },
+  "fraudDetails": {
+    "amountPatterns": [
+      "Fraud Amount:\\s*\\$([0-9,]+(?:\\.[0-9]{2})?)",
+      "\\$([0-9,]+(?:\\.[0-9]{2})?)",
+      "([0-9,]+)\\s*dollars?",
+      "totaling.*\\$([0-9,]+)",
+      "amount.*\\$([0-9,]+)",
+      "charges.*\\$([0-9,]+)",
+      "fraudulent.*\\$([0-9,]+)",
+      "unauthorized.*\\$([0-9,]+)",
+      "disputed.*\\$([0-9,]+)"
+    ],
+    "datePatterns": [
+      "(January|February|March|April|May|June|July|August|September|October|November|December)\\s+(\\d{1,2}),?\\s+(\\d{4})",
+      "(\\d{1,2})/(\\d{1,2})/(\\d{4})",
+      "(\\d{1,2})-(\\d{1,2})-(\\d{4})",
+      "(\\d{4})-(\\d{1,2})-(\\d{1,2})"
+    ],
+    "institutionPatterns": [
+      "Bank:\\s*([A-Z][a-z\\s&]+)",
+      "(TD Bank|Chase|Capital One|Citibank|Wells Fargo|Bank of America|Barclays|American Express|Discover|PNC Bank|US Bank|Navy Federal|USAA)",
+      "Card Company:\\s*([A-Z][a-z\\s&]+)",
+      "Institution:\\s*([A-Z][a-z\\s&]+)",
+      "Credit Union:\\s*([A-Z][a-z\\s&]+)",
+      "issued by\\s+([A-Z][a-z\\s&]+)"
+    ],
+    "travelPatterns": [
+      "Travel Dates:\\s*([A-Za-z0-9\\s,-]+)",
+      "traveling.*in\\s+([A-Z][a-z]+)",
+      "while.*was.*in\\s+([A-Z][a-z]+)",
+      "trip to\\s+([A-Z][a-z]+)",
+      "vacation in\\s+([A-Z][a-z]+)",
+      "abroad in\\s+([A-Z][a-z]+)",
+      "overseas in\\s+([A-Z][a-z]+)"
+    ]
+  },
+  "legalViolations": {
+    "fcraViolations": [
+      "15 U.S.C. § 1681",
+      "15 USC 1681",
+      "FCRA",
+      "Fair Credit Reporting Act",
+      "credit report",
+      "investigation",
+      "dispute",
+      "credit bureau",
+      "reasonable investigation",
+      "willful noncompliance",
+      "negligent noncompliance",
+      "failure to investigate",
+      "inaccurate reporting",
+      "failed to correct",
+      "failed to delete",
+      "maximum possible accuracy",
+      "reasonable procedures",
+      "consumer reporting agency",
+      "furnisher of information",
+      "permissible purpose"
+    ],
+    "specificViolations": {
+      "negligentNoncompliance": [
+        "negligent.*FCRA",
+        "failed to.*reasonable.*investigation",
+        "failed to.*reasonable.*procedures",
+        "negligent.*credit report",
+        "15 U.S.C. § 1681o"
+      ],
+      "willfulNoncompliance": [
+        "willful.*FCRA",
+        "knowingly.*violat",
+        "intentional.*disregard",
+        "willful.*noncompliance",
+        "15 U.S.C. § 1681n"
+      ],
+      "failureToInvestigate": [
+        "fail.*investigat",
+        "no investigation",
+        "inadequate investigation",
+        "superficial investigation",
+        "15 U.S.C. § 1681i"
+      ],
+      "inaccurateReporting": [
+        "inaccurate.*report",
+        "false.*information",
+        "erroneous.*data",
+        "incorrect.*credit",
+        "15 U.S.C. § 1681e\\(b\\)"
+      ],
+      "failureToCorrect": [
+        "fail.*correct",
+        "fail.*delete",
+        "fail.*update",
+        "maintain.*inaccurate",
+        "15 U.S.C. § 1681s-2"
+      ],
+      "improperDisclosure": [
+        "improper.*disclosure",
+        "unauthorized.*access",
+        "without.*permissible purpose",
+        "15 U.S.C. § 1681b"
+      ]
+    },
+    "damages": [
+      "actual damages",
+      "statutory damages",
+      "punitive damages",
+      "attorney fees",
+      "costs",
+      "\\$([0-9,]+)\\s*in damages",
+      "damages.*\\$([0-9,]+)",
+      "emotional distress",
+      "mental anguish",
+      "humiliation",
+      "reputational harm"
+    ],
+    "creditImpactPatterns": [
+      "denied credit",
+      "credit.*reduced",
+      "credit.*limit.*reduced",
+      "application.*denied",
+      "credit.*declined",
+      "adverse action",
+      "credit.*impaired",
+      "credit score.*dropped",
+      "credit score.*decreased",
+      "negative.*credit report",
+      "derogatory.*mark"
+    ]
+  },
+  "documentTypePatterns": {
+    "adverseActionLetter": {
+      "headerPatterns": [
+        "ADVERSE ACTION NOTICE",
+        "NOTICE OF ADVERSE ACTION",
+        "CREDIT DECISION NOTICE",
+        "NOTICE OF ACTION TAKEN",
+        "ADVERSE ACTION",
+        "DENIAL NOTICE",
+        "CREDIT DENIAL"
+      ],
+      "contentPatterns": [
+        "pursuant to.*Fair Credit Reporting Act",
+        "credit report.*obtained from",
+        "consumer reporting agency",
+        "right to obtain.*copy.*credit report",
+        "action.*taken.*credit",
+        "declined.*credit",
+        "denied.*application",
+        "based on information.*credit report",
+        "credit bureau.*provided",
+        "you have the right to",
+        "free credit report",
+        "dispute.*accuracy"
+      ],
+      "statutoryReferences": [
+        "15 U.S.C. § 1681m",
+        "15 USC 1681m",
+        "Fair Credit Reporting Act",
+        "FCRA",
+        "Equal Credit Opportunity Act",
+        "ECOA",
+        "15 U.S.C. § 1691"
+      ],
+      "requiredElements": [
+        "creditor identification",
+        "action taken",
+        "credit bureau information",
+        "consumer rights notice"
+      ],
+      "structureIndicators": {
+        "hasLetterhead": "true",
+        "hasDate": "true",
+        "hasRecipientAddress": "true",
+        "hasSignature": "optional"
+      }
+    },
+    "summons": {
+      "headerPatterns": [
+        "SUMMONS",
+        "CIVIL SUMMONS",
+        "SUMMONS AND COMPLAINT",
+        "UNITED STATES DISTRICT COURT",
+        "SUPERIOR COURT",
+        "CIRCUIT COURT",
+        "IN THE.*COURT"
+      ],
+      "contentPatterns": [
+        "YOU ARE HEREBY SUMMONED",
+        "within.*days.*answer",
+        "default judgment.*may be taken",
+        "failure to respond",
+        "appear and defend",
+        "serve.*answer",
+        "respond.*complaint",
+        "file.*response",
+        "judgment by default"
+      ],
+      "defendantPatterns": [
+        "v\\.\\s*(Equifax|Experian|Trans Union|TransUnion)",
+        "DEFENDANT[S]?:\\s*(.*)",
+        "against.*defendant[s]?\\s*(.*)",
+        "versus\\s+(.*)",
+        "v\\.\\s+(.*)"
+      ],
+      "requiredElements": [
+        "court name",
+        "case number",
+        "defendant name",
+        "response deadline",
+        "plaintiff name"
+      ],
+      "structureIndicators": {
+        "hasCaseCaption": "true",
+        "hasCaseNumber": "true",
+        "hasCourtSeal": "optional"
+      }
+    },
+    "attorneyNotes": {
+      "headerPatterns": [
+        "ATTORNEY NOTES",
+        "CASE NOTES",
+        "CLIENT MEETING",
+        "LEGAL MEMORANDUM",
+        "CONFIDENTIAL.*ATTORNEY",
+        "ATTORNEY.*CLIENT.*PRIVILEGED"
+      ],
+      "contentPatterns": [
+        "client.*meeting",
+        "case.*summary",
+        "legal.*strategy",
+        "violation.*analysis",
+        "damages.*calculation",
+        "fraud.*amount",
+        "discussed.*with.*client",
+        "recommend.*action",
+        "legal.*opinion"
+      ],
+      "requiredElements": [
+        "client information",
+        "case details",
+        "legal analysis"
+      ]
+    },
+    "civilCoverSheet": {
+      "headerPatterns": [
+        "CIVIL COVER SHEET",
+        "JS 44",
+        "JS-44",
+        "CIVIL CASE COVER SHEET",
+        "COVER SHEET"
+      ],
+      "contentPatterns": [
+        "basis of jurisdiction",
+        "nature of suit",
+        "origin.*proceedings",
+        "class action",
+        "jury demand",
+        "related case",
+        "cause of action",
+        "principal parties"
+      ],
+      "requiredElements": [
+        "plaintiff information",
+        "defendant information",
+        "case type",
+        "jurisdiction basis"
+      ],
+      "formFields": [
+        "I. CITIZENSHIP OF PRINCIPAL PARTIES",
+        "II. BASIS OF JURISDICTION",
+        "III. NATURE OF SUIT",
+        "IV. ORIGIN",
+        "V. CLASS ACTION",
+        "VI. CAUSE OF ACTION",
+        "VII. REQUESTED IN COMPLAINT",
+        "VIII. RELATED CASE"
+      ]
+    },
+    "complaint": {
+      "headerPatterns": [
+        "COMPLAINT",
+        "CIVIL COMPLAINT",
+        "VERIFIED COMPLAINT",
+        "COMPLAINT FOR DAMAGES",
+        "COMPLAINT AND DEMAND FOR JURY TRIAL"
+      ],
+      "contentPatterns": [
+        "COMES NOW.*plaintiff",
+        "plaintiff.*alleges",
+        "COUNT.*[IVX]+",
+        "WHEREFORE.*plaintiff",
+        "demand.*judgment",
+        "pray.*relief",
+        "causes of action",
+        "jurisdiction.*venue"
+      ],
+      "structureIndicators": {
+        "hasJurisdictionSection": "true",
+        "hasFactualAllegations": "true",
+        "hasCountsOrClaims": "true",
+        "hasPrayerForRelief": "true"
+      }
+    },
+    "denialLetter": {
+      "headerPatterns": [
+        "DENIAL LETTER",
+        "NOTICE OF DENIAL",
+        "APPLICATION DENIED",
+        "CREDIT DENIAL",
+        "LOAN DENIAL"
+      ],
+      "contentPatterns": [
+        "regret.*inform",
+        "unable.*approve",
+        "application.*denied",
+        "not.*approved",
+        "decline.*request",
+        "does not meet.*requirements"
+      ]
+    },
+    "creditReport": {
+      "headerPatterns": [
+        "CREDIT REPORT",
+        "CONSUMER CREDIT REPORT",
+        "EQUIFAX.*REPORT",
+        "EXPERIAN.*REPORT",
+        "TRANSUNION.*REPORT"
+      ],
+      "contentPatterns": [
+        "credit score",
+        "payment history",
+        "credit inquiries",
+        "account.*status",
+        "balance.*owed",
+        "credit utilization"
+      ],
+      "structureIndicators": {
+        "hasPersonalInfo": "true",
+        "hasAccountList": "true",
+        "hasInquiries": "true",
+        "hasPublicRecords": "optional"
+      }
+    },
+    "disputeLetter": {
+      "headerPatterns": [
+        "DISPUTE LETTER",
+        "NOTICE OF DISPUTE",
+        "CREDIT DISPUTE",
+        "FORMAL DISPUTE"
+      ],
+      "contentPatterns": [
+        "dispute.*accuracy",
+        "incorrect.*information",
+        "request.*investigation",
+        "demand.*correction",
+        "false.*reporting",
+        "erroneous.*data"
+      ]
+    }
+  },
+  "confidenceWeights": {
+    "exactMatch": 1.0,
+    "partialMatch": 0.7,
+    "contextualMatch": 0.5,
+    "weakMatch": 0.3,
+    "headerMatch": 0.9,
+    "statutoryMatch": 0.95,
+    "structureMatch": 0.8
+  },
+  "extractionPriority": {
+    "attorneyNotes": ["clientInfo", "fraudDetails", "legalAnalysis"],
+    "adverseActionLetter": ["institutionInfo", "denialReason", "creditBureauInfo"],
+    "summons": ["courtInfo", "defendantInfo", "deadlines"],
+    "civilCoverSheet": ["caseType", "parties", "jurisdiction"],
+    "complaint": ["allegations", "causesOfAction", "relief"],
+    "creditReport": ["accountInfo", "inquiries", "publicRecords"],
+    "disputeLetter": ["disputedItems", "supportingEvidence", "requestedAction"]
+  }
+}
