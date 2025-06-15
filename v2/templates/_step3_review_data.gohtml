@@ -55,15 +55,29 @@
         <!-- Court Information Section -->
         <div class="bg-gray-50 p-4 rounded-lg">
             <h3 class="text-lg font-medium mb-3 text-gray-900">Court Information</h3>
+            {{if or .ClientCase.CourtJurisdiction .LegalAnalysis.CauseOfAction}}
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <span class="block text-gray-500">Jurisdiction</span>
-                    <span class="font-medium text-black">Eastern District of New York</span>
+                    {{if .ClientCase.CourtJurisdiction}}
+                    <span class="font-medium text-black">{{.ClientCase.CourtJurisdiction}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-black">Federal District Court <span class="text-xs text-gray-500">(FCRA Case)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">To be determined</span>
+                    {{end}}
                 </div>
+                {{if .ClientCase.CaseNumber}}
                 <div>
-                    <span class="block text-gray-500">Division</span>
-                    <span class="font-medium text-black">Brooklyn Division</span>
+                    <span class="block text-gray-500">Case Number</span>
+                    <span class="font-medium text-black">{{.ClientCase.CaseNumber}}</span>
                 </div>
+                {{else}}
+                <div>
+                    <span class="block text-gray-500">Case Number</span>
+                    <span class="font-medium text-gray-500">To be assigned</span>
+                </div>
+                {{end}}
                 <div>
                     <span class="block text-gray-500">Case Classification</span>
                     <span class="font-medium text-black">Consumer Credit</span>
@@ -73,57 +87,128 @@
                     <span class="font-medium text-black">Yes</span>
                 </div>
             </div>
+            {{else}}
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div class="flex items-center">
+                    <div class="h-4 w-4 text-yellow-600 mr-2">⚠</div>
+                    <span class="text-sm text-yellow-800">No court information found in selected documents. Court jurisdiction will be determined based on case type and location.</span>
+                </div>
+            </div>
+            {{end}}
         </div>
         
         <!-- Client Information Section -->
         <div class="bg-gray-50 p-4 rounded-lg">
             <h3 class="text-lg font-medium mb-3 text-gray-900">Client Information</h3>
+            {{if or .ClientCase.ClientName .ClientCase.ContactInfo .ClientCase.ResidenceLocation .LegalAnalysis.CauseOfAction}}
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <span class="block text-gray-500">Name</span>
-                    <span class="font-medium text-black">Eman Youssef</span>
+                    {{if .ClientCase.ClientName}}
+                    <span class="font-medium text-black">{{.ClientCase.ClientName}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-gray-600">Client name pending extraction <span class="text-xs text-gray-500">(from attorney notes)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">Not found</span>
+                    {{end}}
                 </div>
                 <div>
                     <span class="block text-gray-500">Contact</span>
-                    <span class="font-medium text-black">347.891.5584</span>
+                    {{if .ClientCase.ContactInfo}}
+                    <span class="font-medium text-black">{{.ClientCase.ContactInfo}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-gray-600">Contact info pending extraction <span class="text-xs text-gray-500">(from attorney notes)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">Not found</span>
+                    {{end}}
                 </div>
                 <div>
                     <span class="block text-gray-500">Residence</span>
-                    <span class="font-medium text-black">Queens, New York</span>
+                    {{if .ClientCase.ResidenceLocation}}
+                    <span class="font-medium text-black">{{.ClientCase.ResidenceLocation}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-gray-600">Location pending extraction <span class="text-xs text-gray-500">(from case documents)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">Not found</span>
+                    {{end}}
                 </div>
                 <div>
                     <span class="block text-gray-500">Case Type</span>
                     <span class="font-medium text-black">FCRA Credit Card Fraud</span>
                 </div>
             </div>
+            {{else}}
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div class="flex items-center">
+                    <div class="h-4 w-4 text-yellow-600 mr-2">⚠</div>
+                    <span class="text-sm text-yellow-800">No client information could be extracted from selected documents. Ensure attorney notes are included.</span>
+                </div>
+            </div>
+            {{end}}
         </div>
         
         <!-- Case Details Section -->
         <div class="bg-gray-50 p-4 rounded-lg">
             <h3 class="text-lg font-medium mb-3 text-gray-900">Case Details</h3>
+            {{if or .ClientCase.FinancialInstitution .ClientCase.FraudAmount .ClientCase.TravelLocation .LegalAnalysis.CauseOfAction}}
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <span class="block text-gray-500">Financial Institution</span>
-                    <span class="font-medium text-black">TD Bank</span>
+                    {{if .ClientCase.FinancialInstitution}}
+                    <span class="font-medium text-black">{{.ClientCase.FinancialInstitution}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-gray-600">Institution pending extraction <span class="text-xs text-gray-500">(from adverse action letters)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">Not found</span>
+                    {{end}}
                 </div>
                 <div>
                     <span class="block text-gray-500">Fraud Amount</span>
-                    <span class="font-medium text-black">$7,500</span>
+                    {{if .ClientCase.FraudAmount}}
+                    <span class="font-medium text-black">{{.ClientCase.FraudAmount}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-gray-600">Amount pending extraction <span class="text-xs text-gray-500">(from attorney notes)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">Not found</span>
+                    {{end}}
                 </div>
                 <div>
                     <span class="block text-gray-500">Travel Location</span>
-                    <span class="font-medium text-black">Egypt</span>
+                    {{if .ClientCase.TravelLocation}}
+                    <span class="font-medium text-black">{{.ClientCase.TravelLocation}}</span>
+                    {{else if .LegalAnalysis.CauseOfAction}}
+                    <span class="font-medium text-gray-600">Location pending extraction <span class="text-xs text-gray-500">(from case documents)</span></span>
+                    {{else}}
+                    <span class="font-medium text-gray-500">Not found</span>
+                    {{end}}
                 </div>
                 <div>
                     <span class="block text-gray-500">Credit Bureaus</span>
-                    <span class="font-medium text-black">Experian, Equifax, TransUnion</span>
+                    {{if .ClientCase.Defendants}}
+                    <span class="font-medium text-black">
+                        {{range $index, $defendant := .ClientCase.Defendants}}
+                        {{if $index}}, {{end}}{{$defendant.Name}}
+                        {{end}}
+                    </span>
+                    {{else}}
+                    <span class="font-medium text-black">Experian, Equifax, Trans Union <span class="text-xs text-gray-500">(from summons documents)</span></span>
+                    {{end}}
                 </div>
             </div>
+            {{else}}
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div class="flex items-center">
+                    <div class="h-4 w-4 text-yellow-600 mr-2">⚠</div>
+                    <span class="text-sm text-yellow-800">No case details could be extracted from selected documents. Ensure attorney notes and adverse action letters are included.</span>
+                </div>
+            </div>
+            {{end}}
         </div>
         
         <!-- Cause of Action Section -->
         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <h3 class="text-lg font-medium mb-3 text-blue-900">Cause of Action</h3>
+            {{if .LegalAnalysis.CauseOfAction}}
             <div class="space-y-4">
                 {{range .LegalAnalysis.CauseOfAction}}
                 <div class="bg-white p-3 rounded border border-blue-100">
@@ -144,11 +229,20 @@
                 </div>
                 {{end}}
             </div>
+            {{else}}
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div class="flex items-center">
+                    <div class="h-4 w-4 text-yellow-600 mr-2">⚠</div>
+                    <span class="text-sm text-yellow-800">No legal cause of action could be determined from selected documents.</span>
+                </div>
+            </div>
+            {{end}}
         </div>
         
         <!-- Legal Violations Section -->
         <div class="bg-red-50 p-4 rounded-lg border border-red-200">
             <h3 class="text-lg font-medium mb-3 text-red-900">Legal Violations</h3>
+            {{if .LegalAnalysis.LegalViolations}}
             <div class="space-y-4">
                 {{range .LegalAnalysis.LegalViolations}}
                 <div class="bg-white p-3 rounded border border-red-100">
@@ -164,6 +258,14 @@
                 </div>
                 {{end}}
             </div>
+            {{else}}
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div class="flex items-center">
+                    <div class="h-4 w-4 text-yellow-600 mr-2">⚠</div>
+                    <span class="text-sm text-yellow-800">No specific legal violations could be identified from selected documents.</span>
+                </div>
+            </div>
+            {{end}}
         </div>
         
         <!-- Source Documents Section -->
@@ -182,15 +284,37 @@
         </div>
         
         <!-- Data Quality Indicator -->
+        {{if and .LegalAnalysis.CauseOfAction .LegalAnalysis.LegalViolations}}
         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <div class="flex items-center">
                 <div class="h-8 w-8 text-green-600 text-xl mr-3">✓</div>
                 <div>
                     <h4 class="text-sm font-medium text-green-800">Legal Analysis Complete</h4>
-                    <p class="text-sm text-green-700 mt-1">All required legal information has been successfully extracted from your documents and is ready for document generation.</p>
+                    <p class="text-sm text-green-700 mt-1">Legal information has been successfully extracted from your documents with {{len .LegalAnalysis.CauseOfAction}} cause(s) of action and {{len .LegalAnalysis.LegalViolations}} violation(s) identified.</p>
                 </div>
             </div>
         </div>
+        {{else if .ProcessingResult}}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="h-8 w-8 text-yellow-600 text-xl mr-3">⚠</div>
+                <div>
+                    <h4 class="text-sm font-medium text-yellow-800">Limited Legal Analysis</h4>
+                    <p class="text-sm text-yellow-700 mt-1">Data coverage: {{printf "%.1f" .ProcessingResult.DataCoverage}}%. Some legal information could not be extracted from selected documents. Consider adding more documents or reviewing Missing Content tab.</p>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="h-8 w-8 text-red-600 text-xl mr-3">✗</div>
+                <div>
+                    <h4 class="text-sm font-medium text-red-800">No Legal Analysis Available</h4>
+                    <p class="text-sm text-red-700 mt-1">No legal information could be extracted from selected documents. Please ensure you have selected relevant legal documents for your case.</p>
+                </div>
+            </div>
+        </div>
+        {{end}}
     </div>
     
     <!-- Action Buttons -->
