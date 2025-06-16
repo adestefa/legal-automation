@@ -1,0 +1,23 @@
+{
+  "sessionId": "demo_session_token",
+  "workflowState": {
+    "icloudConnected": true,
+    "icloudUsername": "anthony.destefano@gmail.com",
+    "selectedParentFolder": "/CASES",
+    "selectedCaseFolder": "/CASES/Eman_Youseef",
+    "availableDocuments": null,
+    "selectedDocuments": [
+      "/CASES/Eman_Youseef/Adverse_Action_Letter_Cap_One.pdf",
+      "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_1.docx",
+      "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_2.docx",
+      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf"
+    ],
+    "selectedTemplate": "fcra-credit-card-fraud",
+    "currentStep": 3,
+    "lastUpdated": "2025-06-14T17:30:43.656679-04:00",
+    "username": ""
+  },
+  "createdAt": "2025-06-14T14:11:45.018426-04:00",
+  "lastAccessed": "2025-06-14T17:30:43.656679-04:00",
+  "expiresAt": "2025-06-15T14:11:45.018426-04:00"
+}

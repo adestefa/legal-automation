@@ -1,0 +1,278 @@
+{
+  "federalQuestionRules": {
+    "fcraJurisdiction": {
+      "statutoryBasis": "15 U.S.C. § 1681 et seq.",
+      "jurisdictionType": "federal_question",
+      "confidenceFactors": [
+        {
+          "factor": "explicit_fcra_citation",
+          "weight": 0.4,
+          "patterns": [
+            "15\\s+U\\.?S\\.?C\\.?\\s*§?\\s*168[01]",
+            "Fair\\s+Credit\\s+Reporting\\s+Act",
+            "FCRA"
+          ]
+        },
+        {
+          "factor": "consumer_reporting_language",
+          "weight": 0.3,
+          "patterns": [
+            "consumer\\s+report(ing)?",
+            "credit\\s+report",
+            "background\\s+check",
+            "consumer\\s+reporting\\s+agency"
+          ]
+        },
+        {
+          "factor": "fcra_violations",
+          "weight": 0.3,
+          "patterns": [
+            "willful\\s+violation",
+            "negligent\\s+violation", 
+            "reasonable\\s+procedures",
+            "maximum\\s+possible\\s+accuracy",
+            "reinvestigation"
+          ]
+        }
+      ],
+      "minimumConfidence": 0.6,
+      "jurisdictionRequirements": [
+        "Federal statute creates cause of action",
+        "Complaint raises federal question",
+        "Federal law is essential element of claim"
+      ]
+    },
+    "constitutionalClaims": {
+      "statutoryBasis": "U.S. Constitution", 
+      "jurisdictionType": "federal_question",
+      "confidenceFactors": [
+        {
+          "factor": "constitutional_provisions",
+          "weight": 0.5,
+          "patterns": [
+            "Due\\s+Process\\s+Clause",
+            "Equal\\s+Protection",
+            "Fourth\\s+Amendment",
+            "Fourteenth\\s+Amendment"
+          ]
+        },
+        {
+          "factor": "section_1983_claims",
+          "weight": 0.5,
+          "patterns": [
+            "42\\s+U\\.?S\\.?C\\.?\\s*§?\\s*1983",
+            "Section\\s+1983",
+            "civil\\s+rights\\s+violation"
+          ]
+        }
+      ],
+      "minimumConfidence": 0.7
+    }
+  },
+  "diversityJurisdictionRules": {
+    "citizenshipAnalysis": {
+      "individualCitizenship": {
+        "determinationFactors": [
+          "state_of_domicile",
+          "principal_residence", 
+          "intent_to_remain"
+        ],
+        "patterns": [
+          "citizen\\s+of\\s+([A-Z][a-z]+)",
+          "domiciled\\s+in\\s+([A-Z][a-z]+)",
+          "resident\\s+of\\s+([A-Z][a-z]+)"
+        ]
+      },
+      "corporateCitizenship": {
+        "determinationFactors": [
+          "state_of_incorporation",
+          "principal_place_of_business"
+        ],
+        "patterns": [
+          "incorporated\\s+in\\s+([A-Z][a-z]+)",
+          "principal\\s+place\\s+of\\s+business\\s+in\\s+([A-Z][a-z]+)",
+          "Delaware\\s+corporation",
+          "LLC\\s+organized\\s+under\\s+([A-Z][a-z]+)\\s+law"
+        ]
+      }
+    },
+    "amountInControversy": {
+      "threshold": 75000,
+      "calculationRules": [
+        "exclude_interest_and_costs",
+        "include_attorney_fees_if_contractual",
+        "good_faith_pleading_standard",
+        "aggregate_claims_if_common_undivided_interest"
+      ],
+      "patterns": [
+        "\\$([0-9,]+(?:\\.[0-9]{2})?)",
+        "([0-9,]+)\\s+dollars",
+        "exceeds\\s+\\$?([0-9,]+)",
+        "damages\\s+of\\s+\\$?([0-9,]+)"
+      ],
+      "confidenceFactors": [
+        {
+          "factor": "explicit_amount_pleaded",
+          "weight": 0.4
+        },
+        {
+          "factor": "damages_calculation_basis",
+          "weight": 0.3
+        },
+        {
+          "factor": "attorney_fees_claimed",
+          "weight": 0.2
+        },
+        {
+          "factor": "punitive_damages_potential",
+          "weight": 0.1
+        }
+      ]
+    }
+  },
+  "jurisdictionValidationRules": {
+    "wellPleadedComplaintRule": {
+      "description": "Federal question must appear on face of well-pleaded complaint",
+      "requirements": [
+        "Federal law creates cause of action",
+        "Federal question is essential element",
+        "Federal law is not merely defense"
+      ],
+      "patterns": [
+        "federal\\s+statute\\s+creates",
+        "federal\\s+question\\s+jurisdiction",
+        "arising\\s+under\\s+federal\\s+law"
+      ]
+    },
+    "supplementalJurisdiction": {
+      "statutoryBasis": "28 U.S.C. § 1367",
+      "requirements": [
+        "anchor_claim_with_original_jurisdiction",
+        "common_nucleus_operative_facts",
+        "same_case_or_controversy"
+      ],
+      "exclusions": [
+        "diversity_only_cases_certain_claims",
+        "substantial_predominance_state_issues",
+        "compelling_reasons_decline"
+      ]
+    }
+  },
+  "fcraSpecificJurisdiction": {
+    "primaryJurisdictionBasis": {
+      "type": "federal_question",
+      "statute": "15 U.S.C. § 1681 et seq.",
+      "confidence": 0.9,
+      "requirements": [
+        "FCRA creates private right of action",
+        "Federal law is essential element",
+        "No adequate state law remedy"
+      ]
+    },
+    "alternativeJurisdictionBasis": {
+      "type": "diversity",
+      "applicability": "when_fcra_claims_supplemented_by_state_claims",
+      "requirements": [
+        "complete_diversity_of_citizenship",
+        "amount_in_controversy_exceeds_75000",
+        "good_faith_belief_jurisdictional_requirements_met"
+      ]
+    },
+    "jurisdictionStrengthIndicators": [
+      {
+        "indicator": "explicit_fcra_statute_citation",
+        "strength": "very_strong",
+        "weight": 0.3
+      },
+      {
+        "indicator": "fcra_violation_allegations",
+        "strength": "strong", 
+        "weight": 0.25
+      },
+      {
+        "indicator": "consumer_reporting_context",
+        "strength": "moderate",
+        "weight": 0.2
+      },
+      {
+        "indicator": "credit_bureau_defendants",
+        "strength": "moderate",
+        "weight": 0.15
+      },
+      {
+        "indicator": "fcra_damages_claimed",
+        "strength": "weak",
+        "weight": 0.1
+      }
+    ]
+  },
+  "commonJurisdictionIssues": {
+    "inadequate_federal_question": {
+      "description": "Federal law merely provides defense or incidental issue",
+      "riskFactors": [
+        "primary_state_law_claims",
+        "federal_law_only_defense",
+        "state_law_alternative_remedies"
+      ],
+      "mitigation": [
+        "emphasize_federal_statute_cause_of_action",
+        "minimize_state_law_claims", 
+        "establish_federal_preemption"
+      ]
+    },
+    "diversity_destroyed": {
+      "description": "Lack of complete diversity between parties",
+      "riskFactors": [
+        "parties_same_state_citizenship",
+        "uncertain_corporate_citizenship",
+        "post_removal_citizenship_changes"
+      ],
+      "mitigation": [
+        "verify_all_party_citizenship",
+        "research_corporate_structures",
+        "strategic_party_alignment"
+      ]
+    },
+    "amount_in_controversy_insufficient": {
+      "description": "Good faith belief damages do not exceed $75,000",
+      "riskFactors": [
+        "limited_actual_damages",
+        "uncertain_statutory_damages",
+        "no_attorney_fees_provision"
+      ],
+      "mitigation": [
+        "include_all_potential_damages",
+        "claim_statutory_damages",
+        "include_attorney_fees_if_available"
+      ]
+    }
+  },
+  "strategicJurisdictionConsiderations": {
+    "forum_selection": {
+      "federal_court_advantages": [
+        "federal_question_expertise",
+        "consistent_federal_law_application", 
+        "broader_geographic_jury_pool",
+        "faster_docket_in_some_districts"
+      ],
+      "state_court_advantages": [
+        "local_jury_familiarity",
+        "state_law_expertise",
+        "potentially_more_liberal_discovery",
+        "different_damages_standards"
+      ]
+    },
+    "removal_considerations": {
+      "removal_likely_if": [
+        "clear_federal_question",
+        "diversity_jurisdiction_exists",
+        "corporate_defendants_prefer_federal_court"
+      ],
+      "removal_unlikely_if": [
+        "purely_state_law_claims",
+        "local_defendants",
+        "insufficient_amount_in_controversy"
+      ]
+    }
+  }
+}

@@ -11,7 +11,13 @@
       "/CASES/Eman_Youseef/Atty_Notes.docx",
       "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_1.docx",
       "/CASES/Eman_Youseef/Barclays_Applicaiton_Denial_2.docx",
-      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf"
+      "/CASES/Eman_Youseef/Civil Cover Sheet.pdf",
+      "/CASES/Eman_Youseef/Complaint_Final.docx",
+      "/CASES/Eman_Youseef/SummonsEquifax.pdf",
+      "/CASES/Eman_Youseef/Summons_Experian.pdf",
+      "/CASES/Eman_Youseef/Summons_TD Bank.pdf",
+      "/CASES/Eman_Youseef/Summons_Trans Union.pdf",
+      "/CASES/Eman_Youseef/generated_complaint_eman_youssef_20250602_105238.pdf"
     ],
     "selectedTemplate": "fcra-credit-card-fraud",
     "processingResult": {
@@ -98,10 +104,10 @@
       "creditImpact": ""
     },
     "currentStep": 3,
-    "lastUpdated": "2025-06-14T15:28:45.336076-04:00",
+    "lastUpdated": "2025-06-15T20:07:07.360157-04:00",
     "username": ""
   },
-  "createdAt": "2025-06-14T14:11:45.018426-04:00",
-  "lastAccessed": "2025-06-14T15:28:45.336076-04:00",
-  "expiresAt": "2025-06-15T14:11:45.018426-04:00"
+  "createdAt": "2025-06-15T16:25:26.35938-04:00",
+  "lastAccessed": "2025-06-15T20:07:07.360157-04:00",
+  "expiresAt": "2025-06-16T16:25:26.35938-04:00"
 }

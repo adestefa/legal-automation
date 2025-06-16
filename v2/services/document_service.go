@@ -103,13 +103,14 @@ type ClientCase struct {
 
 // DocumentService handles document operations
 type DocumentService struct {
-	documentsDir        string
-	testCasesDir        string
-	extractor           *DocumentExtractor
-	contentAnalyzer     *ContentAnalyzer
-	attorneyNotesAnalyzer *AttorneyNotesAnalyzer
-	templateEngine      *TemplateEngine
-	extractionPatterns  map[string]interface{}
+	documentsDir               string
+	testCasesDir               string
+	extractor                  *DocumentExtractor
+	contentAnalyzer            *ContentAnalyzer
+	attorneyNotesAnalyzer      *AttorneyNotesAnalyzer
+	civilCoverSheetAnalyzer    *CivilCoverSheetAnalyzer
+	templateEngine             *TemplateEngine
+	extractionPatterns         map[string]interface{}
 }
 
 // NewDocumentService creates a new document service instance
@@ -137,6 +138,16 @@ func NewDocumentService() *DocumentService {
 	} else {
 		service.attorneyNotesAnalyzer = attorneyAnalyzer
 		log.Printf("[DOCUMENT_SERVICE] Initialized with Attorney Notes Intelligence Engine")
+	}
+	
+	// Initialize civil cover sheet analyzer
+	civilCoverAnalyzer, err := NewCivilCoverSheetAnalyzer()
+	if err != nil {
+		log.Printf("[DOCUMENT_SERVICE] Warning: Could not initialize civil cover sheet analyzer: %v", err)
+		// Continue without civil cover analyzer for now
+	} else {
+		service.civilCoverSheetAnalyzer = civilCoverAnalyzer
+		log.Printf("[DOCUMENT_SERVICE] Initialized with Civil Cover Sheet Legal Mapping Engine")
 	}
 	
 	// Initialize template engine
@@ -331,6 +342,20 @@ func (s *DocumentService) ProcessSelectedDocuments(selectedDocIDs []string, temp
 				analysis = s.enhanceAnalysisWithAttorneyIntelligence(analysis, attorneyAnalysis)
 				log.Printf("[DOCUMENT_SERVICE] Enhanced %s with attorney intelligence - %.1f%% confidence", 
 					fileName, attorneyAnalysis.ConfidenceScores.OverallConfidence)
+			}
+		}
+		
+		// Civil cover sheet specialized analysis
+		if doc.ContentType == "civil_cover_sheet" && s.civilCoverSheetAnalyzer != nil {
+			log.Printf("[DOCUMENT_SERVICE] Performing civil cover sheet legal mapping for %s", fileName)
+			coverSheetAnalysis, err := s.civilCoverSheetAnalyzer.AnalyzeCivilCoverSheet(docPath, content.RawText)
+			if err != nil {
+				log.Printf("[DOCUMENT_SERVICE] Warning: Civil cover sheet analysis failed for %s: %v", fileName, err)
+			} else {
+				// Store civil cover sheet analysis for legal framework enhancement
+				extractedData["civil_cover_sheet_analysis"] = coverSheetAnalysis
+				log.Printf("[DOCUMENT_SERVICE] Civil cover sheet analysis complete - %.1f%% confidence, nature of suit: %s", 
+					coverSheetAnalysis.AnalysisMetadata.ConfidenceScore, coverSheetAnalysis.NatureOfSuit.PrimaryCode)
 			}
 		}
 		
