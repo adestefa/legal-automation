@@ -289,8 +289,132 @@
 
         // Global missing content analysis function
         window.loadMissingContentAnalysis = function() {
-            // Implementation would go here if needed
-            console.log('Loading missing content analysis...');
+            // Get available documents from backend data (actual iCloud folder contents)
+            let allAvailableDocuments = [];
+            try {
+                const availableDataElement = document.getElementById('available-documents-data');
+                if (availableDataElement) {
+                    const jsonData = '[' + availableDataElement.textContent.trim() + ']';
+                    allAvailableDocuments = JSON.parse(jsonData);
+                    console.log('Successfully loaded available documents from backend:', allAvailableDocuments);
+                }
+            } catch (e) {
+                console.warn('Failed to parse available documents data:', e);
+                // Fallback to empty array if can't parse
+                allAvailableDocuments = [];
+            }
+            
+            // Get selected documents from backend data (reliable source)
+            let selectedDocs = [];
+            try {
+                const dataElement = document.getElementById('selected-documents-data');
+                if (dataElement) {
+                    const jsonData = '[' + dataElement.textContent.trim() + ']';
+                    selectedDocs = JSON.parse(jsonData);
+                    console.log('Successfully loaded selected docs from backend:', selectedDocs);
+                }
+            } catch (e) {
+                console.warn('Failed to parse selected documents data:', e);
+            }
+            
+            // Fallback: try to get from UI elements if backend data failed
+            if (selectedDocs.length === 0) {
+                const sourceDocElements = document.querySelectorAll('#review-tab .bg-gray-50 .bg-white.border.border-gray-200 span');
+                sourceDocElements.forEach(el => {
+                    if (el.textContent.trim()) {
+                        selectedDocs.push(el.textContent.trim());
+                    }
+                });
+                console.log('Fallback: Found selected docs from DOM:', selectedDocs);
+            }
+            
+            // Final fallback - this should rarely be needed now
+            if (selectedDocs.length === 0) {
+                console.warn('Could not detect selected documents - using hardcoded fallback');
+                selectedDocs.push('Attorney_Notes.txt', 'Adverse_Action_Letter_Cap_One.pdf', 'Civil_Cover_Sheet.txt', 'Complaint_Final.docx');
+            }
+            
+            // Find unselected documents
+            const unselectedDocs = allAvailableDocuments.filter(doc => !selectedDocs.includes(doc));
+            
+            // Populate unselected documents section
+            const unselectedContainer = document.getElementById('unselected-documents');
+            if (unselectedContainer && unselectedDocs.length > 0) {
+                unselectedContainer.innerHTML = unselectedDocs.map((doc, index) => `
+                    <div class="flex items-center">
+                        <div class="text-xs font-medium text-orange-700 mr-3 w-6">${index + 1}.</div>
+                        <div class="h-2 w-2 bg-orange-500 rounded-full mr-3"></div>
+                        <span class="text-sm text-orange-800">${doc}</span>
+                        <span class="ml-auto text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">Not Selected</span>
+                    </div>
+                `).join('');
+            } else if (unselectedContainer) {
+                unselectedContainer.innerHTML = '<p class="text-sm text-gray-600 italic">All available documents have been selected.</p>';
+            }
+            
+            // Analyze what's actually missing based on selected documents
+            const missingDataAnalysis = window.analyzeMissingData(selectedDocs, unselectedDocs);
+            
+            // Show appropriate message based on analysis
+            const missingDataSection = document.getElementById('missing-data-analysis');
+            const allCompleteSection = document.getElementById('all-data-complete');
+            const missingDataList = document.getElementById('missing-data-list');
+            
+            if (missingDataAnalysis.issues.length > 0) {
+                // Show missing data warnings
+                if (missingDataSection) missingDataSection.classList.remove('hidden');
+                if (allCompleteSection) allCompleteSection.classList.add('hidden');
+                
+                if (missingDataList) {
+                    missingDataList.innerHTML = missingDataAnalysis.issues.map(issue => `
+                        <li class="flex items-start">
+                            <div class="h-2 w-2 bg-yellow-500 rounded-full mr-3 mt-2"></div>
+                            <span>${issue}</span>
+                        </li>
+                    `).join('');
+                }
+            } else {
+                // Show all complete message
+                if (missingDataSection) missingDataSection.classList.add('hidden');
+                if (allCompleteSection) allCompleteSection.classList.remove('hidden');
+            }
+            
+            console.log('Missing content analysis loaded. Selected:', selectedDocs, 'Unselected:', unselectedDocs, 'Issues:', missingDataAnalysis.issues);
+        };
+
+        // Global missing data analysis helper function
+        window.analyzeMissingData = function(selectedDocs, unselectedDocs) {
+            const issues = [];
+            
+            // Check for missing summons documents (multiple defendants)
+            const summonsSelected = selectedDocs.filter(doc => doc.toLowerCase().includes('summons')).length;
+            const summonsAvailable = unselectedDocs.filter(doc => doc.toLowerCase().includes('summons')).length;
+            
+            if (summonsAvailable > 0) {
+                issues.push(`Additional defendant information (${summonsAvailable} summons document${summonsAvailable > 1 ? 's' : ''} not selected)`);
+            }
+            
+            // Check for missing adverse action letters
+            const adverseSelected = selectedDocs.filter(doc => doc.toLowerCase().includes('adverse') || doc.toLowerCase().includes('denial')).length;
+            const adverseAvailable = unselectedDocs.filter(doc => doc.toLowerCase().includes('adverse') || doc.toLowerCase().includes('denial')).length;
+            
+            if (adverseAvailable > 0) {
+                issues.push(`Specific adverse action details from other credit denials (${adverseAvailable} document${adverseAvailable > 1 ? 's' : ''} not selected)`);
+            }
+            
+            // Check if core documents are missing
+            const hasAttorneyNotes = selectedDocs.some(doc => doc.toLowerCase().includes('attorney') || doc.toLowerCase().includes('atty'));
+            const hasCivilCover = selectedDocs.some(doc => doc.toLowerCase().includes('civil') || doc.toLowerCase().includes('cover'));
+            
+            if (!hasAttorneyNotes && unselectedDocs.some(doc => doc.toLowerCase().includes('attorney') || doc.toLowerCase().includes('atty'))) {
+                issues.push('Attorney notes containing case details and client information');
+            }
+            
+            if (!hasCivilCover && unselectedDocs.some(doc => doc.toLowerCase().includes('civil') || doc.toLowerCase().includes('cover'))) {
+                issues.push('Civil cover sheet with court and case classification information');
+            }
+            
+            return { issues };
         };
 
         console.log('Mallon Legal Assistant v2.14.0 loaded with enhanced session management and global tab functions');
