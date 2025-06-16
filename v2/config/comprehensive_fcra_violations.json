@@ -1,0 +1,439 @@
+{
+  "violationDatabase": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-06-16",
+    "description": "Comprehensive FCRA violation database with detailed legal elements and evidence requirements",
+    "fcraViolations": [
+      {
+        "violationId": "FCRA-1681e-b",
+        "statute": {
+          "citation": "15 U.S.C. § 1681e(b)",
+          "title": "Fair Credit Reporting Act - Reasonable Procedures",
+          "text": "Whenever a consumer reporting agency prepares a consumer report it shall follow reasonable procedures to assure maximum possible accuracy of the information concerning the individual about whom the report relates."
+        },
+        "violationName": "Negligent Failure to Follow Reasonable Procedures",
+        "violationType": "negligent",
+        "legalElements": [
+          {
+            "elementId": "duty_reasonable_procedures",
+            "elementDescription": "Defendant owed duty to follow reasonable procedures",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["consumer_reports", "policies_procedures", "industry_standards"],
+            "strengthIndicators": ["documented_procedures", "industry_compliance_history"],
+            "weaknessIndicators": ["no_documented_procedures", "history_of_violations"]
+          },
+          {
+            "elementId": "failure_maximum_accuracy",
+            "elementDescription": "Defendant failed to assure maximum possible accuracy",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["inaccurate_reports", "verification_failures", "reinvestigation_records"],
+            "strengthIndicators": ["multiple_inaccuracies", "obvious_errors", "failed_verification"],
+            "weaknessIndicators": ["minor_errors", "isolated_incidents", "corrective_action_taken"]
+          },
+          {
+            "elementId": "inaccurate_information",
+            "elementDescription": "Information reported was inaccurate",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["credit_reports", "source_documents", "dispute_records"],
+            "strengthIndicators": ["clear_documentation", "multiple_sources", "expert_testimony"],
+            "weaknessIndicators": ["conflicting_evidence", "ambiguous_records", "credibility_issues"]
+          },
+          {
+            "elementId": "proximate_cause_damages",
+            "elementDescription": "Failure proximately caused consumer damages",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["adverse_actions", "credit_denials", "economic_impact"],
+            "strengthIndicators": ["direct_causation", "clear_harm", "documented_losses"],
+            "weaknessIndicators": ["intervening_causes", "speculative_damages", "minimal_impact"]
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "patternId": "inaccurate_reporting_pattern",
+            "documentTypes": ["credit_reports", "adverse_action_letters"],
+            "requiredContent": ["inaccurate_information", "reporting_date", "consumer_impact"],
+            "confidenceThreshold": 0.8
+          },
+          {
+            "patternId": "procedure_failure_pattern",
+            "documentTypes": ["policies_procedures", "investigation_records"],
+            "requiredContent": ["inadequate_procedures", "verification_failures"],
+            "confidenceThreshold": 0.7
+          }
+        ],
+        "documentSources": ["credit_reports", "dispute_correspondence", "reinvestigation_records"],
+        "defendantTypes": ["consumer_reporting_agency"],
+        "damageCategories": ["actual_damages", "attorney_fees", "costs"],
+        "relatedViolations": ["FCRA-1681i-a", "FCRA-1681n"],
+        "caseStrengthFactors": [
+          {
+            "factorId": "multiple_inaccuracies",
+            "description": "Multiple inaccurate items reported",
+            "strengthMultiplier": 1.5,
+            "evidenceRequired": ["multiple_credit_reports", "documented_inaccuracies"]
+          },
+          {
+            "factorId": "willful_blindness",
+            "description": "Evidence of willful blindness to accuracy problems",
+            "strengthMultiplier": 2.0,
+            "evidenceRequired": ["notice_of_problems", "failure_to_investigate"]
+          }
+        ]
+      },
+      {
+        "violationId": "FCRA-1681i-a",
+        "statute": {
+          "citation": "15 U.S.C. § 1681i(a)",
+          "title": "Procedure in case of disputed accuracy",
+          "subsection": "(1)(A) reinvestigation required"
+        },
+        "violationName": "Failure to Conduct Reasonable Reinvestigation",
+        "violationType": "willful_or_negligent",
+        "legalElements": [
+          {
+            "elementId": "consumer_dispute_received",
+            "elementDescription": "Consumer disputed accuracy of information",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["dispute_letters", "online_disputes", "phone_records"],
+            "strengthIndicators": ["written_dispute", "specific_allegations", "documented_receipt"],
+            "weaknessIndicators": ["vague_dispute", "undocumented_communication", "late_dispute"]
+          },
+          {
+            "elementId": "reinvestigation_duty",
+            "elementDescription": "Duty to conduct reasonable reinvestigation",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["fcra_requirements", "industry_standards", "cra_policies"],
+            "strengthIndicators": ["clear_statutory_duty", "established_procedures"],
+            "weaknessIndicators": ["ambiguous_requirements", "conflicting_standards"]
+          },
+          {
+            "elementId": "failure_reasonable_investigation",
+            "elementDescription": "Failed to conduct reasonable reinvestigation",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["investigation_records", "furnisher_contacts", "verification_procedures"],
+            "strengthIndicators": ["no_investigation", "inadequate_investigation", "sham_investigation"],
+            "weaknessIndicators": ["thorough_investigation", "reasonable_procedures", "good_faith_effort"]
+          },
+          {
+            "elementId": "continued_reporting",
+            "elementDescription": "Continued reporting disputed information",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["post_dispute_reports", "credit_monitoring", "verification_results"],
+            "strengthIndicators": ["unchanged_reporting", "no_deletion", "repeated_violations"],
+            "weaknessIndicators": ["corrective_action", "deletion_of_errors", "improved_accuracy"]
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "patternId": "dispute_receipt_pattern",
+            "documentTypes": ["dispute_correspondence", "attorney_notes"],
+            "requiredContent": ["dispute_notification", "consumer_allegations", "receipt_confirmation"],
+            "confidenceThreshold": 0.85
+          },
+          {
+            "patternId": "failed_investigation_pattern",
+            "documentTypes": ["investigation_records", "correspondence"],
+            "requiredContent": ["investigation_failure", "inadequate_procedures", "continued_reporting"],
+            "confidenceThreshold": 0.8
+          }
+        ],
+        "documentSources": ["dispute_correspondence", "investigation_records", "credit_reports"],
+        "defendantTypes": ["consumer_reporting_agency"],
+        "damageCategories": ["actual_damages", "statutory_damages", "attorney_fees"],
+        "relatedViolations": ["FCRA-1681e-b", "FCRA-1681i-a5", "FCRA-1681n"],
+        "caseStrengthFactors": [
+          {
+            "factorId": "sham_investigation",
+            "description": "Evidence of sham or token investigation",
+            "strengthMultiplier": 2.5,
+            "evidenceRequired": ["minimal_investigation_records", "obvious_inadequacy"]
+          },
+          {
+            "factorId": "repeated_failures",
+            "description": "Multiple failed reinvestigations",
+            "strengthMultiplier": 2.0,
+            "evidenceRequired": ["multiple_disputes", "repeated_failures"]
+          }
+        ]
+      },
+      {
+        "violationId": "FCRA-1681i-a5",
+        "statute": {
+          "citation": "15 U.S.C. § 1681i(a)(5)(A)",
+          "title": "Deletion of inaccurate or unverifiable information",
+          "subsection": "(5)(A) deletion required"
+        },
+        "violationName": "Failure to Delete Inaccurate or Unverifiable Information",
+        "violationType": "negligent",
+        "legalElements": [
+          {
+            "elementId": "determination_inaccuracy",
+            "elementDescription": "Determination that information is inaccurate or unverifiable",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["investigation_results", "verification_attempts", "source_confirmation"],
+            "strengthIndicators": ["clear_inaccuracy", "verification_failure", "source_disavowal"],
+            "weaknessIndicators": ["disputed_accuracy", "conflicting_sources", "verification_success"]
+          },
+          {
+            "elementId": "duty_to_delete",
+            "elementDescription": "Duty to promptly delete inaccurate information",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["fcra_requirements", "statutory_deadlines"],
+            "strengthIndicators": ["clear_statutory_duty", "established_timelines"],
+            "weaknessIndicators": ["ambiguous_requirements", "disputed_obligations"]
+          },
+          {
+            "elementId": "failure_to_delete",
+            "elementDescription": "Failed to delete inaccurate information",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["credit_reports", "monitoring_records", "post_investigation_reports"],
+            "strengthIndicators": ["continued_reporting", "unchanged_records", "repeated_appearance"],
+            "weaknessIndicators": ["deletion_occurred", "corrective_action", "good_faith_effort"]
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "patternId": "deletion_failure_pattern",
+            "documentTypes": ["credit_reports", "investigation_records"],
+            "requiredContent": ["unverifiable_information", "failure_to_delete", "continued_reporting"],
+            "confidenceThreshold": 0.8
+          }
+        ],
+        "documentSources": ["credit_reports", "investigation_records", "dispute_correspondence"],
+        "defendantTypes": ["consumer_reporting_agency"],
+        "damageCategories": ["actual_damages", "attorney_fees", "costs"],
+        "relatedViolations": ["FCRA-1681i-a", "FCRA-1681e-b"]
+      },
+      {
+        "violationId": "FCRA-1681c-a2",
+        "statute": {
+          "citation": "15 U.S.C. § 1681c(a)(2)",
+          "title": "Requirements relating to information contained in consumer reports",
+          "subsection": "(a)(2) time limitations"
+        },
+        "violationName": "Reporting Prohibited Information - Time Limitations",
+        "violationType": "negligent",
+        "legalElements": [
+          {
+            "elementId": "obsolete_information",
+            "elementDescription": "Information reported beyond permissible time periods",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["credit_reports", "historical_records", "date_analysis"],
+            "strengthIndicators": ["clear_date_violations", "obvious_obsolescence"],
+            "weaknessIndicators": ["disputed_dates", "permissible_exceptions"]
+          },
+          {
+            "elementId": "knowledge_obsolescence",
+            "elementDescription": "Knowledge or should have known information was obsolete",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["reporting_dates", "source_dates", "system_records"],
+            "strengthIndicators": ["obvious_age", "system_alerts", "clear_violations"],
+            "weaknessIndicators": ["reasonable_reliance", "system_errors", "good_faith_belief"]
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "patternId": "obsolete_reporting_pattern",
+            "documentTypes": ["credit_reports", "adverse_action_letters"],
+            "requiredContent": ["obsolete_information", "reporting_dates", "time_violations"],
+            "confidenceThreshold": 0.9
+          }
+        ],
+        "documentSources": ["credit_reports", "adverse_action_letters"],
+        "defendantTypes": ["consumer_reporting_agency"],
+        "damageCategories": ["actual_damages", "attorney_fees", "costs"]
+      },
+      {
+        "violationId": "FCRA-1681m-a",
+        "statute": {
+          "citation": "15 U.S.C. § 1681m(a)",
+          "title": "Requirements on users of consumer reports",
+          "subsection": "(a) duties of users taking adverse actions"
+        },
+        "violationName": "Adverse Action Notice Violations",
+        "violationType": "negligent",
+        "legalElements": [
+          {
+            "elementId": "adverse_action_taken",
+            "elementDescription": "Adverse action taken based on consumer report",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["denial_letters", "adverse_action_notices", "application_records"],
+            "strengthIndicators": ["clear_adverse_action", "documented_basis"],
+            "weaknessIndicators": ["disputed_action", "multiple_factors"]
+          },
+          {
+            "elementId": "notice_requirement",
+            "elementDescription": "Duty to provide adverse action notice",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["fcra_requirements", "statutory_provisions"],
+            "strengthIndicators": ["clear_statutory_duty", "established_requirements"],
+            "weaknessIndicators": ["ambiguous_requirements", "disputed_obligations"]
+          },
+          {
+            "elementId": "notice_failure",
+            "elementDescription": "Failed to provide required notice or inadequate notice",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["notice_records", "consumer_testimony", "mailing_records"],
+            "strengthIndicators": ["no_notice_provided", "inadequate_disclosure", "untimely_notice"],
+            "weaknessIndicators": ["proper_notice", "timely_disclosure", "adequate_information"]
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "patternId": "adverse_action_pattern",
+            "documentTypes": ["adverse_action_letters", "denial_notices"],
+            "requiredContent": ["adverse_action", "inadequate_notice", "fcra_violations"],
+            "confidenceThreshold": 0.8
+          }
+        ],
+        "documentSources": ["adverse_action_letters", "application_records", "correspondence"],
+        "defendantTypes": ["credit_user"],
+        "damageCategories": ["actual_damages", "attorney_fees", "costs"]
+      },
+      {
+        "violationId": "FCRA-1681n",
+        "statute": {
+          "citation": "15 U.S.C. § 1681n",
+          "title": "Civil liability for willful noncompliance",
+          "subsection": "(a) willful noncompliance"
+        },
+        "violationName": "Willful Non-Compliance with FCRA",
+        "violationType": "willful",
+        "legalElements": [
+          {
+            "elementId": "willful_violation",
+            "elementDescription": "Willful violation of FCRA requirements",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["violation_evidence", "intent_evidence", "knowledge_evidence"],
+            "strengthIndicators": ["deliberate_action", "knowledge_of_requirements", "reckless_disregard"],
+            "weaknessIndicators": ["good_faith_effort", "reasonable_interpretation", "inadvertent_error"]
+          },
+          {
+            "elementId": "pattern_violations",
+            "elementDescription": "Pattern of willful non-compliance",
+            "proofRequirement": "preponderance",
+            "evidenceSources": ["multiple_violations", "systemic_failures", "repeated_conduct"],
+            "strengthIndicators": ["systematic_violations", "repeated_failures", "ignored_warnings"],
+            "weaknessIndicators": ["isolated_incidents", "corrective_action", "compliance_efforts"]
+          }
+        ],
+        "evidenceRequirements": [
+          {
+            "patternId": "willful_violation_pattern",
+            "documentTypes": ["multiple_document_types", "pattern_evidence"],
+            "requiredContent": ["willful_conduct", "pattern_violations", "reckless_disregard"],
+            "confidenceThreshold": 0.85
+          }
+        ],
+        "documentSources": ["all_document_types"],
+        "defendantTypes": ["consumer_reporting_agency", "credit_user"],
+        "damageCategories": ["actual_damages", "statutory_damages", "punitive_damages", "attorney_fees"],
+        "relatedViolations": ["FCRA-1681e-b", "FCRA-1681i-a", "FCRA-1681m-a"],
+        "caseStrengthFactors": [
+          {
+            "factorId": "willfulness_evidence",
+            "description": "Clear evidence of willful conduct",
+            "strengthMultiplier": 3.0,
+            "evidenceRequired": ["deliberate_action", "knowledge_of_law", "reckless_disregard"]
+          },
+          {
+            "factorId": "punitive_damages_potential",
+            "description": "Strong potential for punitive damages",
+            "strengthMultiplier": 2.5,
+            "evidenceRequired": ["egregious_conduct", "pattern_violations", "consumer_harm"]
+          }
+        ]
+      }
+    ],
+    "violationInterconnections": [
+      {
+        "primaryViolation": "FCRA-1681e-b",
+        "relatedViolations": ["FCRA-1681i-a"],
+        "relationshipType": "supporting",
+        "legalSynergy": {
+          "synergyType": "reinforcing",
+          "combinedElements": [
+            "initial_inaccuracy_establishes_unreasonable_procedures",
+            "failed_reinvestigation_confirms_system_deficiency",
+            "continued_reporting_demonstrates_willful_disregard"
+          ],
+          "strengthMultiplier": 1.75,
+          "strategicAdvantages": [
+            "dual_liability_theory",
+            "progressive_culpability_narrative",
+            "enhanced_damages_potential"
+          ]
+        }
+      },
+      {
+        "primaryViolation": "FCRA-1681i-a",
+        "relatedViolations": ["FCRA-1681i-a5"],
+        "relationshipType": "prerequisite",
+        "legalSynergy": {
+          "synergyType": "sequential",
+          "combinedElements": [
+            "failed_investigation_leads_to_deletion_duty",
+            "failure_to_delete_compounds_investigation_failure"
+          ],
+          "strengthMultiplier": 1.5,
+          "strategicAdvantages": [
+            "step_by_step_violation_narrative",
+            "clear_causation_chain"
+          ]
+        }
+      },
+      {
+        "primaryViolation": "FCRA-1681n",
+        "relatedViolations": ["FCRA-1681e-b", "FCRA-1681i-a", "FCRA-1681m-a"],
+        "relationshipType": "enhancement",
+        "legalSynergy": {
+          "synergyType": "aggregating",
+          "combinedElements": [
+            "multiple_violations_establish_willfulness",
+            "pattern_of_violations_supports_punitive_damages"
+          ],
+          "strengthMultiplier": 2.0,
+          "strategicAdvantages": [
+            "willfulness_pattern_evidence",
+            "punitive_damages_eligibility",
+            "maximum_damages_potential"
+          ]
+        }
+      }
+    ],
+    "evidencePatterns": [
+      {
+        "patternId": "fcra_systematic_failure",
+        "description": "Pattern indicating systematic FCRA compliance failure",
+        "requiredElements": [
+          "multiple_violation_types",
+          "repeated_failures",
+          "lack_of_corrective_action"
+        ],
+        "documentSources": ["credit_reports", "dispute_correspondence", "investigation_records"],
+        "legalImplications": [
+          "willfulness_evidence",
+          "punitive_damages_eligibility",
+          "pattern_liability"
+        ],
+        "strengthMultiplier": 2.5
+      },
+      {
+        "patternId": "consumer_harm_progression",
+        "description": "Progressive consumer harm from FCRA violations",
+        "requiredElements": [
+          "initial_inaccuracy",
+          "dispute_and_failure",
+          "continued_harm"
+        ],
+        "documentSources": ["adverse_action_letters", "credit_reports", "dispute_records"],
+        "legalImplications": [
+          "causation_evidence",
+          "damages_calculation",
+          "timeline_establishment"
+        ],
+        "strengthMultiplier": 1.8
+      }
+    ]
+  }
+}
