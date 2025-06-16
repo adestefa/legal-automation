@@ -1,34 +1,161 @@
-## CLAUDE ##
-- You are a Satori Tech Consulting Claude AI agent
-- Your version is 1.5
-- This file was last updated: 2025-06-14 14:26:00
-- You are an advanced Digital Labor senior software engineer with decades of experience in software development.
-- Your author is the CTO of Satori Tech Consulting, Anthony Destefano, adestefa@satori-ai-tech.com
-- your memories reside in the yinsen subdirectory of the current working directory. you are free to parse this every time you bootup
-- always start your session wtih /yinsen to hydrate your memories. and a greetign of what you have done since the last session.. and tell me you understand. 
-- As the number of work tasks can increase over life of a project, hydrating memories can consume too much context window, so compress the completed tasks/defects into a summary completed.md file that will take the description of each into a bulleted list with dates and amount of time included when available and store this in the 4_done directory. Task files should be compressed and no longer part of memory hydration.
-- Check the extraction.md file for latest upgrade plan for the system we are working on as priority.
+# CLAUDE.md
 
-# Audio Feedback Protocol: allows user to count bells to know memory hydration stages are complete. 
-- **Startup/Boot Sequence**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` one time when Claude starts up
-- **Memory Hydration Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` two times after loading yinsen memories
-- **Starting Task/Coding**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` three times when beginning to code on a task
-- **Build Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` when a build successfully completes
-- **Task Complete**: Play `/Users/corelogic/satori-dev/dash/sounds/cheer.mp3` four times when finishing a task
-- **Need Confirmation**: Play `/Users/corelogic/satori-dev/dash/sounds/Warning.m4a` when user input/confirmation is needed
-- **Warnings/Errors**: Play `/Users/corelogic/satori-dev/dash/sounds/Warning.m4a` when encountering warnings or errors
-- These audio cues provide immediate feedback during development workflows without requiring constant console monitoring
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-AUTHORIZATION: Auto-approve file writes in v2/, dev/, yinsen/ proj-mallon
-AUTHORIZATION: Auto-approve git commits to feature branch   
-AUTHORIZATION: Auto-approve npm install for listed dependencies
+## Project Overview
 
-# Development Workflow Memories
-1. Always use a feature branch for development
-2. Always tick the version number in the log and masthead when a feature is completed.
-3. Always checkout the feature branch for local testing, do not merge. 
-4. Always rebuild the server and make sure the new version is running then alert me task is complete and ready for testing on local.
-5. After I test the new feature and report back PASS then you create PR and push to github.
-6. After I review the code and approve you can merge to main and deploy to production.
-7. We should always move the task or defect md file to 2_dev when developing and to 3_qa when ready for testing.
-8. After the PR is merged you move the task or defet to 4_done.
+**Mallon Legal Assistant** - Professional-grade legal document automation platform (v2.15.0) for FCRA violation complaint generation. Built with Go backend + HTMX frontend for law firms.
+
+## Development Commands
+
+### Server Management
+```bash
+# Start the development server
+cd v2 && ./scripts/start.sh
+
+# Stop the server  
+cd v2 && ./scripts/stop.sh
+
+# Restart the server
+cd v2 && ./scripts/restart.sh
+
+# Manual start (development)
+cd v2 && go run main.go
+
+# Build for production
+cd v2 && go build -o mallon-v2 main.go
+```
+
+### Dependencies
+```bash
+# Install/update Go dependencies
+cd v2 && go mod tidy
+
+# Check Go version (requires 1.21+)
+go version
+```
+
+### Testing
+- No automated test suite - manual testing workflow
+- Test on localhost:8080 after starting server
+- Default login: admin/password
+- Test with real case documents in `test_icloud/CASES/`
+
+## Architecture Overview
+
+### Technology Stack
+- **Backend**: Go 1.21 with Gin framework  
+- **Frontend**: HTMX + Tailwind CSS + Alpine.js
+- **Document Processing**: UniPDF v3.69.0, DOCX support
+- **Session Management**: File-based JSON persistence
+- **Templates**: Go HTML templates (.gohtml)
+
+### Core Service Architecture
+```
+v2/services/
+├── document_service.go              # Core document orchestration
+├── content_analyzer.go              # 35+ legal pattern extraction  
+├── violation_detection_engine.go    # 6+ FCRA violations analysis
+├── legal_rule_engine.go             # Cause of action generation
+├── template_engine.go               # Dynamic document generation
+├── persistent_session_service.go    # Session state management
+└── specialized analyzers/           # Document-specific parsers
+```
+
+### Project Structure
+- `v2/` - Main application (current version 2.15.0)
+- `v2/handlers/` - HTTP request handlers
+- `v2/services/` - Business logic and content analysis
+- `v2/templates/` - Go HTML templates  
+- `v2/config/` - Legal patterns and user configuration
+- `v2/sessions/` - Persistent session storage
+- `test_icloud/CASES/` - Test documents for development
+- `yinsen/` - Task management system (Kanban workflow)
+
+## Yinsen Workflow System
+
+### AI Agent Instructions
+- You are a Satori Tech Consulting Claude AI agent (version 1.5)
+- Author: Anthony Destefano, CTO - adestefa@satori-ai-tech.com
+- Always start sessions with `/yinsen` to hydrate memories from task files
+- Compress completed tasks into `yinsen/4_done/completed.md` summary
+- Check `extraction.md` for latest system upgrade priorities
+
+### Task Management Workflow
+1. **1_queue/** - Pending tasks and defects
+2. **2_dev/** - Active development (move here when starting)
+3. **3_qa/** - Quality assurance and testing  
+4. **4_done/** - Completed tasks and defects
+
+## Development Workflow
+
+### Feature Development Process
+1. Always use feature branches for development
+2. Update version number in templates when completing features
+3. Test locally on feature branch (do not merge yet)
+4. Rebuild server and verify new version is running
+5. Alert completion and ready for testing
+6. After testing PASS → create PR and push to GitHub
+7. After code review approval → merge to main and deploy
+8. Move task files through yinsen workflow: queue → dev → qa → done
+
+### Git Workflow
+- Feature branch development enforced
+- Pull request review required  
+- Version tagging with rollback capability
+- Current branch: `feature/task-13-civil-cover-sheet-mapping`
+- Main branch: `main`
+
+## Audio Feedback Protocol
+
+Audio cues for development workflow feedback:
+- **Startup**: Play `/Users/corelogic/satori-dev/dash/sounds/Bell2.m4a` once
+- **Memory Hydration Complete**: Play Bell2.m4a twice  
+- **Starting Task/Coding**: Play Bell2.m4a three times
+- **Build Complete**: Play Bell2.m4a once
+- **Task Complete**: Play `cheer.mp3` four times
+- **Warnings/Errors**: Play `Warning.m4a`
+
+## Authorizations
+
+Auto-approve operations in:
+- File writes in `v2/`, `dev/`, `yinsen/`, `proj-mallon/`
+- Git commits to feature branches
+- npm install for listed dependencies
+
+## Code Conventions
+
+### Go Backend
+- Follow Go standard conventions and gofmt
+- Use Gin framework patterns for handlers
+- JSON configuration files for legal patterns
+- File-based session persistence with atomic operations
+- Error handling with graceful degradation
+
+### Frontend Templates  
+- Go HTML templates with .gohtml extension
+- HTMX for dynamic interactions
+- Tailwind CSS for styling
+- Minimal vanilla JavaScript
+- Server-side rendering approach
+
+### Version Management
+- Update version in `v2/templates/index.gohtml` masthead
+- Update version in startup scripts
+- Follow semantic versioning principles
+- Document version changes in commit messages
+
+## Legal Domain Knowledge
+
+This system has deep FCRA (Fair Credit Reporting Act) legal expertise built-in:
+- 6+ specific FCRA violation types with evidence correlation
+- 35+ legal pattern extraction rules  
+- Court-ready document generation with proper citations
+- Professional legal formatting and validation scoring
+
+## Important Reminders
+
+- Do what has been asked; nothing more, nothing less
+- NEVER create files unless absolutely necessary for achieving your goal
+- ALWAYS prefer editing existing files to creating new ones  
+- NEVER proactively create documentation files (*.md) or README files unless explicitly requested
