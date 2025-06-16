@@ -1,0 +1,18 @@
+{
+  "sessionId": "demo_session_token",
+  "workflowState": {
+    "icloudConnected": true,
+    "icloudUsername": "anthony.destefano@gmail.com",
+    "selectedParentFolder": "/CASES",
+    "selectedCaseFolder": "",
+    "availableDocuments": null,
+    "selectedDocuments": null,
+    "selectedTemplate": "",
+    "currentStep": 0,
+    "lastUpdated": "2025-06-15T20:45:36.630181-04:00",
+    "username": ""
+  },
+  "createdAt": "2025-06-15T20:45:29.582106-04:00",
+  "lastAccessed": "2025-06-15T20:45:36.630181-04:00",
+  "expiresAt": "2025-06-16T20:45:29.582106-04:00"
+}

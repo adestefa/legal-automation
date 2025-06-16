@@ -1030,15 +1030,22 @@ func (h *UIHandlers) generateLegalAnalysis(selectedDocs []string) LegalAnalysis 
 	}
 }
 
-// generateLegalAnalysisFromExtraction creates legal analysis using actual extracted data
+// generateLegalAnalysisFromExtraction creates comprehensive legal analysis using ViolationDetectionEngine
 func (h *UIHandlers) generateLegalAnalysisFromExtraction(processingResult *services.DocumentProcessingResult, clientCase *services.ClientCase, selectedDocs []string) LegalAnalysis {
 	if processingResult == nil || clientCase == nil {
 		log.Printf("[WARNING] Missing processing results, falling back to minimal analysis")
 		return h.generateMinimalLegalAnalysis(selectedDocs)
 	}
 	
+	// Initialize comprehensive violation detection engine
+	violationEngine, err := services.NewViolationDetectionEngine()
+	if err != nil {
+		log.Printf("[ERROR] Failed to initialize violation detection engine: %v", err)
+		return h.generateMinimalLegalAnalysis(selectedDocs)
+	}
+	
 	// Debug log what data we actually have
-	log.Printf("[DEBUG] Generating legal analysis from actual extraction results")
+	log.Printf("[DEBUG] Generating comprehensive legal analysis using ViolationDetectionEngine")
 	log.Printf("[DEBUG] ClientCase data - Name: '%s', Contact: '%s', Residence: '%s', Institution: '%s', FraudAmount: '%s', TravelLocation: '%s'", 
 		clientCase.ClientName, clientCase.ContactInfo, clientCase.ResidenceLocation, 
 		clientCase.FinancialInstitution, clientCase.FraudAmount, clientCase.TravelLocation)
@@ -1052,7 +1059,16 @@ func (h *UIHandlers) generateLegalAnalysisFromExtraction(processingResult *servi
 		sourceDocs[i] = parts[len(parts)-1]
 	}
 	
-	// Build analysis based on actual extracted data
+	// Run comprehensive violation detection
+	detectedViolations, err := violationEngine.DetectViolations(processingResult, clientCase, selectedDocs)
+	if err != nil {
+		log.Printf("[ERROR] Violation detection failed: %v", err)
+		return h.generateMinimalLegalAnalysis(selectedDocs)
+	}
+	
+	log.Printf("[INFO] Comprehensive violation detection complete: %d violations detected", len(detectedViolations))
+	
+	// Build analysis from detected violations
 	analysis := LegalAnalysis{
 		ExtractionDate: time.Now().Format("January 2, 2006"),
 		SourceDocs:     sourceDocs,
@@ -1060,37 +1076,151 @@ func (h *UIHandlers) generateLegalAnalysisFromExtraction(processingResult *servi
 		LegalViolations: []LegalViolationItem{},
 	}
 	
-	// Generate legal analysis based on available data and document types
-	hasLegalDocuments := h.hasLegalDocumentTypes(sourceDocs)
-	hasClientInfo := clientCase.ClientName != "" || clientCase.ContactInfo != ""
-	hasFraudInfo := clientCase.FraudAmount != "" || clientCase.TravelLocation != "" || clientCase.FinancialInstitution != ""
-	
-	// If we have legal documents (like summons, adverse action letters, etc.), generate analysis
-	if hasLegalDocuments || len(processingResult.ExtractedData) > 0 || hasClientInfo || hasFraudInfo {
+	// Convert detected violations to legal analysis format
+	for _, violation := range detectedViolations {
+		// Create cause of action for each violation
+		causeOfAction := CauseOfActionItem{
+			Title:          violation.ViolationDefinition.ViolationName,
+			Description:    violation.ViolationDefinition.Statute.Text,
+			StatutoryBasis: violation.ViolationDefinition.Statute.Citation,
+			SourceDoc:      h.findBestSourceDoc(violation.DocumentSources, sourceDocs),
+			Elements:       h.extractElementsFromViolation(violation),
+		}
+		analysis.CauseOfAction = append(analysis.CauseOfAction, causeOfAction)
 		
-		// Check if we have client information to build FCRA case
-		if hasClientInfo || hasLegalDocuments {
-			clientName := clientCase.ClientName
-			if clientName == "" {
-				clientName = "the consumer" // Generic reference when name not extracted
+		// Create legal violation entry
+		legalViolation := LegalViolationItem{
+			Statute:       violation.ViolationDefinition.Statute.Citation,
+			ViolationType: fmt.Sprintf("%s - %s", 
+				strings.Title(violation.ViolationDefinition.ViolationType), 
+				violation.ViolationDefinition.ViolationName),
+			Description:   h.buildViolationDescription(violation, clientCase),
+			SourceDoc:     h.findBestSourceDoc(violation.DocumentSources, sourceDocs),
+			Penalties:     h.determinePenalties(violation.ViolationDefinition),
+		}
+		analysis.LegalViolations = append(analysis.LegalViolations, legalViolation)
+		
+		log.Printf("[INFO] Added violation: %s (strength: %s, confidence: %.2f)", 
+			violation.ViolationDefinition.ViolationName, 
+			violation.StrengthAssessment.StrengthCategory,
+			violation.ConfidenceScore)
+	}
+	
+	if len(detectedViolations) == 0 {
+		log.Printf("[WARNING] No violations detected, generating fallback analysis")
+		return h.generateFallbackAnalysis(processingResult, clientCase, selectedDocs)
+	}
+	
+	log.Printf("[INFO] Generated comprehensive legal analysis: %d causes of action, %d violations", 
+		len(analysis.CauseOfAction), len(analysis.LegalViolations))
+	
+	return analysis
+}
+
+// Helper methods for comprehensive violation detection
+
+// findBestSourceDoc finds the most relevant source document for a violation
+func (h *UIHandlers) findBestSourceDoc(documentSources []string, sourceDocs []string) string {
+	if len(documentSources) > 0 && len(sourceDocs) > 0 {
+		// Try to find best match
+		for _, source := range documentSources {
+			for _, doc := range sourceDocs {
+				if strings.Contains(strings.ToLower(doc), strings.ToLower(source)) {
+					return doc
+				}
 			}
-			
-			analysis.CauseOfAction = append(analysis.CauseOfAction, CauseOfActionItem{
-				Title:          "Negligent Non-Compliance with FCRA",
-				Description:    fmt.Sprintf("Defendants negligently failed to follow reasonable procedures regarding %s's consumer credit information", clientName),
-				StatutoryBasis: "15 U.S.C. § 1681e(b)",
-				SourceDoc:      h.findSourceForClientData(sourceDocs),
-				Elements: []string{
-					"Duty to maintain reasonable procedures",
-					"Failure to assure maximum possible accuracy",
-					"Reporting of inaccurate information",
-					"Proximately caused damages to consumer",
-				},
-			})
+		}
+		return sourceDocs[0] // Fallback to first document
+	}
+	return "Document Analysis"
+}
+
+// extractElementsFromViolation extracts legal elements from violation definition
+func (h *UIHandlers) extractElementsFromViolation(violation services.DetectedViolation) []string {
+	var elements []string
+	for _, element := range violation.ViolationDefinition.LegalElements {
+		elements = append(elements, element.ElementDescription)
+	}
+	return elements
+}
+
+// buildViolationDescription builds a description for the violation
+func (h *UIHandlers) buildViolationDescription(violation services.DetectedViolation, clientCase *services.ClientCase) string {
+	clientName := clientCase.ClientName
+	if clientName == "" {
+		clientName = "the consumer"
+	}
+	
+	switch violation.ViolationDefinition.ViolationID {
+	case "FCRA-1681e-b":
+		return fmt.Sprintf("Consumer reporting agency failed to follow reasonable procedures to assure maximum possible accuracy of information concerning %s", clientName)
+	case "FCRA-1681i-a":
+		return fmt.Sprintf("Upon dispute by %s, consumer reporting agency failed to conduct reasonable reinvestigation to determine whether the disputed information is inaccurate", clientName)
+	case "FCRA-1681i-a5":
+		return fmt.Sprintf("Failed to promptly delete inaccurate or unverifiable information from %s's consumer file following dispute", clientName)
+	case "FCRA-1681c-a2":
+		return fmt.Sprintf("Continued reporting of adverse information concerning %s beyond the permissible time periods", clientName)
+	case "FCRA-1681m-a":
+		return fmt.Sprintf("Failed to provide required adverse action notices to %s with consumer reporting agency information", clientName)
+	case "FCRA-1681n":
+		return fmt.Sprintf("Pattern of willful non-compliance with FCRA requirements causing harm to %s", clientName)
+	default:
+		return fmt.Sprintf("%s affecting %s", violation.ViolationDefinition.ViolationName, clientName)
+	}
+}
+
+// determinePenalties determines the appropriate penalties for a violation
+func (h *UIHandlers) determinePenalties(violationDef services.FCRAViolationDefinition) string {
+	switch violationDef.ViolationType {
+	case "willful":
+		return "Actual damages OR $100-$1,000 statutory damages, plus punitive damages and attorney fees"
+	case "negligent":
+		return "Actual damages, attorney fees, and costs"
+	default:
+		return "Actual damages, attorney fees, and costs"
+	}
+}
+
+// generateFallbackAnalysis generates analysis when no violations are detected
+func (h *UIHandlers) generateFallbackAnalysis(processingResult *services.DocumentProcessingResult, clientCase *services.ClientCase, selectedDocs []string) LegalAnalysis {
+	log.Printf("[INFO] Generating fallback analysis due to no violations detected")
+	
+	sourceDocs := make([]string, len(selectedDocs))
+	for i, docPath := range selectedDocs {
+		parts := strings.Split(docPath, "/")
+		sourceDocs[i] = parts[len(parts)-1]
+	}
+	
+	analysis := LegalAnalysis{
+		ExtractionDate: time.Now().Format("January 2, 2006"),
+		SourceDocs:     sourceDocs,
+		CauseOfAction:  []CauseOfActionItem{},
+		LegalViolations: []LegalViolationItem{},
+	}
+	
+	// Add generic FCRA violations if we have any client data
+	if clientCase.ClientName != "" || len(processingResult.ExtractedData) > 0 {
+		clientName := clientCase.ClientName
+		if clientName == "" {
+			clientName = "the consumer"
 		}
 		
-		// Check if we have fraud details or legal documents indicating dispute
-		if hasFraudInfo || h.hasDisputeDocuments(sourceDocs) {
+		// Generic negligent violation
+		analysis.CauseOfAction = append(analysis.CauseOfAction, CauseOfActionItem{
+			Title:          "Negligent Non-Compliance with FCRA",
+			Description:    fmt.Sprintf("Defendants negligently failed to follow reasonable procedures regarding %s's consumer credit information", clientName),
+			StatutoryBasis: "15 U.S.C. § 1681e(b)",
+			SourceDoc:      h.findSourceForClientData(sourceDocs),
+			Elements: []string{
+				"Duty to maintain reasonable procedures",
+				"Failure to assure maximum possible accuracy",
+				"Reporting of inaccurate information",
+				"Proximately caused damages to consumer",
+			},
+		})
+		
+		// Generic willful violation if we have dispute indicators
+		if clientCase.FraudAmount != "" || h.hasDisputeDocuments(sourceDocs) {
 			analysis.CauseOfAction = append(analysis.CauseOfAction, CauseOfActionItem{
 				Title:          "Willful Non-Compliance with FCRA",
 				Description:    "Defendants willfully failed to conduct reasonable reinvestigation upon consumer dispute",
@@ -1104,10 +1234,8 @@ func (h *UIHandlers) generateLegalAnalysisFromExtraction(processingResult *servi
 				},
 			})
 		}
-	}
-	
-	// Build legal violations based on actual evidence
-	if len(analysis.CauseOfAction) > 0 {
+		
+		// Build legal violations from causes of action
 		for _, cause := range analysis.CauseOfAction {
 			analysis.LegalViolations = append(analysis.LegalViolations, LegalViolationItem{
 				Statute:       cause.StatutoryBasis,
@@ -1118,9 +1246,6 @@ func (h *UIHandlers) generateLegalAnalysisFromExtraction(processingResult *servi
 			})
 		}
 	}
-	
-	log.Printf("[DEBUG] Generated legal analysis: %d causes of action, %d violations from actual extraction", 
-		len(analysis.CauseOfAction), len(analysis.LegalViolations))
 	
 	return analysis
 }

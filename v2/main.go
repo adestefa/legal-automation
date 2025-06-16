@@ -231,8 +231,8 @@ func main() {
 	}
 
 	// Start the server
-	log.Println("[INFO] Starting Satori Legal Assistant Agent v2.14.0 on :8080")
-	log.Printf("[INFO] Features: Civil Cover Sheet Legal Mapping (Task 13), Summons Document Analysis Engine (Task 11), Dynamic Template Population Engine (Task 4), Persistent Sessions")
+	log.Println("[INFO] Starting Satori Legal Assistant Agent v2.15.0 on :8080")
+	log.Printf("[INFO] Features: Civil Cover Sheet Legal Mapping (Task 13), Attorney Notes Intelligence (Task 12), Summons Document Analysis Engine (Task 11), Dynamic Template Population Engine (Task 4), Persistent Sessions")
 	log.Printf("[INFO] Templates directory: /Users/corelogic/satori-dev/clients/proj-mallon/v2/templates")
 	log.Printf("[INFO] Test iCloud directory: /Users/corelogic/satori-dev/clients/proj-mallon/test_icloud")
 	log.Printf("[INFO] Session directory: %s", sessionDir)
