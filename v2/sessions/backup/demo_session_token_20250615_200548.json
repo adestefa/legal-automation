@@ -1,0 +1,20 @@
+{
+  "sessionId": "demo_session_token",
+  "workflowState": {
+    "icloudConnected": true,
+    "icloudUsername": "anthony.destefano@gmail.com",
+    "selectedParentFolder": "/CASES",
+    "selectedCaseFolder": "/CASES/Eman_Youseef",
+    "availableDocuments": null,
+    "selectedDocuments": [
+      "/CASES/Eman_Youseef/Atty_Notes.docx"
+    ],
+    "selectedTemplate": "fcra-credit-card-fraud",
+    "currentStep": 3,
+    "lastUpdated": "2025-06-15T20:05:48.032804-04:00",
+    "username": ""
+  },
+  "createdAt": "2025-06-15T16:25:26.35938-04:00",
+  "lastAccessed": "2025-06-15T20:05:48.032804-04:00",
+  "expiresAt": "2025-06-16T16:25:26.35938-04:00"
+}

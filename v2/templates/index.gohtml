@@ -13,7 +13,7 @@
         <!-- Header -->
         <header class="mb-8">
             <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-800">Satori Legal Assistant Agent <span class="text-sm font-normal text-gray-500">v2.13.0</span></h1>
+                <h1 class="text-3xl font-bold text-gray-800">Satori Legal Assistant Agent <span class="text-sm font-normal text-gray-500">v2.14.0</span></h1>
                 <div class="flex items-center space-x-4">
                     <!-- iCloud Status -->
                     <div class="flex items-center space-x-2">
@@ -225,7 +225,75 @@
             }, 5000);
         }
 
-        console.log('Mallon Legal Assistant v2.5.32 loaded with enhanced session management');
+        // Global tab switching function for Step 3
+        window.showTab = function(tabId, buttonElement) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active styles from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('border-blue-500', 'text-blue-600');
+                button.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Add active styles to clicked button
+            if (buttonElement) {
+                buttonElement.classList.remove('border-transparent', 'text-gray-500');
+                buttonElement.classList.add('border-blue-500', 'text-blue-600');
+            }
+            
+            // Load preview content if preview tab is selected
+            if (tabId === 'preview-tab') {
+                loadPreviewContent();
+            }
+            
+            // Load missing content analysis if missing tab is selected
+            if (tabId === 'missing-tab') {
+                loadMissingContentAnalysis();
+            }
+        };
+
+        // Global preview loading function
+        window.loadPreviewContent = function() {
+            const previewContent = document.getElementById('preview-content');
+            const loadingIndicator = document.querySelector('#preview-tab .text-center');
+            
+            if (loadingIndicator) {
+                loadingIndicator.classList.remove('hidden');
+            }
+            if (previewContent) {
+                previewContent.classList.add('hidden');
+            }
+            
+            // Load preview via HTMX
+            htmx.ajax('GET', '/ui/preview-document', {
+                target: '#preview-content',
+                swap: 'innerHTML'
+            }).then(() => {
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                }
+                if (previewContent) {
+                    previewContent.classList.remove('hidden');
+                }
+            });
+        };
+
+        // Global missing content analysis function
+        window.loadMissingContentAnalysis = function() {
+            // Implementation would go here if needed
+            console.log('Loading missing content analysis...');
+        };
+
+        console.log('Mallon Legal Assistant v2.14.0 loaded with enhanced session management and global tab functions');
     </script>
 </body>
 </html>
